@@ -69,6 +69,8 @@ class Core:
     def h_ready(self, m):
         self.push("init", {"chats": self.chats, "home": HOME, "version": self.version(),
                            "settings": self.settings, "usage": self.usage, "appVersion": VERSION})
+        if not (os.path.isfile(CLAUDE) and os.access(CLAUDE, os.X_OK)):
+            self.push("toast", {"text": "The Claude Code CLI was not found. Install it from claude.com/claude-code, then run: claude auth login", "err": True})
         self.start_update_checks()
         self.refresh_usage()
         self.h_account({})

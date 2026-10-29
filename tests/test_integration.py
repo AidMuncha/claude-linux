@@ -92,7 +92,8 @@ class AppRun:
             os.makedirs(self.data, exist_ok=True)
             json.dump(settings, open(os.path.join(self.data, "settings.json"), "w"))
         e = dict(os.environ, CL_DATA=self.data, CL_EXPORT_DIR=self.exports, CL_CLAUDE_DIR=self.claude_dir, CL_CLAUDE=os.path.join(env.HERE, "fake_claude.py"),
-                 CL_APP_ID="dev.nein.ClaudeLinuxIntegration", CL_TEST_JS_DELAY=str(delay), **(extra_env or {}))
+                 CL_APP_ID="dev.nein.ClaudeLinuxIntegration", CL_TEST_JS_DELAY=str(delay))
+        e.update(extra_env or {})
         if script:
             e["CL_TEST_JS"] = "(async () => { try { " + HELPERS + script + " } catch (e) { post({type:'log', text: JSON.stringify({error: String(e && e.message || e) + ' | ' + String(e && e.stack || '')})}); post({type:'quit'}); } })()"
         self.proc = subprocess.Popen([sys.executable, "-W", "ignore", APP, *args], env=e, stderr=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
@@ -186,6 +187,16 @@ class Startup(Base):
         log = second.wait_log()
         self.assertEqual((log["theme"], log["fs"], log["titles"], log["items"]), ("tokyonight", "17px", ["hello there"], 2))
         self.assertEqual(second.finish(), 0)
+
+    def test_a_missing_cli_gives_a_clear_message_and_the_app_still_opens(self):
+        r = self.run_app("""log({toast:document.getElementById('toast').textContent, err:document.getElementById('toast').className, hasChats:Object.keys(chats).length}); post({type:'quit'});""",
+                         settings={"tray": False}, extra_env={"CL_CLAUDE": "/nonexistent/claude"}, delay=300)
+        log = r.wait_log()
+        self.assertIn("Claude Code CLI was not found", log["toast"])
+        self.assertIn("claude auth login", log["toast"])
+        self.assertGreaterEqual(log["hasChats"], 1)
+        self.assertEqual(r.finish(), 0)
+        self.no_problems(r)
 
     def test_page_script_errors_would_show_up(self):
         r = self.run_app("post({type:'jserr', text:'planted'}); log({ok:true}); post({type:'quit'});", settings={"tray": False})

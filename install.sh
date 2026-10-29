@@ -19,9 +19,14 @@ if [ "${1:-}" = "--uninstall" ]; then
 fi
 
 echo "Checking requirements..."
-python3 - <<'PY' || { echo "Missing: Python 3 with GTK 4 and WebKitGTK 6 (python3-gobject, webkitgtk6.0). On Fedora/Bazzite they are preinstalled; on Ubuntu: sudo apt install python3-gi gir1.2-gtk-4.0 gir1.2-webkit-6.0"; exit 1; }
+python3 - <<'PY' || { echo "Cannot continue. Needs Python 3 with GTK 4.10+ and WebKitGTK 6 (2.40+): Python 3 with GTK 4 and WebKitGTK 6 (python3-gobject, webkitgtk6.0). On Fedora/Bazzite they are preinstalled; on Ubuntu: sudo apt install python3-gi gir1.2-gtk-4.0 gir1.2-webkit-6.0"; exit 1; }
 import gi
 gi.require_version("Gtk", "4.0"); gi.require_version("WebKit", "6.0")
+from gi.repository import Gtk, WebKit
+import sys
+if (Gtk.get_major_version(), Gtk.get_minor_version()) < (4, 10) or (WebKit.get_major_version(), WebKit.get_minor_version()) < (2, 40):
+    print("Your GTK (%d.%d) or WebKitGTK (%d.%d) is too old: Claude Linux needs GTK 4.10+ and WebKitGTK 2.40+ (Ubuntu 24.04+, Fedora 38+, Debian 13+)." % (Gtk.get_major_version(), Gtk.get_minor_version(), WebKit.get_major_version(), WebKit.get_minor_version()))
+    sys.exit(1)
 PY
 if ! command -v claude >/dev/null && [ ! -x "$HOME/.local/bin/claude" ]; then
   echo "Note: the Claude Code CLI ('claude') was not found. Install it from https://claude.com/claude-code and run 'claude auth login' once, then Claude Linux will work."

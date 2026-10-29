@@ -1,9 +1,9 @@
 {
-  "version": "1.0.0",
-  "url": "claude-linux-1.0.0.tar.gz",
-  "sha256": "97e772bb7b6923d950d5f4a532d00761d39cf0b91797b21737a9656eff597652",
-  "signature": "HYrHZwQQfKuJr/ODSDlT0SHjpGd4X046r5ewer4KwJ6aIHBx+rTC254AAxtaurY66Q6d3wms+1SYx/5qjz8gAQ==",
-  "size": 144148,
-  "notes": "First public release",
+  "version": "1.0.1",
+  "url": "claude-linux-1.0.1.tar.gz",
+  "sha256": "cdef334b8ce3a79a18a111806cb04752d9c48ecdfd5ccee78fed7fcb3146e597",
+  "signature": "xInBBRC4pqoQ0IpW+Oyj6Ve1p+Lo0zQ+clBkXfEkWCkrr/NW8jaWa6hACIr8go103HMaKXplm68tsCYGiR5lDg==",
+  "size": 144406,
+  "notes": "Clearer message if the Claude CLI is missing, stricter install checks, tidier startup",
   "required": true
 }
