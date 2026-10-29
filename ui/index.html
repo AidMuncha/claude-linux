@@ -1,0 +1,2009 @@
+<!doctype html>
+<html data-theme="dark">
+<head>
+<meta charset="utf-8">
+<title>Claude Linux</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root {
+  color-scheme:dark;
+  --bg:#262624; --side:#1f1e1d; --card:#30302e; --card2:#383835; --fg:#faf9f5; --dim:#a8a59c; --faint:#3f3e3a; --line:#34332f;
+  --input:#30302e; --codebg:#1b1b19; --strong:#fff; --hover:rgba(255,255,255,.055); --accent:#d97757; --accent2:#c6613f;
+  --green:#5fbf79; --red:#f0707f; --yellow:#e6c07b; --shadow:0 10px 40px rgba(0,0,0,.45);
+  --sans:"Inter","Segoe UI","Cantarell","Noto Sans",system-ui,-apple-system,sans-serif;
+  --mono:"JetBrains Mono","Cascadia Code","Fira Code","DejaVu Sans Mono",monospace;
+  --sp:1; --onacc:#fff; --fs:15px; --cw:800px; --ga:.82; --sa:.78; --blur:18px;
+  --sc:var(--dim); --ss:var(--green); --sn:var(--yellow); --sk:var(--accent);
+  --sf:color-mix(in srgb,var(--accent) 55%,var(--fg)); --st:color-mix(in srgb,var(--yellow) 70%,var(--red)); --sv:color-mix(in srgb,var(--green) 60%,var(--fg));
+}
+[data-theme=light] {
+  --bg:#faf9f5; --side:#f0eee6; --card:#ffffff; --card2:#f4f2ea; --fg:#29261f; --dim:#77736a; --faint:#dcd8cb; --line:#e6e2d6;
+  --input:#ffffff; --codebg:#f2efe6; --strong:#000; --hover:rgba(0,0,0,.05); --shadow:0 10px 40px rgba(60,50,30,.18);
+  --green:#1f8a3b; --red:#c62d45; --yellow:#8a5a00; color-scheme:light;
+}
+[data-theme=sepia] { --bg:#f4ecd8; --side:#ebe1c9; --card:#fbf6e9; --card2:#efe5cc; --fg:#433422; --dim:#85704f; --faint:#d8c9a6; --line:#e2d5b6; --input:#fbf6e9; --codebg:#efe5cc; --strong:#201608; --hover:rgba(67,52,34,.07); --accent:#b4552d; --shadow:0 10px 40px rgba(80,60,20,.2); --green:#4a7a2a; --red:#b3362b; --yellow:#8a5a00; color-scheme:light; }
+[data-theme=midnight] { --bg:#0f1420; --side:#0b0f19; --card:#171d2c; --card2:#1f2740; --fg:#e6ecff; --dim:#8f9bbd; --faint:#2b3550; --line:#222b42; --input:#171d2c; --codebg:#0a0e18; --accent:#6ea8fe; --shadow:0 10px 40px rgba(0,0,0,.6); }
+[data-theme=nord] { --bg:#2e3440; --side:#272c36; --card:#3b4252; --card2:#434c5e; --fg:#eceff4; --dim:#a7b1c6; --faint:#4c566a; --line:#3e4659; --input:#3b4252; --codebg:#252a33; --accent:#88c0d0; --green:#a3be8c; --red:#bf616a; --yellow:#ebcb8b; }
+[data-theme=dracula] { --bg:#282a36; --side:#21222c; --card:#343746; --card2:#44475a; --fg:#f8f8f2; --dim:#a4acd0; --faint:#4b4f66; --line:#3a3d4f; --input:#343746; --codebg:#1e1f29; --accent:#bd93f9; --green:#50fa7b; --red:#ff5555; --yellow:#f1fa8c; }
+[data-theme=solarized] { --bg:#002b36; --side:#00232c; --card:#073642; --card2:#0d4553; --fg:#eee8d5; --dim:#93a1a1; --faint:#1c5563; --line:#0b3d4b; --input:#073642; --codebg:#00212b; --accent:#cb4b16; --green:#859900; --red:#dc322f; --yellow:#b58900; }
+[data-theme=gruvbox] { --bg:#282828; --side:#1d2021; --card:#3c3836; --card2:#504945; --fg:#ebdbb2; --dim:#a89984; --faint:#504945; --line:#45403d; --input:#3c3836; --codebg:#1b1b1b; --accent:#fe8019; --green:#b8bb26; --red:#fb4934; --yellow:#fabd2f; }
+[data-theme=rosepine] { --bg:#191724; --side:#14121f; --card:#26233a; --card2:#2a2740; --fg:#e0def4; --dim:#9893b5; --faint:#403d52; --line:#2a2740; --input:#26233a; --codebg:#12101c; --accent:#eb6f92; --green:#9ccfd8; --red:#eb6f92; --yellow:#f6c177; }
+[data-theme=terminal] { --bg:#0c0c0c; --side:#080808; --card:#161616; --card2:#1f1f1f; --fg:#d4d4d4; --dim:#808080; --faint:#333; --line:#222; --input:#121212; --codebg:#060606; --strong:#fff; --sans:var(--mono); }
+[data-theme=contrast] { --bg:#000; --side:#000; --card:#0d0d0d; --card2:#1a1a1a; --fg:#fff; --dim:#cfcfcf; --faint:#777; --line:#555; --input:#000; --codebg:#000; --strong:#fff; --accent:#ffb000; --green:#3cff7a; --red:#ff5c5c; --yellow:#ffe14d; --hover:rgba(255,255,255,.12); }
+
+/* more palettes */
+[data-theme=catppuccin-mocha] { --bg:#1e1e2e; --side:#181825; --card:#313244; --card2:#45475a; --fg:#cdd6f4; --dim:#a6adc8; --faint:#45475a; --line:#313244; --input:#313244; --codebg:#11111b; --accent:#cba6f7; --green:#a6e3a1; --red:#f38ba8; --yellow:#f9e2af; --hover:rgba(255,255,255,.055); --shadow:0 10px 40px rgba(0,0,0,.5); --strong:#fff; }
+[data-theme=catppuccin-macchiato] { --bg:#24273a; --side:#1e2030; --card:#363a4f; --card2:#494d64; --fg:#cad3f5; --dim:#a5adcb; --faint:#494d64; --line:#363a4f; --input:#363a4f; --codebg:#181926; --accent:#c6a0f6; --green:#a6da95; --red:#ed8796; --yellow:#eed49f; --hover:rgba(255,255,255,.055); --shadow:0 10px 40px rgba(0,0,0,.5); --strong:#fff; }
+[data-theme=catppuccin-latte] { --bg:#eff1f5; --side:#e6e9ef; --card:#ffffff; --card2:#e6e9ef; --fg:#4c4f69; --dim:#6c6f85; --faint:#ccd0da; --line:#dce0e8; --input:#ffffff; --codebg:#e6e9ef; --accent:#8839ef; --green:#40a02b; --red:#d20f39; --yellow:#b86e0a; --hover:rgba(0,0,0,.05); --shadow:0 10px 40px rgba(60,50,30,.18); --strong:#000; color-scheme:light; }
+[data-theme=tokyonight] { --bg:#1a1b26; --side:#16161e; --card:#24283b; --card2:#2f334d; --fg:#c0caf5; --dim:#8d96c0; --faint:#3b4261; --line:#292e42; --input:#24283b; --codebg:#13141c; --accent:#7aa2f7; --green:#9ece6a; --red:#f7768e; --yellow:#e0af68; --hover:rgba(255,255,255,.055); --shadow:0 10px 40px rgba(0,0,0,.5); --strong:#fff; }
+[data-theme=onedark] { --bg:#282c34; --side:#21252b; --card:#2c313a; --card2:#333842; --fg:#abb2bf; --dim:#8b919d; --faint:#3e4451; --line:#353b45; --input:#2c313a; --codebg:#1e2227; --accent:#61afef; --green:#98c379; --red:#e06c75; --yellow:#e5c07b; --hover:rgba(255,255,255,.055); --shadow:0 10px 40px rgba(0,0,0,.5); --strong:#fff; }
+[data-theme=everforest] { --bg:#2d353b; --side:#232a2e; --card:#343f44; --card2:#3d484d; --fg:#d3c6aa; --dim:#9da9a0; --faint:#475258; --line:#3a464c; --input:#343f44; --codebg:#1e2326; --accent:#a7c080; --green:#a7c080; --red:#e67e80; --yellow:#dbbc7f; --hover:rgba(255,255,255,.055); --shadow:0 10px 40px rgba(0,0,0,.5); --strong:#fff; }
+[data-theme=kanagawa] { --bg:#1f1f28; --side:#16161d; --card:#2a2a37; --card2:#363646; --fg:#dcd7ba; --dim:#a6a69c; --faint:#54546d; --line:#2f2f3d; --input:#2a2a37; --codebg:#181820; --accent:#7e9cd8; --green:#98bb6c; --red:#e46876; --yellow:#e6c384; --hover:rgba(255,255,255,.055); --shadow:0 10px 40px rgba(0,0,0,.5); --strong:#fff; }
+[data-theme=ayu] { --bg:#1f2430; --side:#191e2a; --card:#272d3b; --card2:#323a4c; --fg:#cccac2; --dim:#9099a6; --faint:#3d4659; --line:#2a3040; --input:#272d3b; --codebg:#171b24; --accent:#ffcc66; --green:#87d96c; --red:#f28779; --yellow:#ffd173; --hover:rgba(255,255,255,.055); --shadow:0 10px 40px rgba(0,0,0,.5); --strong:#fff; }
+[data-theme=monokai] { --bg:#272822; --side:#1e1f1c; --card:#34352e; --card2:#3e3d32; --fg:#f8f8f2; --dim:#b0aa8e; --faint:#49483e; --line:#3b3c35; --input:#34352e; --codebg:#1c1d19; --accent:#a6e22e; --green:#a6e22e; --red:#f92672; --yellow:#e6db74; --hover:rgba(255,255,255,.055); --shadow:0 10px 40px rgba(0,0,0,.5); --strong:#fff; }
+[data-theme=cyberpunk] { --bg:#0d0221; --side:#080115; --card:#1a0b3a; --card2:#26104f; --fg:#e8f1ff; --dim:#a58fcf; --faint:#3a1f6e; --line:#2a1458; --input:#1a0b3a; --codebg:#070113; --accent:#ff2a6d; --green:#05ffa1; --red:#ff4d6d; --yellow:#f9f871; --hover:rgba(255,255,255,.055); --shadow:0 10px 40px rgba(0,0,0,.5); --strong:#fff; }
+[data-theme=synthwave] { --bg:#262335; --side:#1f1c2e; --card:#2f2b43; --card2:#3b3654; --fg:#ffffff; --dim:#b6b1d1; --faint:#495495; --line:#34294f; --input:#2f2b43; --codebg:#1c1928; --accent:#ff7edb; --green:#72f1b8; --red:#fe4450; --yellow:#fede5d; --hover:rgba(255,255,255,.055); --shadow:0 10px 40px rgba(0,0,0,.5); --strong:#fff; }
+
+/* themes built from a handful of colors: "system" (Plasma's colors) and "custom" (your own). JS sets --bg --side --card --fg --dim ... inline. */
+[data-theme=system], [data-theme=custom] {
+  --card2:color-mix(in srgb,var(--card) 86%,var(--fg)); --faint:color-mix(in srgb,var(--bg) 80%,var(--fg)); --line:color-mix(in srgb,var(--bg) 88%,var(--fg));
+  --input:var(--card); --codebg:color-mix(in srgb,var(--bg) 70%,#000); --hover:color-mix(in srgb,var(--fg) 7%,transparent); --strong:#fff;
+}
+html[data-scheme=light][data-theme=system], html[data-scheme=light][data-theme=custom] {
+  color-scheme:light; --codebg:color-mix(in srgb,var(--bg) 94%,#000); --strong:#000; --shadow:0 10px 40px rgba(60,50,30,.18);
+}
+
+/* syntax themes (code colors), chosen in Settings > Appearance */
+html[data-syntax=monokai][data-scheme=dark] { --sc:#88846f; --ss:#e6db74; --sn:#ae81ff; --sk:#f92672; --sf:#a6e22e; --st:#66d9ef; --sv:#fd971f; }
+html[data-syntax=github][data-scheme=dark] { --sc:#8b949e; --ss:#a5d6ff; --sn:#79c0ff; --sk:#ff7b72; --sf:#d2a8ff; --st:#ffa657; --sv:#79c0ff; }
+html[data-syntax=github][data-scheme=light] { --sc:#6e7781; --ss:#0a3069; --sn:#0550ae; --sk:#cf222e; --sf:#8250df; --st:#953800; --sv:#0550ae; }
+html[data-syntax=onedark][data-scheme=dark] { --sc:#7f848e; --ss:#98c379; --sn:#d19a66; --sk:#c678dd; --sf:#61afef; --st:#e5c07b; --sv:#e06c75; }
+html[data-syntax=dracula][data-scheme=dark] { --sc:#7b86b6; --ss:#f1fa8c; --sn:#bd93f9; --sk:#ff79c6; --sf:#50fa7b; --st:#8be9fd; --sv:#ffb86c; }
+html[data-syntax=nord][data-scheme=dark] { --sc:#7b88a1; --ss:#a3be8c; --sn:#b48ead; --sk:#81a1c1; --sf:#88c0d0; --st:#8fbcbb; --sv:#d8dee9; }
+html[data-syntax=solarized] { --sc:#7f9094; --ss:#2aa198; --sn:#d33682; --sk:#859900; --sf:#268bd2; --st:#b58900; --sv:#cb4b16; }
+html[data-syntax=catppuccin][data-scheme=dark] { --sc:#7f849c; --ss:#a6e3a1; --sn:#fab387; --sk:#cba6f7; --sf:#89b4fa; --st:#f9e2af; --sv:#f5c2e7; }
+html[data-syntax=catppuccin][data-scheme=light] { --sc:#7c7f93; --ss:#40a02b; --sn:#fe640b; --sk:#8839ef; --sf:#1e66f5; --st:#df8e1d; --sv:#ea76cb; }
+* { box-sizing:border-box; }
+html,body { margin:0; height:100%; background:var(--bg); color:var(--fg); font:var(--fs,15px)/1.6 var(--sans); }
+button,input,select,textarea { font:inherit; color:inherit; }
+svg.i { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex:none; vertical-align:-3px; }
+#app { display:flex; height:100%; }
+
+/* sidebar */
+#side { width:260px; background:var(--side); border-right:1px solid var(--line); display:flex; flex-direction:column; flex:none; overflow:hidden; transition:width calc(.26s*var(--sp)) cubic-bezier(.2,.8,.2,1),opacity calc(.2s*var(--sp)),border-color calc(.2s*var(--sp)); }
+#sidein { width:259px; flex:1; min-height:0; display:flex; flex-direction:column; }   /* fixed width, so collapsing the sidebar clips it instead of squeezing it */
+#side.collapsed { width:0; opacity:0; border-right-width:0; pointer-events:none; }
+html.notrans #side { transition:none; }
+.brand { display:flex; align-items:center; gap:9px; padding:16px 16px 10px; font-weight:600; font-size:15px; }
+.brand svg { width:22px; height:22px; }
+#new { margin:6px 12px 8px; padding:9px 12px; display:flex; align-items:center; gap:8px; background:var(--accent); color:var(--onacc,#fff); border:0; border-radius:10px; cursor:pointer; font-weight:500; transition:filter calc(.15s*var(--sp)),transform calc(.12s*var(--sp)); }
+#new:hover { filter:brightness(1.08); } #new:active { transform:scale(.98); }
+#list { flex:1; overflow:auto; padding:4px 8px; }
+.grp { padding:12px 10px 4px; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); }
+.chat { padding:7px 10px; border-radius:8px; color:var(--dim); cursor:pointer; display:flex; align-items:center; gap:6px; font-size:14px; transition:background calc(.12s*var(--sp)),color calc(.12s*var(--sp)); }
+.chat:hover { background:var(--hover); color:var(--fg); }
+.chat.active { background:var(--card); color:var(--fg); }
+.chat .t { flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.chat .x { opacity:0; border:0; background:none; cursor:pointer; color:var(--dim); padding:2px; border-radius:4px; display:flex; }
+.chat:hover .x { opacity:1; } .chat .x:hover { color:var(--red); }
+.chat .bz { width:7px; height:7px; border-radius:50%; background:var(--accent); animation:pulse calc(1s*var(--sp)) ease-in-out infinite; }
+#sidefoot { border-top:1px solid var(--line); padding:8px; display:flex; flex-direction:column; gap:2px; }
+.sbtn { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:8px; border:0; background:none; cursor:pointer; color:var(--dim); text-align:left; font-size:14px; transition:background calc(.12s*var(--sp)),color calc(.12s*var(--sp)); }
+.sbtn:hover { background:var(--hover); color:var(--fg); }
+.sbtn .dot { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); margin-left:auto; }
+
+/* top bar */
+#main { flex:1; display:flex; flex-direction:column; min-width:0; }
+#top { display:flex; align-items:center; gap:12px; padding:10px 18px; }
+#tabs { display:flex; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:3px; gap:2px; }
+#tabs button { border:0; background:none; padding:5px 16px; border-radius:7px; cursor:pointer; color:var(--dim); font-weight:500; transition:all calc(.18s*var(--sp)); }
+#tabs button:hover { color:var(--fg); } #tabs button.on { background:var(--card2); color:var(--fg); box-shadow:0 1px 3px rgba(0,0,0,.3); }
+#title { flex:1; text-align:center; color:var(--dim); font-size:14px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.chip { display:flex; align-items:center; gap:10px; border:1px solid var(--line); background:var(--card); border-radius:999px; padding:4px 12px; font-size:12.5px; color:var(--dim); cursor:pointer; transition:all calc(.15s*var(--sp)); white-space:nowrap; }
+.chip:hover { border-color:var(--accent); color:var(--fg); }
+.chip .g { width:7px; height:7px; border-radius:50%; background:var(--green); box-shadow:0 0 7px var(--green); }
+.chip .g.y { background:var(--yellow); box-shadow:0 0 7px var(--yellow); animation:pulse calc(1s*var(--sp)) infinite; }
+.mini { width:34px; height:5px; border-radius:3px; background:var(--faint); overflow:hidden; display:inline-block; vertical-align:middle; }
+.mini i { display:block; height:100%; background:var(--accent); border-radius:3px; transition:width calc(.6s*var(--sp)) cubic-bezier(.2,.8,.2,1); }
+.mini.hi i { background:var(--red); }
+.ib { border:0; background:none; cursor:pointer; color:var(--dim); border-radius:8px; padding:7px; display:flex; transition:all calc(.15s*var(--sp)); }
+.ib:hover { background:var(--hover); color:var(--fg); }
+
+/* conversation */
+#scroll { flex:1; overflow:auto; }
+#col { max-width:var(--cw,800px); margin:0 auto; padding:10px 24px 30px; }
+.hero { text-align:center; padding:12vh 0 10px; animation:rise calc(.5s*var(--sp)) ease both; }
+.hero svg { width:46px; height:46px; margin-bottom:14px; }
+.hero h1 { font-size:28px; font-weight:500; margin:0 0 6px; letter-spacing:-.01em; }
+.hero p { color:var(--dim); margin:0; font-size:14px; }
+.msg { margin:14px 0; animation:rise calc(.28s*var(--sp)) cubic-bezier(.2,.8,.2,1) both; word-break:break-word; }
+.msg.user { animation-name:riseUser; }
+.user { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px 14px; white-space:pre-wrap; }
+.asst { line-height:1.7; }
+.asst p { margin:0 0 .8em; } .asst p:last-child { margin-bottom:0; }
+.asst h1,.asst h2,.asst h3 { margin:1em 0 .4em; line-height:1.3; font-weight:600; } .asst h1 { font-size:1.35em; } .asst h2 { font-size:1.18em; } .asst h3 { font-size:1.05em; }
+.asst ul,.asst ol { margin:.3em 0 .8em; padding-left:1.4em; } .asst li { margin:.15em 0; }
+.asst code { font:12.5px var(--mono); background:var(--card); border:1px solid var(--line); padding:1px 6px; border-radius:5px; }
+.asst a { color:var(--accent); }
+.cb { background:var(--codebg); border:1px solid var(--line); border-radius:10px; margin:.7em 0; overflow:hidden; }
+.cb .ch { display:flex; justify-content:space-between; padding:5px 12px; font-size:11.5px; color:var(--dim); border-bottom:1px solid var(--line); }
+.cb .copy { border:0; background:none; cursor:pointer; color:var(--dim); font-size:11.5px; } .cb .copy:hover { color:var(--fg); }
+.cb pre { margin:0; padding:10px 14px; overflow:auto; font:12.5px/1.55 var(--mono); } .cb pre code { background:none; border:0; padding:0; }
+.msg.live:has(.tail)::after { display:none; } .msg.live .tail > :last-child::after, .msg.live::after { content:""; display:inline-block; width:8px; height:16px; background:var(--accent); border-radius:2px; vertical-align:-3px; margin-left:3px; box-shadow:0 0 8px var(--accent); animation:caret calc(1.1s*var(--sp)) ease-in-out infinite; }
+.tool { border:1px solid var(--line); border-radius:10px; background:var(--card); overflow:hidden; }
+.th { display:flex; align-items:center; gap:9px; padding:7px 12px; cursor:pointer; font-size:13px; }
+.th:hover { background:var(--hover); }
+.th .n { font-weight:600; } .th .a { font:12px var(--mono); color:var(--dim); flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.th .chev { transition:transform calc(.2s*var(--sp)); color:var(--dim); } .tool.open .chev { transform:rotate(90deg); }
+.ts { width:14px; height:14px; border-radius:50%; flex:none; display:flex; }
+.tool.run .ts { border:2px solid var(--faint); border-top-color:var(--accent); animation:spin calc(.8s*var(--sp)) linear infinite; }
+.tool.ok .ts { color:var(--green); } .tool.err .ts { color:var(--red); }
+.tb { display:block; max-height:0; overflow:hidden; opacity:0; border-top:0 solid var(--line); padding:0 12px; font:12px/1.5 var(--mono); color:var(--dim); white-space:pre-wrap; background:var(--codebg);
+  transition:max-height calc(.3s*var(--sp)) cubic-bezier(.2,.8,.2,1),opacity calc(.2s*var(--sp)),padding calc(.3s*var(--sp)),border-top-width calc(.2s*var(--sp)); }
+.tool.open .tb { max-height:340px; overflow:auto; opacity:1; padding:8px 12px; border-top-width:1px; }
+.tool.err .tb { color:var(--red); }
+.dc { display:flex; gap:8px; font:600 12px var(--mono); margin-left:8px; } .dc em { font-style:normal; } .dc .p { color:var(--green); } .dc .m { color:var(--red); }
+.tb:has(.df) { padding-left:0; padding-right:0; white-space:normal; } .tool.open .tb:has(.df) { padding-top:6px; padding-bottom:6px; }
+.dr { display:flex; white-space:pre-wrap; word-break:break-all; color:var(--dim); } .dr i { width:44px; flex:none; text-align:right; padding-right:10px; opacity:.55; font-style:normal; user-select:none; } .dr b { width:16px; flex:none; font-weight:700; user-select:none; } .dr span { flex:1; min-width:0; padding-right:12px; }
+.dr.add { background:color-mix(in srgb, var(--green) 16%, transparent); color:var(--fg); } .dr.add b { color:var(--green); }
+.dr.del { background:color-mix(in srgb, var(--red) 16%, transparent); color:var(--fg); } .dr.del b { color:var(--red); }
+.dr.sep { opacity:.5; } .dr.er { color:var(--red); padding:6px 12px 0; border-top:1px solid var(--line); margin-top:6px; }
+.sys { color:var(--dim); font-size:13px; white-space:pre-wrap; background:var(--card); border:1px dashed var(--faint); border-radius:10px; padding:8px 12px; }
+.errtxt { color:var(--red); white-space:pre-wrap; border:1px solid var(--red); border-radius:10px; padding:8px 12px; font-size:13px; }
+
+/* composer */
+#bar { padding:4px 24px 18px; }
+#wrap { max-width:var(--cw,800px); margin:0 auto; position:relative; }
+#status { height:22px; font-size:13px; color:var(--dim); padding-left:6px; display:flex; align-items:center; gap:8px; }
+#status .st { color:var(--accent); } .shim { background:linear-gradient(90deg,var(--dim) 30%,var(--strong) 50%,var(--dim) 70%); background-size:200% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation:shimmer calc(2.2s*var(--sp)) linear infinite; }
+#box { background:var(--input); border:1px solid var(--faint); border-radius:18px; padding:12px 14px 10px; box-shadow:0 4px 24px rgba(0,0,0,.18); transition:border-color calc(.2s*var(--sp)),box-shadow calc(.2s*var(--sp)); }
+#box:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent),0 4px 24px rgba(0,0,0,.22); }
+#in { width:100%; background:none; border:0; outline:0; resize:none; max-height:220px; line-height:1.55; }
+#in::placeholder { color:var(--dim); }
+#row { display:flex; align-items:center; gap:8px; margin-top:8px; }
+.pill { display:flex; align-items:center; gap:6px; background:none; border:1px solid transparent; border-radius:8px; padding:4px 9px; cursor:pointer; color:var(--dim); font-size:13px; transition:all calc(.15s*var(--sp)); max-width:230px; }
+.pill:hover { background:var(--hover); color:var(--fg); } .pill span { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.pill.acc { color:var(--accent); }
+#sendb { width:34px; height:34px; border-radius:50%; border:0; background:var(--accent); color:var(--onacc,#fff); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform calc(.12s*var(--sp)),filter calc(.15s*var(--sp)); }
+#sendb:hover { filter:brightness(1.1); } #sendb:active { transform:scale(.92); }
+.sp { flex:1; }
+
+/* popups */
+.pop { position:fixed; background:var(--card); border:1px solid var(--faint); border-radius:14px; box-shadow:var(--shadow); display:none; z-index:50; animation:rise calc(.14s*var(--sp)) ease both; overflow:hidden; }
+.mi { display:flex; align-items:center; gap:10px; padding:9px 14px; cursor:pointer; transition:background calc(.1s*var(--sp)); }
+.mi:hover,.mi.sel { background:var(--hover); } .mi .tx { flex:1; min-width:0; } .mi b { font-weight:500; display:block; } .mi small { color:var(--dim); font-size:12px; display:block; }
+.mi .ck { color:var(--accent); width:16px; } .mi.acc b { color:var(--accent); }
+.msep { height:1px; background:var(--line); margin:4px 0; } .mhead { padding:8px 14px 2px; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); }
+#cmds { position:absolute; left:0; right:0; bottom:100%; margin-bottom:6px; max-height:280px; overflow:auto; }
+.cmd { gap:12px; } .cmd b { font:13px var(--mono); color:var(--accent); font-weight:500; display:inline; } .cmd small { display:inline; }
+.seg { display:flex; background:var(--bg); border:1px solid var(--line); border-radius:9px; padding:3px; gap:2px; margin:6px 14px 10px; }
+.seg button { flex:1; border:0; background:none; border-radius:6px; padding:5px 2px; cursor:pointer; color:var(--dim); font-size:12px; transition:all calc(.15s*var(--sp)); white-space:nowrap; }
+.seg button:hover { color:var(--fg); } .seg button.on { background:var(--accent); color:var(--onacc,#fff); }
+.swrow { display:flex; align-items:center; justify-content:space-between; padding:8px 14px; }
+.sw { position:relative; width:36px; height:21px; flex:none; display:inline-block; } .sw input { opacity:0; width:100%; height:100%; margin:0; position:absolute; cursor:pointer; z-index:1; }
+.sw i { position:absolute; inset:0; background:var(--faint); border-radius:999px; transition:background calc(.2s*var(--sp)); } .sw i::after { content:""; position:absolute; width:15px; height:15px; border-radius:50%; background:#fff; top:3px; left:3px; transition:transform calc(.2s*var(--sp)); }
+.sw input:checked + i { background:var(--accent); } .sw input:checked + i::after { transform:translateX(15px); }
+
+/* usage */
+#upop { width:360px; padding:16px 18px; right:18px; top:52px; }
+.uh { font-weight:600; font-size:14px; margin:0 0 12px; } .uh2 { font-weight:600; font-size:13px; margin:16px 0 8px; }
+.ur { margin:12px 0; } .ur .l { display:flex; justify-content:space-between; font-size:13.5px; } .ur .l span:last-child { color:var(--dim); }
+.ur .bar { height:8px; background:var(--faint); border-radius:999px; overflow:hidden; margin:6px 0 4px; } .ur .bar i { display:block; height:100%; background:var(--accent); border-radius:999px; transition:width calc(.6s*var(--sp)) cubic-bezier(.2,.8,.2,1); } .ur .bar.hi i { background:var(--red); }
+.ur .r { font-size:12px; color:var(--dim); }
+.uf { display:flex; justify-content:space-between; align-items:center; margin-top:14px; font-size:12px; color:var(--dim); }
+
+/* session drawer */
+#drawer { width:310px; flex:none; background:var(--side); border-left:1px solid var(--line); display:none; flex-direction:column; overflow:auto; animation:slidein calc(.2s*var(--sp)) ease both; }
+#drawer.open { display:flex; }
+.dh { display:flex; align-items:center; justify-content:space-between; padding:14px 16px 6px; font-weight:600; }
+.dsec { margin:8px 14px; padding:14px; background:var(--card); border:1px solid var(--line); border-radius:12px; }
+.dsec h4 { margin:0 0 4px; font-size:13px; display:flex; align-items:center; justify-content:space-between; }
+.dsec p { margin:6px 0 0; font-size:12.5px; color:var(--dim); line-height:1.5; }
+.kv { display:flex; justify-content:space-between; gap:10px; font-size:12.5px; padding:3px 0; } .kv span:first-child { color:var(--dim); } .kv span:last-child { text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.rstate { display:flex; align-items:center; gap:8px; margin-top:10px; font-size:13px; } .rstate .d { width:8px; height:8px; border-radius:50%; background:var(--faint); } .rstate .d.on { background:var(--green); box-shadow:0 0 8px var(--green); } .rstate .d.y { background:var(--yellow); animation:pulse calc(1s*var(--sp)) infinite; }
+.who { display:inline-block; font-size:11px; color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:0 8px; margin-right:8px; vertical-align:1px; }
+.themes { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; }
+.tc { border:2px solid var(--line); border-radius:12px; padding:8px; cursor:pointer; background:var(--card); transition:border-color calc(.15s*var(--sp)),transform calc(.12s*var(--sp)); } .tc:hover { transform:translateY(-1px); border-color:var(--faint); } .tc.on { border-color:var(--accent); }
+.tc .pv { height:46px; border-radius:7px; display:flex; overflow:hidden; border:1px solid rgba(128,128,128,.25); } .tc .pv i { flex:1; } .tc .pv i:first-child { flex:.7; }
+.tc b { display:block; font-size:12.5px; font-weight:500; margin-top:7px; }
+/* settings */
+#modal { position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; z-index:60; }
+#panel { width:min(940px,95vw); height:min(660px,92vh); background:var(--bg); border:1px solid var(--faint); border-radius:16px; display:flex; overflow:hidden; box-shadow:var(--shadow); animation:rise calc(.2s*var(--sp)) ease both; }
+#pnav { width:210px; background:var(--side); border-right:1px solid var(--line); padding:14px 10px; display:flex; flex-direction:column; gap:2px; flex:none; }
+#pnav h3 { margin:2px 10px 12px; font-size:17px; font-weight:600; }
+#pnav button { text-align:left; border:0; background:none; padding:8px 12px; border-radius:8px; cursor:pointer; color:var(--dim); display:flex; align-items:center; gap:10px; font-size:14px; transition:all calc(.12s*var(--sp)); }
+#pnav button:hover { background:var(--hover); color:var(--fg); } #pnav button.on { background:var(--card); color:var(--fg); }
+#pbody { flex:1; overflow:auto; padding:22px 30px 30px; position:relative; }
+#pclose { position:absolute; right:14px; top:12px; }
+.ph { font-size:20px; font-weight:600; margin:0 0 4px; } .pd { color:var(--dim); font-size:13.5px; margin:0 0 18px; }
+.pd code,.set code,.rc code { font:12px var(--mono); background:var(--card); border:1px solid var(--line); padding:1px 5px; border-radius:5px; }
+.sec { margin:22px 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); }
+.card { background:var(--card); border:1px solid var(--line); border-radius:12px; }
+.set { display:flex; align-items:center; gap:18px; padding:12px 16px; border-bottom:1px solid var(--line); } .set:last-child { border-bottom:0; }
+.set .tx { flex:1; min-width:0; } .set .tx b { font-weight:500; display:block; } .set .tx small { color:var(--dim); font-size:12.5px; display:block; margin-top:1px; }
+.sel { -webkit-appearance:none; appearance:none; cursor:pointer; padding-right:32px !important; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a8a59c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>"); background-repeat:no-repeat; background-position:right 9px center; }
+.sel option { background:var(--card); color:var(--fg); }
+.num::-webkit-inner-spin-button { opacity:.4; filter:invert(.6); }
+.sel,.txt,.num { color:var(--fg); background-color:var(--bg); border:1px solid var(--faint); border-radius:8px; padding:6px 10px; outline:0; min-width:170px; } .sel:focus,.txt:focus,.num:focus,.ta:focus { border-color:var(--accent); }
+.num { min-width:90px; width:90px; } .ta { width:100%; background:var(--card); border:1px solid var(--faint); border-radius:10px; padding:10px 12px; outline:0; font:13px/1.5 var(--mono); resize:vertical; }
+.big { min-height:410px; white-space:pre; }
+.btn { white-space:nowrap; flex:none; background:var(--accent); color:var(--onacc,#fff); border:0; border-radius:9px; padding:8px 18px; cursor:pointer; font-weight:500; transition:filter calc(.15s*var(--sp)),transform calc(.12s*var(--sp)); } .btn:hover { filter:brightness(1.1); } .btn:active { transform:scale(.97); }
+.btn.g { background:var(--card2); color:var(--fg); } .btn.red { background:var(--red); color:#fff; }
+.search { width:100%; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:9px 14px; outline:0; margin-bottom:14px; } .search:focus { border-color:var(--accent); }
+.rc { padding:16px; display:flex; flex-direction:column; gap:12px; }
+.rc .st { display:flex; align-items:center; gap:10px; font-weight:500; } .rc .dotc { width:9px; height:9px; border-radius:50%; background:var(--faint); } .rc .dotc.on { background:var(--green); box-shadow:0 0 9px var(--green); } .rc .dotc.y { background:var(--yellow); animation:pulse calc(1s*var(--sp)) infinite; }
+.qr { background:#fff; padding:12px; border-radius:10px; display:inline-block; line-height:0; } .qr canvas { image-rendering:pixelated; }
+.opt { display:flex; align-items:center; gap:12px; padding:11px 16px; border-bottom:1px solid var(--line); cursor:pointer; } .opt:last-child { border-bottom:0; } .opt:hover { background:var(--hover); }
+.opt .rd { width:16px; height:16px; border-radius:50%; border:2px solid var(--faint); flex:none; } .opt.on .rd { border-color:var(--accent); background:radial-gradient(var(--accent) 45%, transparent 50%); }
+.opt .tx b { font-weight:500; } .opt .tx small { display:block; color:var(--dim); font-size:12.5px; }
+pre.raw { background:var(--codebg); border:1px solid var(--line); border-radius:10px; padding:12px 14px; font:12px/1.55 var(--mono); white-space:pre-wrap; color:var(--dim); }
+#toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); background:var(--card2); border:1px solid var(--accent); padding:9px 18px; border-radius:10px; display:none; z-index:90; animation:rise calc(.2s*var(--sp)) ease both; font-size:13px; box-shadow:var(--shadow); }
+#toast.err { border-color:var(--red); }
+@keyframes rise { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+@keyframes pulse { 0%,100% { opacity:.4; } 50% { opacity:1; } }
+@keyframes blink { 50% { opacity:0; } }
+@keyframes caret { 0%,100% { opacity:1; } 50% { opacity:.25; } }
+@keyframes riseUser { from { opacity:0; transform:translateY(8px) scale(.985); } to { opacity:1; transform:none; } } @keyframes spin { to { transform:rotate(360deg); } }
+@keyframes shimmer { from { background-position:200% 0; } to { background-position:-200% 0; } }
+::-webkit-scrollbar { width:10px; height:10px; } ::-webkit-scrollbar-thumb { background:var(--faint); border-radius:6px; border:2px solid transparent; background-clip:content-box; }
+.hide { display:none !important; }
+@media (max-width:820px) { #side { display:none; } #title { display:none; } }
+
+/* permission / question / plan cards */
+.pc { border:1px solid var(--accent); border-radius:12px; background:var(--card); overflow:hidden; box-shadow:0 2px 14px rgba(0,0,0,.18); }
+.pc.done { border-color:var(--line); box-shadow:none; opacity:.75; }
+.pc .ph2 { padding:10px 14px 4px; font-weight:500; display:flex; gap:8px; align-items:baseline; }
+.pc .ph2 small { color:var(--dim); font-weight:400; font-size:12.5px; }
+.pc .pbody { padding:4px 14px 10px; font-size:14px; }
+.pc pre.cmd { margin:6px 0 2px; padding:8px 10px; background:var(--codebg); border-radius:8px; font:12.5px/1.5 var(--mono); white-space:pre-wrap; max-height:220px; overflow:auto; }
+.pc .df { max-height:260px; overflow:auto; border-radius:8px; margin-top:6px; }
+.pc .plan { max-height:380px; overflow:auto; padding:2px 2px 2px 0; }
+.pc .opts { display:flex; flex-direction:column; gap:4px; padding:4px 10px 12px; }
+.pc .opt { text-align:left; background:var(--card2); border:1px solid transparent; color:var(--fg); border-radius:8px; padding:7px 12px; cursor:pointer; font:inherit; font-size:13.5px; display:flex; gap:10px; align-items:center; }
+.pc .opt:hover { border-color:var(--accent); } .pc .opt kbd { color:var(--dim); font:12px var(--mono); min-width:12px; }
+.pc .opt.primary { background:var(--accent); color:var(--onacc,#fff); } .pc .opt.primary kbd { color:inherit; opacity:.7; }
+.pc input.why { width:100%; box-sizing:border-box; margin-top:2px; background:var(--input); border:1px solid var(--faint); border-radius:8px; color:var(--fg); padding:7px 10px; font:inherit; font-size:13.5px; outline:none; }
+.pc input.why:focus { border-color:var(--accent); }
+.pc .res { padding:6px 14px 10px; color:var(--dim); font-size:13px; }
+.pc .q { margin:8px 0 4px; } .pc .q h4 { margin:0 0 5px; font-size:14px; font-weight:500; }
+.pc .q .chipx { display:inline-block; font-size:11px; padding:1px 8px; border-radius:999px; background:var(--card2); color:var(--dim); margin-right:6px; }
+.pc .qo { display:flex; gap:9px; align-items:flex-start; padding:6px 10px; border:1px solid var(--line); border-radius:8px; margin:4px 0; cursor:pointer; }
+.pc .qo:hover { border-color:var(--accent); } .pc .qo.on { border-color:var(--accent); background:color-mix(in srgb,var(--accent) 12%,transparent); }
+.pc .qo i { width:14px; height:14px; border:2px solid var(--faint); border-radius:50%; margin-top:3px; flex:none; } .pc .qo.multi i { border-radius:4px; }
+.pc .qo.on i { border-color:var(--accent); background:var(--accent); }
+.pc .qo b { font-weight:500; display:block; } .pc .qo small { color:var(--dim); display:block; font-size:12.5px; }
+.tool .kids { display:flex; flex-direction:column; gap:2px; margin-bottom:4px; }
+.tool .kid { font:12px/1.5 var(--mono); color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tool .kid b { color:var(--fg); font-weight:500; margin-right:6px; } .tool .kid.err { color:var(--red); } .tool .kid.run::before { content:"… "; } .tool .kid.ok::before { content:"✓ "; color:var(--green); }
+.todo { white-space:normal; font:13.5px/1.6 var(--sans); color:var(--fg); } .todo div { display:flex; gap:8px; } .todo .done { color:var(--dim); text-decoration:line-through; } .todo .cur { color:var(--accent); font-weight:500; }
+#att { display:flex; gap:8px; flex-wrap:wrap; } #att:not(:empty) { margin-bottom:8px; }
+#att .th2 { position:relative; } #att img { height:56px; border-radius:8px; border:1px solid var(--line); display:block; }
+#att button { position:absolute; top:-6px; right:-6px; width:18px; height:18px; border-radius:50%; border:0; background:var(--card2); color:var(--fg); cursor:pointer; font-size:11px; line-height:18px; padding:0; }
+#queue { display:flex; flex-direction:column; gap:3px; margin-bottom:6px; } #queue:empty { display:none; }
+#queue div { display:flex; gap:8px; align-items:center; background:var(--card); border:1px dashed var(--faint); border-radius:10px; padding:4px 10px; font-size:13px; color:var(--dim); }
+#queue div span { flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; } #queue button { background:none; border:0; color:var(--dim); cursor:pointer; }
+#box.bang { border-color:var(--yellow,#e5c07b); } #box.bang textarea { font-family:var(--mono); }
+.msg.user .imgs { display:block; font-size:12px; opacity:.7; margin-bottom:2px; }
+.mi small.tag { display:inline; margin-left:6px; font-size:10.5px; padding:0 6px; border-radius:999px; background:var(--card2); }
+.msg:not(.live) { content-visibility:auto; contain-intrinsic-size:auto 70px; }
+#col.norise .msg, #col.norise .hero { animation:none; }
+#scroll { overscroll-behavior:contain; }
+.earlier { display:block; margin:8px auto; background:var(--card); color:var(--dim); border:1px solid var(--line); border-radius:999px; padding:5px 16px; cursor:pointer; font:inherit; font-size:12.5px; }
+.earlier:hover { color:var(--fg); border-color:var(--accent); }
+.msg.user .rw { opacity:0; margin-left:8px; background:none; border:0; color:var(--dim); cursor:pointer; font-size:14px; padding:0 4px; transition:opacity calc(.15s*var(--sp)); }
+.msg.user:hover .rw { opacity:1; } .msg.user .rw:hover { color:var(--accent); }
+.hk { display:flex; gap:10px; align-items:center; padding:8px 12px; border:1px solid var(--line); border-radius:10px; background:var(--card); margin:6px 0; font-size:13px; }
+.hk .ev { color:var(--accent); font-weight:500; white-space:nowrap; } .hk code { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .hk button { background:none; border:0; color:var(--dim); cursor:pointer; }
+.hk button:hover { color:var(--red); } .hform { display:flex; flex-direction:column; gap:8px; margin-top:10px; } .hform input, .hform select { width:100%; box-sizing:border-box; }
+@media (max-width:560px) { #wrap { padding-left:8px; padding-right:8px; } .pc .ph2 { flex-wrap:wrap; } #row .pill span { max-width:80px; } }
+.tk-c { color:var(--sc); font-style:italic; } .tk-s { color:var(--ss); } .tk-n { color:var(--sn); } .tk-k { color:var(--sk); } .tk-f { color:var(--sf); } .tk-t { color:var(--st); } .tk-v { color:var(--sv); }
+.tk-a { background:color-mix(in srgb,var(--green) 18%,transparent); display:inline-block; width:100%; } .tk-d { background:color-mix(in srgb,var(--red) 18%,transparent); display:inline-block; width:100%; }
+.divider { display:flex; align-items:center; gap:12px; color:var(--dim); font-size:12.5px; margin:18px 0; } .divider::before, .divider::after { content:""; flex:1; border-top:1px dashed var(--faint); }
+details.think { color:var(--dim); font-size:13.5px; } details.think summary { cursor:pointer; user-select:none; } details.think div { margin-top:6px; padding-left:12px; border-left:2px solid var(--faint); white-space:pre-wrap; }
+.ctxbar { position:relative; height:22px; border-radius:11px; background:var(--card2); overflow:hidden; margin:4px 0 12px; } .ctxbar i { position:absolute; inset:0 auto 0 0; background:var(--accent); } .ctxbar span { position:relative; font-size:12px; line-height:22px; padding:0 10px; color:#fff; }
+.bz.ask { background:var(--yellow); }
+.errtxt .resume { margin-left:12px; background:var(--accent); color:var(--onacc,#fff); border:0; border-radius:8px; padding:3px 12px; cursor:pointer; font:inherit; font-size:12.5px; }
+#search { margin:0 12px 6px; width:calc(100% - 24px); box-sizing:border-box; background:var(--card); border:1px solid var(--line); border-radius:9px; color:var(--fg); padding:6px 10px; font:inherit; font-size:13px; outline:none; } #search:focus { border-color:var(--accent); }
+#pal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:50; align-items:flex-start; justify-content:center; padding-top:12vh; }
+#palbox { width:min(560px,92vw); background:var(--card); border:1px solid var(--faint); border-radius:14px; box-shadow:var(--shadow); overflow:hidden; }
+#palin { width:100%; box-sizing:border-box; background:none; border:0; border-bottom:1px solid var(--line); color:var(--fg); padding:14px 16px; font:inherit; font-size:15px; outline:none; }
+#pallist { max-height:50vh; overflow:auto; } #pallist .mi small { display:inline; margin-left:auto; }
+.task { display:flex; align-items:center; gap:8px; padding:6px 0; font-size:13px; } .task .d { width:8px; height:8px; border-radius:50%; background:var(--faint); flex:none; } .task .d.run { background:var(--accent); animation:pulse calc(1s*var(--sp)) ease-in-out infinite; } .task .d.ok { background:var(--green); } .task .d.bad { background:var(--red); }
+.task span.tx { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .task button { background:none; border:1px solid var(--line); color:var(--dim); border-radius:6px; padding:1px 8px; cursor:pointer; font-size:12px; } .task button:hover { color:var(--red); border-color:var(--red); }
+.mst { font-size:12px; padding:1px 8px; border-radius:999px; background:var(--card2); white-space:nowrap; } .mst.ok { color:var(--green); } .mst.warn { color:var(--yellow); } .mst.bad { color:var(--red); }
+/* ---------- motion, effects, backgrounds, split view, drop zone, new settings widgets ---------- */
+
+/* reduced motion: everything finishes instantly (data-motion is set from the setting / the OS preference) */
+html[data-motion=reduced] *, html[data-motion=reduced] *::before, html[data-motion=reduced] *::after {
+  animation-duration:.001ms !important; animation-delay:0s !important; animation-iteration-count:1 !important;
+  transition-duration:.001ms !important; scroll-behavior:auto !important;
+}
+
+/* theme change: colors cross-fade for a moment */
+html.tfade, html.tfade *, html.tfade *::before, html.tfade *::after {
+  transition:background-color calc(.4s*var(--sp)) ease,color calc(.4s*var(--sp)) ease,border-color calc(.4s*var(--sp)) ease,fill calc(.4s*var(--sp)) ease,stroke calc(.4s*var(--sp)) ease !important;
+}
+
+/* press ripples and hover lift */
+.btn, #new, #sendb, .pill, .seg button, #tabs button, .opt, .ib, .tc { position:relative; overflow:hidden; }
+.ripple { position:absolute; border-radius:50%; pointer-events:none; background:currentColor; opacity:.24; transform:scale(0); animation:ripple calc(.6s*var(--sp)) ease-out forwards; }
+@keyframes ripple { to { transform:scale(1); opacity:0; } }
+.btn:hover:not(:disabled) { transform:translateY(-1px); } .btn:active:not(:disabled) { transform:scale(.97); }
+.chip:hover { transform:translateY(-1px); }
+
+/* thinking indicator: the Claude logo breathes */
+#status .st { display:inline-flex; width:16px; height:16px; }
+#status .st svg { width:16px; height:16px; animation:breathe calc(1.8s*var(--sp)) ease-in-out infinite; }
+@keyframes breathe { 0%,100% { transform:scale(.82) rotate(0deg); opacity:.65; } 50% { transform:scale(1.1) rotate(90deg); opacity:1; } }
+
+/* diff rows slide in one after the other when a card opens */
+.tool.open .dr { animation:rowin calc(.34s*var(--sp)) cubic-bezier(.2,.8,.2,1) both; animation-delay:calc(var(--n,0)*16ms*var(--sp)); }
+.tool.noanim .dr, #col.norise .dr { animation:none; }
+@keyframes rowin { from { opacity:0; transform:translateX(-8px); } to { opacity:1; transform:none; } }
+
+/* finishing a long task */
+#box.glow { animation:glow calc(1.4s*var(--sp)) ease-out; }
+#sendb.glow { animation:glowb calc(1.4s*var(--sp)) ease-out; }
+@keyframes glow { 0% { box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 65%,transparent),0 4px 24px rgba(0,0,0,.18); } 100% { box-shadow:0 0 0 26px transparent,0 4px 24px rgba(0,0,0,.18); } }
+@keyframes glowb { 0% { box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 75%,transparent); } 100% { box-shadow:0 0 0 22px transparent; } }
+#confetti { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:200; }
+
+/* background layer behind the whole app */
+#app { position:relative; z-index:1; }
+#bgfx { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; background:var(--bg); }
+#bgfx::after { content:""; position:absolute; inset:0; background:rgba(0,0,0,var(--dim,.5)); display:none; }
+#bgfx.image::after, #bgfx.gradient::after { display:block; }
+html[data-scheme=light] #bgfx::after { background:rgba(255,255,255,var(--dim,.5)); }
+#bgfx.image { background-size:cover; background-position:center; }
+#bgfx.gradient { animation:gradshift calc(40s*var(--sp)) ease-in-out infinite; }
+@keyframes gradshift { 0%,100% { background-position:0% 50%; } 50% { background-position:100% 50%; } }
+#bgfx.aurora i { position:absolute; width:62vmax; height:62vmax; border-radius:50%; filter:blur(90px); opacity:.42; will-change:transform; animation:drift calc(34s*var(--sp)) ease-in-out infinite alternate; }
+#bgfx.aurora i:nth-child(1) { background:var(--accent); left:-12vmax; top:-18vmax; }
+#bgfx.aurora i:nth-child(2) { background:color-mix(in srgb,var(--accent) 35%,#5b8cff); right:-16vmax; top:8vmax; animation-duration:calc(42s*var(--sp)); animation-delay:-9s; }
+#bgfx.aurora i:nth-child(3) { background:color-mix(in srgb,var(--accent) 45%,#ff6ad5); left:18vmax; bottom:-26vmax; animation-duration:calc(50s*var(--sp)); animation-delay:-20s; }
+@keyframes drift { from { transform:translate(0,0) scale(1); } 50% { transform:translate(7vmax,-5vmax) scale(1.18); } to { transform:translate(-6vmax,6vmax) scale(.92); } }
+#bgfx canvas { position:absolute; inset:0; width:100%; height:100%; }
+
+/* with a background, the surfaces let it show through */
+html.fx, html.fx body { background:var(--bg); }
+html.fx body { background:transparent; }
+html.fx #side { background:color-mix(in srgb,var(--side) calc(var(--sa)*100%),transparent); -webkit-backdrop-filter:blur(var(--blur)); backdrop-filter:blur(var(--blur)); }
+html.fx #main, html.fx #split { background:color-mix(in srgb,var(--bg) calc(var(--sa)*70%),transparent); }
+html.fx .user, html.fx .tool, html.fx .pc, html.fx #box, html.fx .dsec, html.fx .asst code { background:color-mix(in srgb,var(--card) calc(var(--sa)*100%),transparent); }
+html.fx #drawer { background:color-mix(in srgb,var(--side) calc(var(--sa)*100%),transparent); -webkit-backdrop-filter:blur(var(--blur)); backdrop-filter:blur(var(--blur)); }
+html.fx .cb { background:color-mix(in srgb,var(--codebg) calc(var(--sa)*100%),transparent); }
+html.fx .pop, html.fx #palbox { -webkit-backdrop-filter:blur(var(--blur)); backdrop-filter:blur(var(--blur)); }
+
+/* a see-through window (the GTK window is made transparent too) */
+html.glass, html.glass body { background:transparent; }
+html.glass #side { background:color-mix(in srgb,var(--side) calc(var(--ga)*100%),transparent); }
+html.glass #main, html.glass #split { background:color-mix(in srgb,var(--bg) calc(var(--ga)*100%),transparent); }
+html.glass #drawer { background:color-mix(in srgb,var(--side) calc(var(--ga)*100%),transparent); }
+html.glass.fx #main, html.glass.fx #split { background:color-mix(in srgb,var(--bg) calc(var(--sa)*70%),transparent); }
+html.glass.fx #side { background:color-mix(in srgb,var(--side) calc(var(--sa)*100%),transparent); }
+html.glass #bgfx { background:transparent; }
+
+/* code blocks: line numbers and wrapping */
+.cb pre { counter-reset:l; }
+html.codenums .cb .ln::before { counter-increment:l; content:counter(l); display:inline-block; min-width:2.2em; margin-right:1em; text-align:right; color:var(--dim); opacity:.55; user-select:none; }
+html.codewrap .cb pre { white-space:pre-wrap; word-break:break-word; }
+.cb .ch .lang { text-transform:lowercase; }
+
+/* sidebar */
+.chat .cdot { width:8px; height:8px; border-radius:50%; flex:none; }
+.chat.hasSnip { flex-wrap:wrap; row-gap:0; }
+.chat .snip { order:9; flex-basis:100%; font-size:11.5px; color:var(--dim); opacity:.85; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.chat .snip mark { background:color-mix(in srgb,var(--accent) 35%,transparent); color:inherit; border-radius:3px; padding:0 1px; }
+.swatches { display:flex; flex-wrap:wrap; gap:8px; padding:6px 14px 10px; }
+.swc { width:24px; height:24px; border-radius:50%; border:2px solid transparent; cursor:pointer; padding:0; box-shadow:0 0 0 1px rgba(128,128,128,.4) inset; transition:transform calc(.12s*var(--sp)); }
+.swc:hover { transform:scale(1.15); } .swc.on { border-color:var(--fg); }
+.swc.none { background:linear-gradient(135deg,transparent 45%,var(--red) 46%,var(--red) 54%,transparent 55%); }
+
+/* split view: a second chat beside the main one */
+#split { flex:1; min-width:0; display:none; flex-direction:column; border-left:1px solid var(--line); background:var(--bg); }
+#app.splitting #split { display:flex; } #app.splitting #main { flex:1; }
+#shead { display:flex; align-items:center; gap:8px; padding:10px 14px; border-bottom:1px solid var(--line); }
+#shead .stt { flex:1; min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; color:var(--dim); font-size:14px; }
+#sscroll { flex:1; overflow:auto; } #scol { max-width:var(--cw,800px); margin:0 auto; padding:10px 20px 30px; }
+#scol .msg { animation:none; } #scol .pc .opts { display:none; }
+.sendnote { color:var(--dim); font-size:12.5px; text-align:center; padding:8px; }
+@media (max-width:980px) { #app.splitting #split { display:none; } }
+
+/* dropping files onto the window */
+#dropz { position:fixed; inset:0; z-index:150; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.5); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
+#dropz.on { display:flex; animation:rise calc(.15s*var(--sp)) ease both; }
+#dropz div { border:2px dashed var(--accent); border-radius:22px; padding:44px 70px; font-size:18px; font-weight:500; background:var(--card); color:var(--fg); text-align:center; }
+#dropz small { display:block; color:var(--dim); font-size:13px; font-weight:400; margin-top:6px; }
+
+/* settings: appearance */
+.ap-row { display:flex; align-items:center; gap:14px; padding:10px 16px; border-bottom:1px solid var(--line); } .ap-row:last-child { border-bottom:0; }
+.ap-row .tx { flex:1; min-width:0; } .ap-row .tx b { font-weight:500; display:block; } .ap-row .tx small { color:var(--dim); font-size:12.5px; display:block; margin-top:1px; }
+.ap-row input[type=range] { width:190px; accent-color:var(--accent); } .ap-row .val { width:52px; text-align:right; color:var(--dim); font:12.5px var(--mono); }
+input[type=color] { width:38px; height:28px; padding:0; border:1px solid var(--faint); border-radius:7px; background:none; cursor:pointer; }
+.cgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px 16px; padding:14px 16px; }
+.cgrid label { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:13px; color:var(--dim); }
+.themes .tc.ad .pv { background:repeating-linear-gradient(45deg,var(--card2),var(--card2) 6px,var(--card) 6px,var(--card) 12px); }
+.tgroup { margin:16px 0 8px; font-size:12px; color:var(--dim); }
+.demo { margin-top:12px; }
+.note { color:var(--dim); font-size:12.5px; padding:8px 16px 12px; }
+
+/* printing / PDF export: only the document shows */
+#printdoc { display:none; }
+@media print {
+  html, body { height:auto !important; overflow:visible !important; background:#fff !important; color:#111 !important; }
+  body > *:not(#printdoc) { display:none !important; }
+  #printdoc { display:block !important; }
+}
+/* ---------- the update dialog ---------- */
+#updmodal { position:fixed; inset:0; z-index:300; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.6); -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px); }
+#updmodal.on { display:flex; animation:rise calc(.2s*var(--sp)) ease both; }
+#updbox { width:min(460px,92vw); background:var(--card); border:1px solid var(--faint); border-radius:18px; box-shadow:var(--shadow); padding:26px 28px 24px; text-align:center; }
+#updbox .uicon { width:44px; height:44px; margin:0 auto 12px; color:var(--accent); } #updbox .uicon svg { width:44px; height:44px; }
+#updbox h2 { margin:0 0 4px; font-size:21px; font-weight:600; }
+#updbox .usub { color:var(--dim); font-size:14px; margin:0 0 14px; }
+#updbox .unotes { text-align:left; background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:10px 14px; font-size:13.5px; color:var(--fg); max-height:140px; overflow:auto; white-space:pre-wrap; margin:0 0 16px; }
+#updbox .uerr { color:var(--red); font-size:13.5px; margin:0 0 14px; }
+#updbox .ubar { height:10px; border-radius:999px; background:var(--faint); overflow:hidden; margin:4px 0 6px; }
+#updbox .ubar i { display:block; height:100%; width:0; border-radius:999px; background:var(--accent); transition:width calc(.15s*var(--sp)) linear; }
+#updbox .ubar.busy i { background-image:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent); background-size:200% 100%; animation:shimmer calc(1.4s*var(--sp)) linear infinite; }
+#updbox .unum { color:var(--dim); font:12.5px var(--mono); margin:0 0 14px; min-height:18px; }
+#updbox .uact { display:flex; gap:10px; justify-content:center; }
+#updbox .btn { min-width:140px; } #updbox .btn:disabled { opacity:.5; cursor:default; transform:none; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="side"><div id="sidein">
+    <div class="brand"><svg viewBox="0 0 24 24"><path fill="#d97757" d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg>Claude Linux</div>
+    <button id="new"></button>
+    <input id="search" placeholder="Search chats" spellcheck="false">
+    <div id="list"></div>
+    <div id="sidefoot">
+      <button class="sbtn" id="setbtn"></button>
+    </div>
+  </div></div>
+  <div id="main">
+    <div id="top">
+      <button class="ib" id="sbtn" title="Toggle sidebar (Ctrl+B)"></button>
+      <div id="tabs"><button data-t="chat">Chat</button><button data-t="code">Code</button></div>
+      <div id="title"></div>
+      <div class="chip hide" id="taskchip" title="Background agents"></div>
+      <div class="chip hide" id="rcchip" title="Remote Control for this chat"></div>
+      <div class="chip" id="usage" title="Plan usage limits"></div>
+      <button class="ib" id="splbtn" title="Split view (Ctrl+\)"></button>
+      <button class="ib" id="drbtn" title="Session panel"></button>
+    </div>
+    <div id="scroll"><div id="col"></div></div>
+    <div id="bar"><div id="wrap">
+      <div id="cmds" class="pop"></div>
+      <div id="status"></div>
+      <div id="queue"></div>
+      <div id="box">
+        <div id="att"></div>
+        <textarea id="in" rows="1" autofocus></textarea>
+        <div id="row">
+          <button class="pill" id="dirbtn"></button>
+          <button class="pill" id="modebtn"></button>
+          <button class="pill" id="attbtn" title="Attach image (or paste / drop one)"></button><input type="file" id="attfile" accept="image/*" multiple hidden>
+          <span class="sp"></span>
+          <button class="pill" id="modelbtn"></button>
+          <button id="sendb"></button>
+        </div>
+      </div>
+    </div></div>
+  </div>
+  <section id="split"><div id="shead"><span class="stt" id="stitle"></span><button class="ib" id="sswap" title="Swap with the main chat"></button><button class="ib" id="sclose" title="Close split view"></button></div><div id="sscroll"><div id="scol"></div></div></section>
+  <aside id="drawer"></aside>
+</div>
+<div id="menu" class="pop"></div>
+<div id="upop" class="pop"></div>
+<div id="modal"><div id="panel"><div id="pnav"></div><div id="pbody"></div></div></div>
+<div id="pal"><div id="palbox"><input id="palin" placeholder="Type a command, chat, or setting…" spellcheck="false"><div id="pallist"></div></div></div>
+<div id="dropz"><div>Drop files to attach<small>Images are attached; other files are added as @mentions</small></div></div>
+<div id="updmodal"><div id="updbox"></div></div>
+<div id="toast"></div>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const IC = {
+  clip:'<path d="M20 12l-8 8a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/>', plus:'<path d="M12 5v14M5 12h14"/>', gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+  send:'<path d="M12 19V5M5 12l7-7 7 7"/>', stop:'<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/>', folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  chev:'<path d="M9 6l6 6-6 6"/>', down:'<path d="M6 9l6 6 6-6"/>', check:'<path d="M5 12l5 5 9-10"/>', x:'<path d="M6 6l12 12M18 6L6 18"/>', refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>',
+  shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>', remote:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+  cog:'<path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
+  panel:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/>',
+  cpu:'<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>', gauge:'<path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-5"/>', doc:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/>', code:'<path d="M8 8l-5 4 5 4M16 8l5 4-5 4"/>', info:'<circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5"/>', tool:'<path d="M14 6a4 4 0 0 0 4 4l-9 9a2.1 2.1 0 0 1-3-3z"/>',
+};
+const ico = (n, cls) => `<svg class="i ${cls || ''}" viewBox="0 0 24 24">${IC[n]}</svg>`;
+const LOGO = '<svg viewBox="0 0 24 24"><path fill="#d97757" d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg>';
+const LOGO_CC = LOGO.replace('fill="#d97757"', 'fill="currentColor"');
+const EXTRA = {};   // handlers for messages from Python that live in other modules: EXTRA.name = payload => ...
+
+let S = { settings:{}, usage:null, cmds:[], skills:[], files:{}, model:'', version:'', account:null, drawer:false };
+const mine = new Set();
+let chats = {}, cur = null, tab = 'code', home = '', st = {}, toolEls = {}, pending = 0, pt = 0, spinT = null, spinStart = {}, panel = 'general';
+const post = m => window.webkit.messageHandlers.bridge.postMessage(m);
+window.onerror = (msg, src, line) => post({type:'jserr', text: msg + ' @' + line});
+
+/* ---------- models & effort (names as in Claude Code) ---------- */
+const MODELS = [
+  ['', 'Default (recommended)', 'Uses the model your account defaults to'],
+  ['claude-fable-5-1', 'Fable 5.1', 'Most capable model'],
+  ['claude-opus-5-5', 'Opus 5.5', 'Complex, multi-step work'],
+  ['claude-sonnet-5-5', 'Sonnet 5.5', 'Everyday coding and writing'],
+  ['claude-haiku-5-5', 'Haiku 5.5', 'Fastest and lightest'],
+  ['opusplan', 'Opus Plan Mode', 'Opus plans, Sonnet carries it out'],
+];
+const EFFORTS = [['', 'Auto'], ['low', 'Low'], ['medium', 'Medium'], ['high', 'High'], ['xhigh', 'Extra high'], ['max', 'Max']];
+function modelName(id) {
+  if (!id) return '';
+  const k = MODELS.find(m => m[0] === id); if (k) return k[1];
+  const m = id.match(/^claude-([a-z]+)-(\d+)-(\d+)/); if (m) return m[1][0].toUpperCase() + m[1].slice(1) + ' ' + m[2] + '.' + m[3];
+  return id;
+}
+const effortName = e => (EFFORTS.find(x => x[0] === e) || ['', ''])[1];
+const MODES = [['acceptEdits', 'Accept edits', 'Edits files freely; other actions need a rule'], ['default', 'Default', 'Reads only; other actions need a permission rule'], ['plan', 'Plan mode', 'Claude plans and makes no changes'], ['bypassPermissions', 'Bypass permissions', 'Runs everything without asking']];
+const modeName = v => (MODES.find(m => m[0] === v) || MODES[0])[1];
+
+/* ---------- helpers ---------- */
+function toast(t, err) { const e = $('#toast'); e.textContent = t; e.className = err ? 'err' : ''; e.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(() => e.style.display = 'none', 3200); }
+function inline(s) {
+  return s.replace(/`([^`\n]+)`/g, '<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<i>$2</i>')
+          .replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2">$1</a>');
+}
+const KWS = 'if|else|elif|for|while|return|function|const|let|var|class|def|import|from|export|default|async|await|try|catch|except|finally|throw|raise|new|in|of|is|not|and|or|None|null|undefined|true|false|True|False|self|this|fn|pub|use|struct|impl|match|mut|func|type|interface|package|public|private|static|void|int|string|then|fi|do|done|case|esac|switch|break|continue|with|as|lambda|yield|enum|trait|where|extends|implements';
+const STR = '("(?:[^"\\\\\\n]|\\\\.)*"|\'(?:[^\'\\\\\\n]|\\\\.)*\'';
+const HL = {
+  slash: { re: new RegExp('(\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/)|' + STR + '|`(?:[^`\\\\]|\\\\.)*`)|(\\b\\d[\\d_.]*\\b)|\\b(' + KWS + ')\\b|(\\b[A-Za-z_$][\\w$]*(?=\\())|(\\b[A-Z][A-Za-z0-9_]*\\b)', 'g'), map: ['c', 's', 'n', 'k', 'f', 't'] },
+  hash: { re: new RegExp('(#[^\\n]*)|' + STR + ')|(\\$\\{?\\w+\\}?)|(\\b\\d[\\d_.]*\\b)|\\b(' + KWS + ')\\b|(\\b[A-Za-z_][\\w]*(?=\\())|(\\b[A-Z][A-Za-z0-9_]*\\b)', 'g'), map: ['c', 's', 'v', 'n', 'k', 'f', 't'] },
+};
+// one <span class="ln"> per line, so line numbers and wrapping can be switched on in CSS; textContent stays the original code
+const byLine = html => html.split('\n').map((l, i, a) => `<span class="ln">${l}${i < a.length - 1 ? '\n' : ''}</span>`).join('');
+function hl(code, lang) {
+  lang = (lang || '').toLowerCase();
+  if (!lang || code.length > 20000 || /^(text|txt|csv|log|output|console)$/.test(lang)) return byLine(esc(code));
+  const tok = (cls, text) => text.split('\n').map(p => p ? `<span class="tk-${cls}">${esc(p)}</span>` : '').join('\n');
+  if (lang === 'diff' || lang === 'patch') return byLine(code.split('\n').map(l => l ? `<span class="${l[0] === '+' ? 'tk-a' : l[0] === '-' ? 'tk-d' : ''}">${esc(l)}</span>` : '').join('\n'));
+  const h = /^(py|python|sh|bash|shell|zsh|yaml|yml|toml|rb|ruby|make|makefile|dockerfile|conf|ini)$/.test(lang) ? HL.hash : HL.slash, re = h.re;
+  re.lastIndex = 0; let out = '', last = 0, m;
+  while ((m = re.exec(code))) {
+    out += esc(code.slice(last, m.index));
+    let g = 1; while (g < m.length && m[g] == null) g++;
+    out += tok(h.map[g - 1], m[0]); last = re.lastIndex; if (m[0] === '') re.lastIndex++;
+  }
+  return byLine(out + esc(code.slice(last)));
+}
+function md(src) {
+  const out = [], parts = src.split(/```(\w*)\n?([\s\S]*?)(?:```|$)/g);
+  for (let i = 0; i < parts.length; i += 3) {
+    let list = null, para = [];
+    const close = () => { if (list) { out.push(`</${list}>`); list = null; } };
+    const flush = () => { if (para.length) { out.push('<p>' + inline(esc(para.join('\n'))) + '</p>'); para = []; } };
+    for (const line of parts[i].split('\n')) {
+      let m;
+      if ((m = line.match(/^(#{1,3})\s+(.*)/))) { flush(); close(); out.push(`<h${m[1].length}>${inline(esc(m[2]))}</h${m[1].length}>`); }
+      else if ((m = line.match(/^\s*[-*]\s+(.*)/))) { flush(); if (list !== 'ul') { close(); out.push('<ul>'); list = 'ul'; } out.push('<li>' + inline(esc(m[1])) + '</li>'); }
+      else if ((m = line.match(/^\s*\d+[.)]\s+(.*)/))) { flush(); if (list !== 'ol') { close(); out.push('<ol>'); list = 'ol'; } out.push('<li>' + inline(esc(m[1])) + '</li>'); }
+      else if (!line.trim()) { flush(); close(); }
+      else { close(); para.push(line); }
+    }
+    flush(); close();
+    if (i + 2 < parts.length) out.push(`<div class="cb"><div class="ch"><span>${esc(parts[i + 1] || 'text')}</span><button class="copy">Copy</button></div><pre><code>${hl(parts[i + 2].replace(/\n$/, ''), parts[i + 1])}</code></pre></div>`);
+  }
+  return out.join('');
+}
+document.addEventListener('click', e => {
+  const c = e.target.closest('.copy');
+  if (c) { navigator.clipboard.writeText(c.closest('.cb').querySelector('code').textContent).then(() => { c.textContent = 'Copied'; setTimeout(() => c.textContent = 'Copy', 1400); }).catch(() => { }); return; }
+  const th = e.target.closest('.th'); if (th) th.parentElement.classList.toggle('open');
+  const a = e.target.closest('a[href^="http"]'); if (a) { e.preventDefault(); post({type:'open_url', url:a.href}); }
+});
+function persistChat(id) { if (id === S.split) scheduleSplit(); reportStatusSoon(); clearTimeout(pt); pt = setTimeout(() => chats[id] && post({type:'save', id, chat:chats[id]}), 400); }
+const persist = () => cur && persistChat(cur);
+function setSetting(k, v) { S.settings[k] = v; post({type:'setsettings', patch:{[k]: v}}); renderComposer(); if (APPEARANCE_KEYS.has(k)) applyAppearance(); }
+function cset(key, value) { post({type:'cset', key, value: value === '' ? null : value}); }
+const cfg = () => { try { return JSON.parse((S.files.settings || {}).text || '{}') || {}; } catch (e) { return {}; } };
+const pick = (o, path) => path.split('.').reduce((a, k) => a == null ? a : a[k], o);
+
+/* ---------- themes, colors, typography: everything that decides how the app looks ---------- */
+Object.assign(IC, {
+  palette:'<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.9 1.5-1.9-.3-1 .4-2.1 1.5-2.1H17a4 4 0 0 0 4-4c0-5-4-10-9-10z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10.5" cy="7" r="1"/><circle cx="15.5" cy="7.5" r="1"/>',
+  sidebar:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/>', split:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/>',
+  swap:'<path d="M7 7h13M16 3l4 4-4 4M17 17H4M8 13l-4 4 4 4"/>',
+});
+
+// [id, name, [background, card, accent]]
+const THEMES = [
+  ['dark', 'Dark', ['#262624', '#30302e', '#d97757']], ['light', 'Light', ['#faf9f5', '#ffffff', '#d97757']], ['sepia', 'Sepia', ['#f4ecd8', '#fbf6e9', '#b4552d']],
+  ['midnight', 'Midnight', ['#0f1420', '#171d2c', '#6ea8fe']], ['nord', 'Nord', ['#2e3440', '#3b4252', '#88c0d0']], ['dracula', 'Dracula', ['#282a36', '#343746', '#bd93f9']],
+  ['solarized', 'Solarized', ['#002b36', '#073642', '#cb4b16']], ['gruvbox', 'Gruvbox', ['#282828', '#3c3836', '#fe8019']], ['rosepine', 'Rosé Pine', ['#191724', '#26233a', '#eb6f92']],
+  ['terminal', 'Terminal', ['#0c0c0c', '#161616', '#d97757']], ['contrast', 'High contrast', ['#000000', '#0d0d0d', '#ffb000']],
+  ['catppuccin-mocha', 'Catppuccin Mocha', ['#1e1e2e', '#313244', '#cba6f7']], ['catppuccin-macchiato', 'Catppuccin Macchiato', ['#24273a', '#363a4f', '#c6a0f6']],
+  ['catppuccin-latte', 'Catppuccin Latte', ['#eff1f5', '#ffffff', '#8839ef']], ['tokyonight', 'Tokyo Night', ['#1a1b26', '#24283b', '#7aa2f7']],
+  ['onedark', 'One Dark', ['#282c34', '#2c313a', '#61afef']], ['everforest', 'Everforest', ['#2d353b', '#343f44', '#a7c080']], ['kanagawa', 'Kanagawa', ['#1f1f28', '#2a2a37', '#7e9cd8']],
+  ['ayu', 'Ayu Mirage', ['#1f2430', '#272d3b', '#ffcc66']], ['monokai', 'Monokai', ['#272822', '#34352e', '#a6e22e']], ['cyberpunk', 'Cyberpunk', ['#0d0221', '#1a0b3a', '#ff2a6d']],
+  ['synthwave', 'Synthwave', ['#262335', '#2f2b43', '#ff7edb']],
+];
+const ADAPTIVE = [['system', 'System (KDE colors)'], ['auto', 'Auto light / dark'], ['custom', 'Custom']];
+const allThemes = () => [...ADAPTIVE.map(([i, n]) => [i, n, []]), ...THEMES];
+const BASE_KEYS = ['bg', 'side', 'card', 'fg', 'dim', 'accent', 'green', 'red', 'yellow'];
+const BASE_LABELS = { bg:'Background', side:'Sidebar', card:'Cards', fg:'Text', dim:'Muted text', accent:'Accent', green:'Success', red:'Error', yellow:'Warning' };
+const CUSTOM_DEFAULT = { bg:'#262624', side:'#1f1e1d', card:'#30302e', fg:'#faf9f5', dim:'#a8a59c', accent:'#d97757', green:'#5fbf79', red:'#f0707f', yellow:'#e6c07b' };
+const ACCENTS = ['#d97757', '#e5484d', '#f76b15', '#ffb224', '#46a758', '#12a594', '#3e63dd', '#8e4ec6', '#d6409f', '#7d8590'];
+const APPEARANCE_KEYS = new Set(['theme', 'autoDark', 'autoLight', 'accent', 'kdeAccent', 'customTheme', 'projectColors', 'font', 'monoFont', 'fontSize', 'chatWidth',
+  'bgMode', 'bgGradient', 'bgImage', 'bgDim', 'glass', 'glassOpacity', 'motion', 'animSpeed', 'syntax', 'codeNums', 'codeWrap']);
+const SANS_STACK = '"Inter","Segoe UI","Cantarell","Noto Sans",system-ui,-apple-system,sans-serif';
+const MONO_STACK = '"JetBrains Mono","Cascadia Code","Fira Code","DejaVu Sans Mono",monospace';
+let KDE = { scheme:null, buttons:'' };      // Plasma's colors, pushed by Python and refreshed when the user changes scheme
+EXTRA.kde = p => { KDE = p || { scheme:null }; applyAppearance(); if ($('#modal').style.display === 'flex' && ['appearance', 'desktop'].includes(panel)) showPage(true); };
+
+/* ----- color helpers ----- */
+const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
+function safeColor(v) {                       // '#abc' / '#aabbcc' -> '#aabbcc'; anything else -> ''
+  const m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(String(v || '').trim()); if (!m) return '';
+  let h = m[1].toLowerCase(); if (h.length === 3) h = [...h].map(x => x + x).join(''); return '#' + h;
+}
+function parseColor(c) {
+  c = String(c || '').trim(); let m;
+  if ((m = c.match(/^#([0-9a-f]{3})$/i))) return [...m[1]].map(x => parseInt(x + x, 16));
+  if ((m = c.match(/^#([0-9a-f]{6})/i))) return [0, 2, 4].map(i => parseInt(m[1].slice(i, i + 2), 16));
+  if ((m = c.match(/^rgba?\(([^)]+)\)/i))) { const p = m[1].split(/[\s,\/]+/).filter(Boolean).slice(0, 3).map(parseFloat); return p.length === 3 && p.every(n => !isNaN(n)) ? p.map(Math.round) : null; }
+  if ((m = c.match(/^color\(srgb\s+([^)]+)\)/i))) { const p = m[1].split(/[\s\/]+/).filter(Boolean).slice(0, 3).map(parseFloat); return p.length === 3 && p.every(n => !isNaN(n)) ? p.map(x => Math.round(x * 255)) : null; }
+  return null;
+}
+const toHex = rgb => '#' + rgb.map(x => clamp(Math.round(x), 0, 255).toString(16).padStart(2, '0')).join('');
+const relLum = ([r, g, b]) => { const f = x => { x /= 255; return x <= .03928 ? x / 12.92 : Math.pow((x + .055) / 1.055, 2.4); }; return .2126 * f(r) + .7152 * f(g) + .0722 * f(b); };
+let _probe;   // a real (not display:none) element: WebKit does not refresh the cached style of hidden ones
+function varRGB(name) {                       // the color a CSS variable currently resolves to, as [r, g, b]
+  if (!_probe) { _probe = document.createElement('span'); _probe.style.cssText = 'position:fixed;left:-9999px;top:0;width:0;height:0;overflow:hidden;visibility:hidden;pointer-events:none;transition:none !important;animation:none !important'; document.body.appendChild(_probe); }
+  _probe.style.color = ''; _probe.style.color = `var(${name})`;
+  return parseColor(getComputedStyle(_probe).color);
+}
+const chatColor = c => c ? safeColor(c.color) || safeColor((S.settings.projectColors || {})[c.cwd]) : '';   // chat color, else its folder's, ignoring anything that is not a color
+
+/* ----- which theme is really in use ----- */
+function resolveTheme() {
+  const s = S.settings || {}, id = s.theme || 'dark', k = KDE.scheme;
+  const dark = k ? k.dark : matchMedia('(prefers-color-scheme: dark)').matches;
+  if (id === 'auto') return { id: dark ? (s.autoDark || 'dark') : (s.autoLight || 'light') };
+  if (id === 'system') {
+    if (!k) return { id: dark ? 'dark' : 'light' };
+    return { id:'system', base:{ bg:k.view, side:k.window, card:k.button, fg:k.fg, dim:k.dim, accent:s.kdeAccent ? k.accent : null, green:k.green, red:k.red, yellow:k.yellow } };
+  }
+  if (id === 'custom') return { id:'custom', base:{ ...CUSTOM_DEFAULT, ...(s.customTheme || {}) } };
+  return { id: THEMES.some(t => t[0] === id) ? id : 'dark' };
+}
+
+let appKey = '', chromeKey = '';
+function applyAppearance() {
+  const root = document.documentElement, st = root.style, s = S.settings || {}, r = resolveTheme();
+  const over = safeColor(chatColor(chats[cur])) || safeColor(s.accent);
+  const key = r.id + '|' + JSON.stringify(r.base || 0) + '|' + over;
+  const reduced = s.motion === 'reduced' || ((s.motion || 'system') === 'system' && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  if (appKey && key !== appKey && !reduced) {   // cross-fade: switch the transition on first, then change the colors
+    root.classList.add('tfade'); void root.offsetWidth;
+    clearTimeout(applyAppearance.t); applyAppearance.t = setTimeout(() => root.classList.remove('tfade'), 700);
+  }
+  appKey = key;
+  for (const k of BASE_KEYS) st.removeProperty('--' + k);
+  root.dataset.theme = r.id;
+  if (r.base) for (const k of BASE_KEYS) { const v = safeColor(r.base[k]); if (v) st.setProperty('--' + k, v); }
+  const bg = varRGB('--bg'); root.dataset.scheme = bg && relLum(bg) > .4 ? 'light' : 'dark';
+  if (over) st.setProperty('--accent', over);
+  st.setProperty('--accent2', 'color-mix(in srgb, var(--accent) 82%, #000)');
+  const ac = varRGB('--accent') || [217, 119, 87];
+  st.setProperty('--onacc', 1.05 / (relLum(ac) + .05) >= 2 ? '#fff' : '#1a1a1a');
+  // typography and layout
+  const fam = (n, base) => { n = String(n || '').replace(/["\\;{}<>]/g, '').trim(); return n ? `"${n}",${base}` : ''; };
+  const put = (k, v) => v ? st.setProperty(k, v) : st.removeProperty(k);
+  put('--sans', fam(s.font, SANS_STACK)); put('--mono', fam(s.monoFont, MONO_STACK));
+  st.setProperty('--fs', clamp(+s.fontSize || 15, 11, 24) + 'px'); st.setProperty('--cw', clamp(+s.chatWidth || 800, 480, 1400) + 'px');
+  // motion
+  root.dataset.motion = reduced ? 'reduced' : 'full';
+  st.setProperty('--sp', String(+(1 / clamp(+s.animSpeed || 1, .25, 3)).toFixed(3)));
+  // code blocks
+  root.classList.toggle('codenums', !!s.codeNums); root.classList.toggle('codewrap', !!s.codeWrap);
+  if (s.syntax && s.syntax !== 'auto') root.dataset.syntax = s.syntax; else root.removeAttribute('data-syntax');
+  // window
+  root.classList.toggle('glass', !!s.glass); st.setProperty('--ga', String(clamp(+s.glassOpacity || .82, .3, 1)));
+  applyBackground();
+  const px = (n, d) => toHex(varRGB(n) || d);
+  const msg = { type:'chrome', bg:px('--bg', [38, 38, 36]), side:px('--side', [31, 30, 29]), fg:px('--fg', [250, 249, 245]), line:px('--line', [52, 51, 47]), glass:!!s.glass, opacity:clamp(+s.glassOpacity || .82, .3, 1) };
+  const mk = JSON.stringify(msg); if (mk !== chromeKey) { chromeKey = mk; post(msg); }
+}
+
+function setTheme(t) { S.settings.theme = t; applyAppearance(); }
+function applyTheme(t) { setSetting('theme', t); if (t === 'dark' || t === 'light') cset('theme', t); }
+function nextTheme() {
+  const ids = THEMES.map(t => t[0]), i = ids.indexOf(S.settings.theme);
+  const n = ids[(i + 1) % ids.length]; applyTheme(n); toast('Theme: ' + THEMES.find(t => t[0] === n)[1]);
+}
+
+/* ----- sidebar ----- */
+function applySidebar(initial) {
+  const root = document.documentElement, collapsed = S.settings.sidebar === false;
+  if (initial) root.classList.add('notrans');
+  $('#side').classList.toggle('collapsed', collapsed);
+  if (initial) requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove('notrans')));
+}
+function toggleSidebar(force) {
+  const open = force === undefined ? $('#side').classList.contains('collapsed') : !!force;
+  $('#side').classList.toggle('collapsed', !open); setSetting('sidebar', open);
+}
+
+/* ----- custom themes: validate, import, export ----- */
+function sanitizeTheme(o) {
+  if (!o || typeof o !== 'object') return null;
+  if (o.colors && typeof o.colors === 'object') o = o.colors;
+  const out = {}; for (const k of BASE_KEYS) { const v = safeColor(o[k]); if (v) out[k] = v; }
+  return out.bg && out.fg ? out : null;
+}
+function currentPalette() {                    // the colors on screen right now, ready to become a custom theme
+  const out = {}; for (const k of BASE_KEYS) { const c = varRGB('--' + k); out[k] = c ? toHex(c) : CUSTOM_DEFAULT[k]; } return out;
+}
+function importThemeText(text) {
+  let t = null; try { t = sanitizeTheme(JSON.parse(text)); } catch (e) { }
+  if (!t) return toast('That does not look like a Claude Linux theme (it needs at least "bg" and "fg" colors)', true);
+  setSetting('customTheme', { ...CUSTOM_DEFAULT, ...t }); setSetting('theme', 'custom'); toast('Theme imported');
+  if ($('#modal').style.display === 'flex' && panel === 'appearance') showPage(true);
+}
+function exportTheme() {
+  post({type:'savetext', name:'claude-linux-theme', ext:'.json', text:JSON.stringify({ name:'My theme', app:'claude-linux', version:1, colors:currentPalette() }, null, 2) + '\n'});
+}
+EXTRA.themefile = p => importThemeText(p.text);
+
+/* ----- per-chat and per-folder accent colors (right-click a chat in the sidebar) ----- */
+function colorMenu(e, c) {
+  closePops(); const m = $('#menu'); m.style.width = '250px';
+  const dirName = (c.cwd || '').split('/').filter(Boolean).pop() || '/', proj = (S.settings.projectColors || {})[c.cwd];
+  const row = (scope, on) => `<div class="swatches" data-scope="${scope}">${ACCENTS.map(col => `<button class="swc ${on === col ? 'on' : ''}" style="background:${col}" data-c="${col}" title="${col}"></button>`).join('')}<button class="swc none ${!on ? 'on' : ''}" data-c="" title="No color"></button></div>`;
+  m.innerHTML = `<div class="mhead">Color for this chat</div>${row('chat', safeColor(c.color))}` + (c.cwd ? `<div class="msep"></div><div class="mhead">Color for every chat in ${esc(dirName)}</div>${row('dir', safeColor(proj))}` : '');
+  m.onclick = ev => {
+    ev.stopPropagation(); const b = ev.target.closest('.swc'); if (!b) return;
+    const val = safeColor(b.dataset.c);
+    if (b.parentElement.dataset.scope === 'chat') { if (val) c.color = val; else delete c.color; persistChat(c.id); }
+    else { const pc = { ...(S.settings.projectColors || {}) }; if (val) pc[c.cwd] = val; else delete pc[c.cwd]; setSetting('projectColors', pc); }
+    m.style.display = 'none'; renderList(); applyAppearance();
+  };
+  place(m, { getBoundingClientRect: () => ({ left:e.clientX, top:e.clientY, bottom:e.clientY }) }, false);
+}
+/* ---------- usage (the CLI's own /usage numbers) ---------- */
+function fmtClock(d) { return d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}).replace(':00', '').replace(/ /g, ' '); }
+function resetText(epoch, session) {
+  if (!epoch) return '';
+  const d = new Date(epoch * 1000), ms = d - Date.now();
+  if (ms <= 0) return 'Resets now';
+  if (session || ms < 3600e3 * 5) { const h = Math.floor(ms / 3600e3), m = Math.ceil(ms % 3600e3 / 60e3); return 'Resets in ' + (h ? h + ' hr ' : '') + m + ' min'; }
+  const day = d.toDateString() === new Date().toDateString() ? 'today' : d.toDateString() === new Date(Date.now() + 864e5).toDateString() ? 'tomorrow' : d.toLocaleDateString([], {weekday:'long'});
+  return `Resets ${day} at ${fmtClock(d)}`;
+}
+const isSess = r => /^session/i.test(r.label);
+const rowName = r => isSess(r) ? 'Current session' : r.label.replace(/^week\s*\(?/i, '').replace(/\)$/, '').replace(/^all models$/i, 'All models').replace(/^./, x => x.toUpperCase());
+function renderUsage() {
+  const u = S.usage, rows = (u && u.rows) || [];
+  const s = rows.find(isSess), w = rows.find(r => /all models/i.test(r.label));
+  const mini = r => r ? `<span class="mini ${r.pct >= 85 ? 'hi' : ''}"><i style="width:${r.pct}%"></i></span> ${r.pct}%` : '—';
+  $('#usage').innerHTML = !u ? 'Usage…' : !rows.length ? 'Usage' : `<span>Session ${mini(s)}</span><span>Week ${mini(w)}</span>`;
+  if ($('#upop').style.display === 'block') fillUsage($('#upop'));
+}
+function usageBlock() {
+  const u = S.usage; if (!u) return '<div class="ur"><div class="r">Loading…</div></div>';
+  if (u.error) return `<div class="errtxt">${esc(u.error)}</div>`;
+  if (!u.rows.length) return `<pre class="raw">${esc(u.text || 'No plan usage limits to show for this login.')}</pre>`;
+  const row = r => `<div class="ur"><div class="l"><span>${esc(rowName(r))}</span><span>${r.pct}% used</span></div><div class="bar ${r.pct >= 85 ? 'hi' : ''}"><i style="width:${r.pct}%"></i></div><div class="r">${esc(r.resetsAt ? resetText(r.resetsAt, isSess(r)) : 'Resets ' + r.raw)}</div></div>`;
+  const sess = u.rows.filter(isSess), wk = u.rows.filter(r => !isSess(r));
+  return sess.map(row).join('') + (wk.length ? '<div class="uh2">Weekly limits</div>' + wk.map(row).join('') : '');
+}
+function ago(ts) { const m = Math.round((Date.now() / 1000 - ts) / 60); return m < 1 ? 'just now' : m + ' min ago'; }
+function fillUsage(p) {
+  const u = S.usage;
+  p.innerHTML = `<div class="uh">Plan usage limits</div>${usageBlock()}<div class="uf"><span>${u && u.ts ? 'Last updated: ' + ago(u.ts) : ''}</span><button class="ib" id="urefresh" title="Refresh">${ico('refresh')}</button></div>`;
+  $('#urefresh').onclick = e => { e.stopPropagation(); post({type:'refresh_usage'}); };
+}
+$('#usage').onclick = e => { e.stopPropagation(); const p = $('#upop'); if (p.style.display === 'block') { p.style.display = 'none'; return; } closePops(); fillUsage(p); p.style.display = 'block'; post({type:'refresh_usage'}); };
+$('#upop').onclick = e => e.stopPropagation();
+
+/* ---------- popups ---------- */
+function closePops() { document.querySelectorAll('.pop').forEach(p => p.id !== 'cmds' && (p.style.display = 'none')); }
+document.addEventListener('click', closePops);
+function place(m, anchor, up) {
+  const r = anchor.getBoundingClientRect(); m.style.display = 'block';
+  m.style.left = Math.max(8, Math.min(r.left, innerWidth - m.offsetWidth - 8)) + 'px';
+  m.style.top = up ? Math.max(8, r.top - m.offsetHeight - 8) + 'px' : (r.bottom + 8) + 'px';
+}
+function listMenu(anchor, items, up, width) {
+  closePops(); const m = $('#menu'); m.style.width = (width || 300) + 'px'; m.innerHTML = ''; m.onclick = null;
+  items.forEach(it => {
+    if (it.sep) return m.insertAdjacentHTML('beforeend', '<div class="msep"></div>');
+    if (it.head) return m.insertAdjacentHTML('beforeend', `<div class="mhead">${esc(it.head)}</div>`);
+    const d = document.createElement('div'); d.className = 'mi' + (it.accent ? ' acc' : '');
+    d.innerHTML = `<div class="tx"><b>${esc(it.label)}</b>${it.sub ? `<small>${esc(it.sub)}</small>` : ''}</div><span class="ck">${it.on ? ico('check') : ''}</span>`;
+    d.onclick = e => { e.stopPropagation(); m.style.display = 'none'; it.run(); }; m.appendChild(d);
+  });
+  place(m, anchor, up);
+}
+function modelMenu() {
+  closePops(); const m = $('#menu'), s = S.settings; m.style.width = '350px';
+  m.innerHTML = '<div class="mhead">Model</div>' + MODELS.map(([id, name, d]) =>
+    `<div class="mi" data-m="${id}"><div class="tx"><b>${esc(name)}</b><small>${esc(id ? d : (S.model ? 'Currently ' + modelName(S.model) : d))}</small></div><span class="ck">${(s.model || '') === id ? ico('check') : ''}</span></div>`).join('') +
+    `<div class="msep"></div><div class="swrow"><div><b style="font-weight:500;display:block">Extended context</b><small style="color:var(--dim);font-size:12px">1M-token window</small></div><label class="sw"><input type="checkbox" id="long" ${s.long ? 'checked' : ''}><i></i></label></div>
+     <div class="msep"></div><div class="mhead">Reasoning effort</div><div class="seg">${EFFORTS.map(([v, l]) => `<button data-e="${v}" class="${(s.effort || '') === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+  const redo = () => { modelMenu(); };
+  m.querySelectorAll('[data-m]').forEach(el => el.onclick = e => { e.stopPropagation(); setSetting('model', el.dataset.m); redo(); });
+  m.querySelector('#long').onclick = e => { e.stopPropagation(); setSetting('long', e.target.checked); };
+  m.querySelectorAll('[data-e]').forEach(el => el.onclick = e => { e.stopPropagation(); setSetting('effort', el.dataset.e); redo(); });
+  m.onclick = e => e.stopPropagation(); place(m, $('#modelbtn'), true);
+}
+$('#modelbtn').onclick = e => { e.stopPropagation(); modelMenu(); };
+$('#modebtn').onclick = e => { e.stopPropagation(); const c = chats[cur]; listMenu($('#modebtn'), [{head:'Permission mode'}, ...MODES.map(([v, l, d]) => ({label:l, sub:d, on:(c.mode || S.settings.mode) === v, run: () => { c.mode = v; persist(); renderComposer(); post({type:'setmode', chat:cur, mode:v}); }}))], true, 360); };
+$('#dirbtn').onclick = e => {
+  e.stopPropagation(); const rec = [...new Set([home, ...Object.values(chats).map(c => c.cwd).filter(Boolean)])];
+  listMenu($('#dirbtn'), [{label:'Choose a folder…', accent:true, run: () => post({type:'pickdir', start:(chats[cur] || {}).cwd})}, {sep:1}, {head:'Recent'}, ...rec.map(r => ({label: r.split('/').filter(Boolean).pop() || '/', sub:r, on:(chats[cur] || {}).cwd === r, run: () => setCwd(r)}))], true, 380);
+};
+function setCwd(p) { if (chats[cur]) { chats[cur].cwd = p; persist(); renderComposer(); if (!chats[cur].items.length) renderChat(); } }
+
+/* ---------- chats ---------- */
+const kindOf = c => c.kind || 'code';
+function newChat() {
+  const id = crypto.randomUUID();
+  chats[id] = { id, title:'New session', kind:tab, session:null, items:[], t:Date.now(), cwd:S.settings.cwd || home, mode:S.settings.mode || 'acceptEdits' };
+  select(id);
+}
+function select(id) { cur = id; renderAll(); $('#in').focus(); }
+const visible = () => Object.values(chats).filter(c => kindOf(c) === tab && (c.items.length || c.id === cur)).sort((a, b) => b.t - a.t);
+function renderAll() { att = []; renderAtt(); renderQueue(); renderTasks(); renderTabs(); renderList(); renderChat(); renderComposer(); renderBusy(); renderUsage(); renderRC(); applyAppearance(); renderSplit(); }
+function renderTabs() {
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === tab));
+  $('#in').placeholder = tab === 'chat' ? 'Message Claude…  (type / for commands)' : 'Describe what you want to build or fix…  (type / for commands)';
+  $('#new').innerHTML = ico('plus') + 'New ' + (tab === 'chat' ? 'chat' : 'session');
+  $('#setbtn').innerHTML = ico('gear') + 'Settings';
+}
+function dayGroup(t) { const d = new Date(t), n = new Date(); const diff = Math.round((new Date(n.getFullYear(), n.getMonth(), n.getDate()) - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 864e5); return diff <= 0 ? 'Today' : diff === 1 ? 'Yesterday' : diff < 8 ? 'Previous 7 days' : 'Older'; }
+let sq = '';
+$('#search').oninput = e => { sq = e.target.value.trim().toLowerCase(); renderList(); };
+$('#search').onkeydown = e => { if (e.key === 'Escape') { e.target.value = ''; sq = ''; renderList(); e.target.blur(); } };
+function renderList() {
+  const l = $('#list'); l.innerHTML = ''; let last = '';
+  visible().filter(c => !sq || c.title.toLowerCase().includes(sq) || c.items.some(i => i.text && String(i.text).toLowerCase().includes(sq))).forEach(c => {
+    const g = dayGroup(c.t); if (g !== last) { l.insertAdjacentHTML('beforeend', `<div class="grp">${g}</div>`); last = g; }
+    const snip = sq && !c.title.toLowerCase().includes(sq) ? snippet(c, sq) : '', col = safeColor(chatColor(c));
+    const d = document.createElement('div'); d.className = 'chat' + (c.id === cur ? ' active' : '') + (snip ? ' hasSnip' : '');
+    d.oncontextmenu = e => { e.preventDefault(); e.stopPropagation(); colorMenu(e, c); };
+    d.innerHTML = (col ? `<span class="cdot" style="background:${col}"></span>` : '') + (snip ? `<span class="snip">${snip}</span>` : '') + `<span class="t">${esc(c.title)}</span>${c.items.some(x => x.k === 'perm' && x.status === 'wait') ? '<span class="bz ask" title="Waiting for you"></span>' : c.busy ? '<span class="bz"></span>' : ''}<button class="x" title="Delete">${ico('x')}</button>`;
+    d.onclick = () => select(c.id);
+    d.querySelector('.x').onclick = e => { e.stopPropagation(); delete chats[c.id]; post({type:'delete', id:c.id}); const n = visible().find(x => x.id !== c.id && x.items.length); if (n) select(n.id); else { cur = null; newChat(); } };
+    l.appendChild(d);
+  });
+  const ttl = chats[cur] && chats[cur].items.length ? chats[cur].title : '';
+  $('#title').textContent = ttl; if (ttl !== lastTitle) { lastTitle = ttl; post({type:'title', text:ttl}); }
+  reportStatusSoon();
+}
+let lastTitle = null;
+function snippet(c, q) {
+  const it = c.items.find(i => i.text && String(i.text).toLowerCase().includes(q)); if (!it) return '';
+  const t = String(it.text).replace(/\s+/g, ' '), at = t.toLowerCase().indexOf(q), a = Math.max(0, at - 24);
+  return (a ? '…' : '') + esc(t.slice(a, at)) + '<mark>' + esc(t.slice(at, at + q.length)) + '</mark>' + esc(t.slice(at + q.length, at + q.length + 60));
+}
+function renderComposer() {
+  const c = chats[cur] || {}, isChat = tab === 'chat', s = S.settings;
+  $('#dirbtn').classList.toggle('hide', isChat); $('#modebtn').classList.toggle('hide', isChat);
+  $('#dirbtn').innerHTML = ico('folder') + `<span>${esc(((c.cwd || home) || '/').split('/').filter(Boolean).pop() || '/')}</span>`; $('#dirbtn').title = c.cwd || home;
+  $('#modebtn').innerHTML = ico('shield') + `<span>${esc(modeName(c.mode || s.mode))}</span>`;
+  const nm = modelName(s.model) || (S.model ? modelName(S.model) : 'Default'), ef = s.effort ? ' · ' + effortName(s.effort) : '';
+  $('#modelbtn').innerHTML = `<span>${esc(nm + (s.long && s.model ? ' (1M)' : '') + ef)}</span>` + ico('down');
+  $('#modelbtn').classList.add('acc');
+  $('#sendb').innerHTML = ico(c.busy ? 'stop' : 'send');
+}
+const isCode = c => c && kindOf(c) !== 'chat';
+function renderRC() {
+  const c = chats[cur], r = (c && c.rc) || {}, chip = $('#rcchip');
+  $('#drbtn').classList.toggle('hide', tab !== 'code'); $('#drbtn').innerHTML = ico('panel');
+  chip.classList.toggle('hide', !(r.on && tab === 'code'));
+  if (r.on) chip.innerHTML = `<span class="g ${r.state === 'connected' ? '' : 'y'}"></span>Remote · ${r.state === 'connected' ? 'connected' : 'connecting…'}`;
+  const d = $('#drawer'); d.classList.toggle('open', S.drawer && tab === 'code');
+  if (S.drawer && tab === 'code') renderDrawer();
+}
+function renderDrawer() {
+  const c = chats[cur]; if (!c) return; const r = c.rc || {}, t = c.tokens || {i:0, o:0, cr:0, cc:0, cost:0}, a = S.account;
+  const state = !r.on ? ['', 'Off'] : r.state === 'connected' ? ['on', 'Connected'] : r.err ? ['', r.err] : ['y', 'Connecting…'];
+  $('#drawer').innerHTML = `<div class="dh"><span>Session</span><button class="ib" id="dclose">${ico('x')}</button></div>
+    <div class="dsec"><h4>Remote Control <label class="sw"><input type="checkbox" id="rctog" ${r.on ? 'checked' : ''}><i></i></label></h4>
+      <p>Continue this chat from claude.ai/code or the Claude app, or let someone on your account join it. Messages sent from there show up here.</p>
+      <div class="rstate"><span class="d ${state[0]}"></span>${esc(state[1])}</div>
+      ${r.on && r.url ? `<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn" id="rcopen">Open session</button><button class="btn g" id="rccopy">Copy link</button></div>` : ''}</div>
+    ${Object.keys(c.tasks || {}).length ? `<div class="dsec"><h4>Background agents</h4>${Object.values(c.tasks).reverse().slice(0, 12).map(x => `<div class="task"><span class="d ${x.status === 'running' ? 'run' : /fail|error|kill|stop/.test(x.status) ? 'bad' : 'ok'}"></span><span class="tx" title="${esc(x.desc)}">${x.type ? '<b>' + esc(x.type) + '</b> · ' : ''}${esc(x.desc)}</span>${x.status === 'running' ? `<button data-stop="${esc(x.id)}">Stop</button>` : ''}</div>`).join('')}</div>` : ''}
+    <div class="dsec"><h4>This session</h4>
+      <div class="kv"><span>Model</span><span>${esc(modelName(S.settings.model) || (S.model ? modelName(S.model) : 'Default'))}</span></div>
+      <div class="kv"><span>Folder</span><span title="${esc(c.cwd || home)}">${esc(((c.cwd || home).split('/').filter(Boolean).pop()) || '/')}</span></div>
+      <div class="kv"><span>Permissions</span><span>${esc(modeName(c.mode || S.settings.mode))}</span></div>
+      <div class="kv"><span>Input / output</span><span>${fmt(t.i)} / ${fmt(t.o)}</span></div>
+      <div class="kv"><span>Cache read / written</span><span>${fmt(t.cr)} / ${fmt(t.cc)}</span></div></div>
+    <div class="dsec"><h4>Account</h4>
+      ${a && a.loggedIn ? `<div class="kv"><span>Signed in with</span><span>${esc(a.method === 'claude.ai' ? 'Claude subscription' : a.method)}</span></div><div class="kv"><span>Plan</span><span>${esc((a.plan || '').replace(/^./, x => x.toUpperCase()))}</span></div><div class="kv"><span>Account</span><span>${esc(a.email || '')}</span></div>` : '<p>' + (a ? 'Not signed in. Run <code>claude auth login</code> in a terminal.' : 'Checking…') + '</p>'}</div>`;
+  $('#dclose').onclick = () => { S.drawer = false; renderRC(); };
+  $('#drawer').querySelectorAll('[data-stop]').forEach(b => b.onclick = () => post({type:'stoptask', chat:cur, task_id:b.dataset.stop}));
+  $('#rctog').onchange = e => toggleRC(e.target.checked);
+  const o = $('#rcopen'); if (o) o.onclick = () => post({type:'open_url', url:r.url});
+  const cp = $('#rccopy'); if (cp) cp.onclick = () => navigator.clipboard.writeText(r.url).then(() => toast('Link copied')).catch(() => toast(r.url));
+}
+const fmt = n => n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'k' : String(n || 0);
+function toggleRC(on) {
+  const c = chats[cur]; if (!isCode(c)) return toast('Remote Control is only available in Code chats.', true);
+  c.rc = on ? {on:true, state:'connecting'} : {on:false}; renderRC();
+  post({type:'rc_chat', chat:cur, on, title:c.title, kind:kindOf(c), cwd:c.cwd || home, mode:c.mode || S.settings.mode, session:c.session});
+}
+$('#drbtn').onclick = () => { S.drawer = !S.drawer; renderRC(); };
+$('#rcchip').onclick = () => { S.drawer = true; renderRC(); };
+$('#setbtn').onclick = () => openPanel('general');
+
+/* ---------- messages ---------- */
+function hero() {
+  const c = chats[cur] || {};
+  return tab === 'chat' ? `<div class="hero">${LOGO}<h1>How can I help?</h1><p>Chat mode — Claude can't touch your computer.</p></div>`
+    : `<div class="hero">${LOGO}<h1>What are we building?</h1><p>Code mode in <b>${esc(c.cwd || home)}</b></p></div>`;
+}
+function renderChat() {
+  const col = $('#col'); col.innerHTML = ''; toolEls = {};
+  const c = chats[cur]; if (!c) return;
+  if (!c.items.length) col.innerHTML = hero();
+  const ps = st[cur], LIM = 60, items = showAll[cur] || c.items.length <= LIM ? c.items : c.items.slice(-LIM);
+  col.classList.add('norise'); requestAnimationFrame(() => requestAnimationFrame(() => col.classList.remove('norise')));
+  if (items.length < c.items.length) { const b = document.createElement('button'); b.className = 'earlier'; b.textContent = `Show ${c.items.length - items.length} earlier items`; b.onclick = () => { showAll[cur] = true; renderChat(); $('#scroll').scrollTop = 0; }; col.appendChild(b); }
+  items.forEach(it => { const el = addItem(it); if (ps && ps.item === it) { ps.el = el; ps.shown = ps.raw.length; el.classList.add('live'); } });
+  $('#scroll').scrollTop = $('#scroll').scrollHeight;
+}
+const toolArg = i => i.command || i.file_path || i.pattern || i.path || i.url || i.query || i.description || JSON.stringify(i);
+const EDIT_TOOLS = { Edit: 1, MultiEdit: 1, Write: 1 };
+function toolDiff(it) {
+  const i = it.input || {};
+  const pairs = it.name === 'Write' ? [['', i.content || '']] : it.name === 'MultiEdit' ? (i.edits || []).map(e => [e.old_string || '', e.new_string || '']) : [[i.old_string || '', i.new_string || '']];
+  const rows = []; let add = 0, del = 0;
+  for (const [o, n] of pairs) {
+    const a = o ? o.split('\n') : [], b = n ? n.split('\n') : [];
+    let p = 0; while (p < a.length && p < b.length && a[p] === b[p]) p++;
+    let s = 0; while (s < a.length - p && s < b.length - p && a[a.length - 1 - s] === b[b.length - 1 - s]) s++;
+    const row = (cls, n, sign, t) => rows.push(`<div class="dr ${cls}" style="--n:${Math.min(rows.length, 14)}"><i>${n}</i><b>${sign}</b><span>${esc(t)}</span></div>`);
+    if (rows.length) rows.push('<div class="dr sep"><i></i><b></b><span>⋯</span></div>');
+    for (let k = Math.max(0, p - 2); k < p; k++) row('ctx', k + 1, ' ', a[k]);
+    a.slice(p, a.length - s).forEach((t, k) => { row('del', p + k + 1, '−', t); del++; });
+    b.slice(p, b.length - s).forEach((t, k) => { row('add', p + k + 1, '+', t); add++; });
+    for (let k = 0; k < Math.min(2, s); k++) row('ctx', b.length - s + k + 1, ' ', b[b.length - s + k]);
+  }
+  const MAX = 300, more = rows.length - MAX;
+  return { add, del, html: rows.slice(0, MAX).join('') + (more > 0 ? `<div class="dr sep"><i></i><b></b><span>… ${more} more lines</span></div>` : '') };
+}
+const OPEN_TOOL = it => EDIT_TOOLS[it.name] || it.bang || it.name === 'TodoWrite';
+function toolHTML(it) {
+  const state = it.result == null ? 'run' : it.err ? 'err' : 'ok';
+  const d = EDIT_TOOLS[it.name] && toolDiff(it), inp = it.input || {};
+  const cnt = d ? `<span class="dc"><em class="p">+${d.add}</em><em class="m">−${d.del}</em></span>` : '';
+  const isAg = it.name === 'Agent' || it.name === 'Task';
+  const todos = it.name === 'TodoWrite' && Array.isArray(inp.todos) ? inp.todos : null;
+  const kids = (it.kids || []).map(k => `<div class="kid ${k.result == null ? 'run' : k.err ? 'err' : 'ok'}"><b>${esc(k.name)}</b>${esc(String(toolArg(k.input)).slice(0, 160))}</div>`).join('');
+  let body = d ? `<div class="df">${d.html}</div>` + (it.err && it.result ? `<div class="dr er"><span>${esc(it.result)}</span></div>` : '') : it.result != null ? esc(it.result) : '(running…)';
+  if (todos) body = '<div class="todo">' + todos.map(t => `<div class="${t.status === 'completed' ? 'done' : t.status === 'in_progress' ? 'cur' : ''}"><span>${t.status === 'completed' ? '☑' : t.status === 'in_progress' ? '◐' : '☐'}</span><span>${esc(t.status === 'in_progress' && t.activeForm ? t.activeForm : t.content)}</span></div>`).join('') + '</div>';
+  else if (kids) body = `<div class="kids">${kids}</div>` + body;
+  const name = isAg ? 'Agent' + (inp.subagent_type ? ' · ' + inp.subagent_type : '') : it.name;
+  let arg = String(toolArg(inp)).slice(0, 200);
+  if (todos) arg = `${todos.filter(t => t.status === 'completed').length}/${todos.length} done`;
+  else if (isAg && it.kids && it.kids.length) arg = (inp.description || '') + ` · ${it.kids.length} tool call${it.kids.length > 1 ? 's' : ''}`;
+  return [`tool ${state}`, `<div class="th"><span class="ts">${state === 'ok' ? ico('check') : state === 'err' ? ico('x') : ''}</span><span class="n">${esc(name)}</span><span class="a">${esc(arg)}</span>${cnt}${ico('chev', 'chev')}</div><div class="tb">${body}</div>`];
+}
+function reTool(el, it) {
+  const open = el.classList.contains('open'), [cls, html] = toolHTML(it);
+  el.className = 'msg ' + cls + (open ? ' open noanim' : ''); el.innerHTML = html;
+  if (open) setTimeout(() => el.classList.remove('noanim'), 700);
+}
+function refreshTool(id, it) {
+  const el = id === cur && toolEls[it.id];
+  if (el) reTool(el, it);
+}
+function ctxBar(t) {
+  if (!/^## Context Usage/m.test(t)) return '';
+  const m = t.match(/\*\*Tokens:\*\*[^(]*\((\d+(?:\.\d+)?)%\)/); if (!m) return '';
+  return `<div class="ctxbar"><i style="width:${Math.min(100, +m[1])}%"></i><span>${m[1]}% of context used</span></div>`;
+}
+function addItem(it) {
+  let d = document.createElement('div');
+  if (it.k === 'user') { d.className = 'msg user'; if (it.remote) { const w = document.createElement('span'); w.className = 'who'; w.textContent = 'Remote'; d.appendChild(w); } if (it.imgs) { const w = document.createElement('span'); w.className = 'imgs'; w.textContent = '🖼 ' + it.imgs + ' image' + (it.imgs > 1 ? 's' : ''); d.appendChild(w); } d.appendChild(document.createTextNode(it.text)); if (it.uid && isCode(chats[cur])) { const r = document.createElement('button'); r.className = 'rw'; r.textContent = '↶'; r.title = 'Restore files to before this message'; r.onclick = () => post({type:'rewind', chat:cur, uid:it.uid, dry:true}); d.appendChild(r); } }
+  else if (it.k === 'perm') d = permEl(it);
+  else if (it.k === 'text') { d.className = 'msg asst'; d.innerHTML = ctxBar(it.text) + md(it.text); }
+  else if (it.k === 'think') { d.className = 'msg'; d.innerHTML = `<details class="think"><summary>Thinking</summary><div>${esc(it.text)}</div></details>`; }
+  else if (it.k === 'div') { d.className = 'msg divider'; d.textContent = it.text; }
+  else if (it.k === 'tool') { const [cls, html] = toolHTML(it); d.className = 'msg ' + cls + (OPEN_TOOL(it) ? ' open' : ''); d.innerHTML = html; toolEls[it.id] = d; }
+  else if (it.k === 'err') { d.className = 'msg errtxt'; d.textContent = it.text; if (it.resume) { const b = document.createElement('button'); b.className = 'resume'; b.textContent = 'Resume'; b.onclick = () => { it.resume = false; b.remove(); const c = Object.values(chats).find(x => x.items.includes(it)); if (c) dispatch(c.id, 'continue', []); }; d.appendChild(b); } }
+  else { d.className = 'msg sys'; d.textContent = it.text; }
+  $('#col').appendChild(d); return d;
+}
+function pushItem(id, it) {
+  const c = chats[id]; if (!c) return null;
+  if (!c.items.length && id === cur) $('#col').innerHTML = '';
+  c.items.push(it); c.t = Date.now();
+  return id === cur ? addItem(it) : null;
+}
+function sys(text) { if (cur) { pushItem(cur, {k:'sys', text}); scrollEnd(true); persist(); } else toast(text); }
+function scrollEnd(force) { const s = $('#scroll'); if (force || s.scrollHeight - s.scrollTop - s.clientHeight < 180) s.scrollTop = s.scrollHeight; }
+const resultText = c => typeof c === 'string' ? c : Array.isArray(c) ? c.map(x => x.text || '').join('\n') : JSON.stringify(c);
+const trimLines = (t, n) => { const l = t.split('\n'); return l.length > n ? l.slice(0, n).join('\n') + `\n… +${l.length - n} lines` : t; };
+
+/* ---------- busy / spinner ---------- */
+const verbs = ['Thinking', 'Pondering', 'Cogitating', 'Noodling', 'Working', 'Computing'];
+function renderBusy() {
+  clearInterval(spinT); const c = chats[cur];
+  renderComposer();
+  if (!c || !c.busy) { $('#status').innerHTML = ''; return; }
+  const v = verbs[Math.floor(Math.random() * verbs.length)];
+  $('#status').innerHTML = '<span class="st">' + LOGO_CC + '</span><span class="shim"></span><span class="el"></span>';
+  const [a, b, t] = $('#status').children, tick = () => {
+    const w = (c.items.some(x => x.k === 'perm' && x.status === 'wait') ? 'Waiting for you' : v) + '…'; if (b.textContent !== w) b.textContent = w;
+    t.textContent = Math.floor((Date.now() - (spinStart[cur] || Date.now())) / 1000) + 's · esc to interrupt';
+  };
+  tick(); spinT = setInterval(tick, 250);
+}
+function setBusy(id, on) {
+  const c = chats[id]; if (!c) return; c.busy = on;
+  if (on) spinStart[id] = Date.now();
+  else { delete spinStart[id]; endLive(id); }
+  renderList(); if (id === cur) renderBusy();
+}
+
+/* ---------- typewriter reveal for streaming answers ---------- */
+function typeTick() {
+  pending = 0; const q = st[cur]; if (!q || !q.el) return;
+  const back = q.raw.length - q.shown; if (back <= 0) return;
+  q.shown += Math.max(1, Math.ceil(back / 14));
+  if (/[\ud800-\udbff]/.test(q.raw[q.shown - 1] || '')) q.shown++;
+  // finished paragraphs are rendered once; only the unfinished tail is re-rendered per frame
+  if (!q.tail || !q.el.contains(q.tail)) {
+    q.el.innerHTML = '<div class="stable"></div><div class="tail"></div>';
+    q.stable = q.el.firstChild; q.tail = q.el.lastChild; q.cut = 0;
+  }
+  const text = q.raw.slice(0, q.shown), at = text.lastIndexOf('\n\n') + 2;
+  if (at > q.cut && (text.slice(0, at).match(/```/g) || []).length % 2 === 0) {
+    q.stable.insertAdjacentHTML('beforeend', md(text.slice(q.cut, at))); q.cut = at;
+  }
+  q.tail.innerHTML = md(text.slice(q.cut)); scrollEnd();
+  if (q.shown < q.raw.length) pending = requestAnimationFrame(typeTick);
+}
+function endLive(id) {
+  const s = st[id];
+  if (s && s.el) { if (s.shown < s.raw.length) { s.el.innerHTML = md(s.raw); s.shown = s.raw.length; } s.el.classList.remove('live'); }
+  delete st[id];
+}
+
+// a tool that never got a result (denied, interrupted, crashed) must not look like it is still running or succeeded
+function settleTools(id, why, only) {
+  const c = chats[id]; if (!c) return;
+  for (const it of c.items) if (it.k === 'tool' && it.result == null && !it.bang && (!only || it.id === only)) {
+    it.result = why; it.err = true;
+    const el = id === cur && toolEls[it.id];
+    if (el) reTool(el, it);
+  }
+}
+
+/* ---------- events from the CLI ---------- */
+const HIDDEN_TOOLS = { AskUserQuestion: 1, ExitPlanMode: 1 };
+const findTool = (c, tid) => c.items.find(x => x.k === 'tool' && x.id === tid);
+let taskRaf = 0;
+function handleSys(id, c, ev) {
+  const t = c.tasks = c.tasks || {};
+  if (ev.subtype === 'compact_boundary') { pushItem(id, {k:'div', text:'Conversation compacted'}); scrollEnd(); persistChat(id); }
+  else if (ev.subtype === 'task_started') t[ev.task_id] = {id:ev.task_id, desc:ev.description || ev.task_type || 'Task', type:ev.subagent_type || '', status:'running', tokens:0};
+  else if (ev.subtype === 'task_progress' && t[ev.task_id]) { if (ev.description) t[ev.task_id].desc = ev.description; t[ev.task_id].tokens = (ev.usage || {}).total_tokens || t[ev.task_id].tokens; }
+  else if ((ev.subtype === 'task_updated' && ev.patch && ev.patch.status || ev.subtype === 'task_notification') && t[ev.task_id]) t[ev.task_id].status = (ev.patch && ev.patch.status) || ev.status || 'completed';
+  else if (ev.subtype === 'background_tasks_changed') { const live = new Set((ev.tasks || []).map(x => x.task_id)); for (const k in t) if (!live.has(k) && t[k].status === 'running') t[k].status = 'completed'; }
+  else return;
+  if (id === cur && !taskRaf) taskRaf = requestAnimationFrame(() => { taskRaf = 0; renderTasks(); });
+}
+function renderTasks() {
+  const c = chats[cur], ts = Object.values((c && c.tasks) || {}), run = ts.filter(x => x.status === 'running'), chip = $('#taskchip');
+  chip.classList.toggle('hide', !run.length); chip.innerHTML = `<span class="g y"></span>${run.length} agent${run.length > 1 ? 's' : ''} running`;
+  if (S.drawer) renderDrawer();
+}
+$('#taskchip').onclick = () => { S.drawer = true; renderRC(); };
+function handle(id, ev) {
+  const c = chats[id]; if (!c) return;
+  const par = ev.parent_tool_use_id;
+  if (ev.type === 'system') { handleSys(id, c, ev); return; }
+  if (ev.type === 'assistant' && !par && ev.uuid) c.lastAsst = ev.uuid;
+  if (par && ev.type === 'stream_event') return;
+  if (par && (ev.type === 'assistant' || ev.type === 'user')) {
+    const p = findTool(c, par), ct = ev.message && ev.message.content; if (!p || !Array.isArray(ct)) return;
+    p.kids = p.kids || [];
+    for (const b of ct) {
+      if (b.type === 'tool_use') p.kids.push({id:b.id, name:b.name, input:b.input, result:null});
+      else if (b.type === 'tool_result') { const k = p.kids.find(x => x.id === b.tool_use_id); if (k) { k.result = trimLines(resultText(b.content), 20); k.err = !!b.is_error; } }
+    }
+    refreshTool(id, p); persistChat(id); return;
+  }
+  if (ev.type === 'stream_event') {
+    const e = ev.event;
+    if (e.type === 'message_start' && !c.busy) setBusy(id, true);
+    if (e.type === 'message_start') endLive(id);
+    if (e.type === 'content_block_delta' && e.delta.type === 'text_delta') {
+      let s = st[id];
+      if (!s) { const item = {k:'text', text:''}; s = st[id] = { item, raw:'', shown:0, streamed:true }; s.el = pushItem(id, item); if (s.el) s.el.classList.add('live'); }
+      s.raw += e.delta.text; s.item.text = s.raw;
+      if (id === cur && !pending) pending = requestAnimationFrame(typeTick);
+    }
+  }
+  else if (ev.type === 'assistant') {
+    for (const b of ev.message.content) {
+      if (b.type === 'thinking' && b.thinking && b.thinking.trim()) pushItem(id, {k:'think', text:b.thinking});
+      else if (b.type === 'tool_use' && HIDDEN_TOOLS[b.name]) endLive(id);
+      else if (b.type === 'tool_use') { endLive(id); pushItem(id, {k:'tool', id:b.id, name:b.name, input:b.input, result:null}); }
+      else if (b.type === 'text' && b.text.trim() && !(st[id] && st[id].streamed)) pushItem(id, {k:'text', text:b.text});
+    }
+    scrollEnd();
+  }
+  else if (ev.type === 'user' && ev.isReplay) {
+    if (!mine.has(ev.uuid)) {
+      const ct = ev.message.content, text = typeof ct === 'string' ? ct : (ct || []).filter(b => b.type === 'text').map(b => b.text).join('\n');
+      if (text.trim()) { if (!c.items.length) c.title = text.slice(0, 44); pushItem(id, {k:'user', text, remote:true}); if (!c.busy) setBusy(id, true); scrollEnd(true); renderList(); }
+    }
+  }
+  else if (ev.type === 'user' && Array.isArray(ev.message.content)) {
+    for (const b of ev.message.content) if (b.type === 'tool_result') {
+      const it = [...c.items].reverse().find(x => x.k === 'tool' && x.id === b.tool_use_id); if (!it) continue;
+      it.result = trimLines(resultText(b.content), 80) || '(no output)'; it.err = !!b.is_error;
+      const el = id === cur && toolEls[it.id];
+      if (el) reTool(el, it);
+    }
+    scrollEnd();
+  }
+  else if (ev.type === 'result') {
+    if (!ev.is_error) celebrate(id);
+    const u = ev.usage || {}, t = c.tokens = c.tokens || {i:0, o:0, cr:0, cc:0, cost:0};
+    t.i += u.input_tokens || 0; t.o += u.output_tokens || 0; t.cr += u.cache_read_input_tokens || 0; t.cc += u.cache_creation_input_tokens || 0; t.cost += ev.total_cost_usd || 0;
+    for (const d of ev.permission_denials || []) {
+      const it = c.items.find(x => x.k === 'tool' && x.id === d.tool_use_id);
+      if (it) { it.result = null; settleTools(id, 'Permission denied: this action was not allowed in the current permission mode, so it did not run.', it.id); }
+    }
+    settleTools(id, 'No result: the command was interrupted or did not run.');
+    if (ev.is_error && ev.result) pushItem(id, {k:'err', text:ev.result});
+  }
+  persistChat(id);
+}
+
+window.fromPyBatch = items => { for (const [n, p] of items) { try { window.fromPy(n, p); } catch (e) { post({type:'jserr', text:String(e && e.stack || e)}); } } };
+window.fromPy = (name, p) => {
+  if (EXTRA[name]) return EXTRA[name](p);
+  if (name === 'init') {
+    chats = p.chats || {}; home = p.home; S.version = p.version; S.appVersion = p.appVersion; Object.assign(S.settings, p.settings || {}); S.usage = p.usage; Object.values(chats).forEach(c => { delete c.rc; delete c.queue; delete c.tasks; expirePerms(c.id); });
+    applyAppearance(); applySidebar(true); post({type:'getfile', which:'settings'});
+    const first = Object.values(chats).sort((a, b) => b.t - a.t)[0];
+    if (first) { tab = kindOf(first); select(first.id); } else newChat();
+    return;
+  }
+  if (name === 'toast') return toast(p.text, p.err);
+  if (name === 'mcp_state') { S.mcp = p; if ($('#modal').style.display === 'flex' && panel === 'mcp') showPage(true); return; }
+  if (name === 'cmds') { S.cmds = p.commands || []; S.skills = p.skills || []; return; }
+  if (name === 'sysmsg') return sys(p.text);
+  if (name === 'usage') { S.usage = p; renderUsage(); if ($('#modal').style.display === 'flex' && panel === 'usage') showPage(true); return; }
+  if (name === 'account') { S.account = p; if (S.drawer) renderRC(); if ($('#modal').style.display === 'flex' && panel === 'about') showPage(true); return; }
+  if (name === 'file') { S.files[p.which] = p; if ($('#modal').style.display === 'flex' && ['config', 'perms', 'advanced', 'memory', 'hooks'].includes(panel)) showPage(true); return; }
+  if (name === 'cwd') { if (chats[cur]) setCwd(p.path); return; }
+  const id = p.chat; if (!chats[id]) return;
+  if (name === 'done') { expirePerms(id); settleTools(id, 'No result: the command was interrupted or did not run.'); setBusy(id, false); persistChat(id); if (id === cur) $('#in').focus(); drainQueue(id); }
+  else if (name === 'error') { expirePerms(id); settleTools(id, 'No result: the command crashed or was interrupted.'); pushItem(id, {k:'err', text:p.text, resume:!!chats[id].session}); setBusy(id, false); scrollEnd(); persistChat(id); }
+  else if (name === 'meta_init') { chats[id].session = p.session; S.model = p.model; if (p.commands && p.commands.length) S.cmds = p.commands; renderComposer(); }
+  else if (name === 'event') handle(id, p.ev);
+  else if (name === 'perm') { const it = {k:'perm', chat:id, rid:p.rid, tool:p.tool, input:p.input, desc:p.desc, sugg:p.suggestions, blocked:p.blocked, status:'wait'}; pushItem(id, it); if (id === cur) scrollEnd(true); renderList(); persistChat(id); }
+  else if (name === 'perm_cancel') { const it = chats[id].items.find(x => x.k === 'perm' && x.rid === p.rid && x.status === 'wait'); if (it) { it.status = 'gone'; redrawPerm(it); } }
+  else if (name === 'rewind') rewindResult(id, p);
+  else if (name === 'files') { const t = tokenAt(); if (id === cur && t && t.q === p.q && p.files.length) { fmode = true; flist = p.files; fsel = 0; showFiles(); } }
+  else if (name === 'bang') { const it = findTool(chats[id], p.id); if (it) { it.result = trimLines((p.out + (p.err ? '\n' + p.err : '')).trim(), 200) || '(no output)'; it.err = p.code !== 0; refreshTool(id, it); const c2 = chats[id]; c2.ctx = (c2.ctx || '') + `<bash-input>${it.input.command}</bash-input>\n<bash-stdout>${p.out}</bash-stdout><bash-stderr>${p.err}</bash-stderr>\n`; scrollEnd(); persistChat(id); } }
+  else if (name === 'rc_resp') { const c = chats[id]; if (p.ok) { if (c.rc && c.rc.on) c.rc.url = p.url || c.rc.url; } else if (c.rc && c.rc.on) { c.rc = {on:false, err:p.error}; toast(p.error || 'Remote Control failed', true); } renderRC(); if ($('#modal').style.display === 'flex' && panel === 'remote') showPage(true); }
+  else if (name === 'rc_state') { const c = chats[id]; if (c.rc && c.rc.on) { c.rc.state = p.state; if (p.state === 'disconnected' || p.state === 'failed') c.rc.err = 'Disconnected'; } renderRC(); }
+};
+
+/* ---------- slash commands ---------- */
+const LOCAL = {
+  help: ['Show all commands', () => sys('Commands:\n' + cmdList().map(([n, d]) => `  /${n.padEnd(18)} ${d}`).join('\n'))],
+  clear: ['Start a fresh conversation', () => newChat()], new: ['Start a new session', () => newChat()],
+  resume: ['Pick a previous conversation', () => listMenu($('#title'), visible().filter(c => c.items.length).slice(0, 12).map(c => ({label:c.title, run: () => select(c.id)})), false, 360)],
+  rename: ['Rename: /rename <title>', a => { if (a && chats[cur]) { chats[cur].title = a; persist(); renderList(); } else sys('Usage: /rename <new title>'); }],
+  model: ['Choose the model', a => { if (a) { setSetting('model', a); sys('Model set to ' + a); } else modelMenu(); }],
+  effort: ['Reasoning effort: /effort [low|medium|high|xhigh|max|auto]', a => { if (a) { setSetting('effort', a === 'auto' ? '' : a); sys('Effort set to ' + a); } else modelMenu(); }],
+  rewind: ['Restore files to an earlier message', () => { const c = chats[cur], us = c ? c.items.filter(x => x.k === 'user' && x.uid).slice(-12).reverse() : []; if (!isCode(c) || !us.length) return sys('Nothing to rewind yet. Rewind restores files Claude changed after one of your messages.'); listMenu($('#title'), us.map(u => ({label:(u.text || '[image]').slice(0, 60), run: () => post({type:'rewind', chat:cur, uid:u.uid, dry:true})})), false, 380); }],
+  hooks: ['Manage hooks', () => openPanel('hooks')],
+  config: ['Open settings', () => openPanel('config')], settings: ['Open settings', () => openPanel('general')],
+  permissions: ['Edit permission rules', () => openPanel('perms')], memory: ['Edit CLAUDE.md', () => openPanel('memory')],
+  usage: ['Show plan usage limits', () => { closePops(); const p = $('#upop'); fillUsage(p); p.style.display = 'block'; post({type:'refresh_usage'}); }],
+  status: ['Show plan usage limits', () => LOCAL.usage[1]()],
+  cost: ['Token usage for this chat', () => { const t = (chats[cur] || {}).tokens || {i:0, o:0, cr:0, cc:0, cost:0}; sys(`Input ${t.i} · output ${t.o} · cache read ${t.cr} · cache written ${t.cc} tokens · $${t.cost.toFixed(4)} at API list price`); }],
+  cd: ['Change folder: /cd <path>', a => a ? setCwd(a.replace(/^~/, home)) : post({type:'pickdir', start:(chats[cur] || {}).cwd})],
+  'add-dir': ['Allow another folder: /add-dir <path>', a => { if (!a) return sys('Usage: /add-dir <path>'); setSetting('addDirs', [...(S.settings.addDirs || []), a.replace(/^~/, home)]); sys('Added ' + a); }],
+  'remote-control': ['Toggle Remote Control for this chat', () => { const c = chats[cur]; if (!isCode(c)) return sys('Remote Control is only available in Code chats.'); S.drawer = true; toggleRC(!(c.rc && c.rc.on)); }], rc: ['Toggle Remote Control for this chat', () => LOCAL['remote-control'][1]()],
+  mcp: ['Manage MCP servers', () => openPanel('mcp')],
+  export: ['Save this chat: /export [md|html|pdf]', a => exportChat(a)],
+  theme: ['Change theme: /theme [name]', a => { const t = allThemes().find(x => x[0] === a.toLowerCase() || x[1].toLowerCase() === a.toLowerCase()); if (t) applyTheme(t[0]); else listMenu($('#title'), allThemes().map(x => ({label:x[1], on:S.settings.theme === x[0], run: () => applyTheme(x[0])})), false, 260); }],
+  appearance: ['Colors, fonts, background and animations', () => openPanel('appearance')],
+  accent: ['Accent color for this chat: /accent #rrggbb or /accent reset', a => { const c = chats[cur]; if (!c) return; if (a === 'reset' || a === '') { delete c.color; } else if (safeColor(a)) { c.color = safeColor(a); } else return sys('Usage: /accent #rrggbb   (or /accent reset)'); persist(); renderList(); applyAppearance(); }],
+  split: ['Show a second chat beside this one', () => toggleSplit()],
+  login: ['How to sign in', () => sys('Run `claude auth login` in a terminal, then restart Claude Linux.')], logout: ['How to sign out', () => sys('Run `claude auth logout` in a terminal.')],
+  version: ['Show version', () => sys('Claude Code v' + S.version)], exit: ['Quit Claude Linux', () => post({type:'quit'})], quit: ['Quit Claude Linux', () => post({type:'quit'})],
+};
+const PASS = {
+  compact: 'Compact the conversation', context: 'Show context usage', init: 'Create a CLAUDE.md', review: 'Review a pull request', 'security-review': 'Security review of pending changes', agents: 'Manage agents', doctor: 'Diagnose your installation', 'code-review': 'Review code for bugs',
+  'deep-research': 'Multi-source research report', design: 'Visual designs and prototypes', 'design-sync': 'Sync a design system', dataviz: 'Charts and data visualization', 'update-config': 'Edit settings.json, hooks, permissions', verify: 'Verify a change really works', debug: 'Debug a problem', simplify: 'Simplify the changed code', batch: 'Run one change across many files',
+  'fewer-permission-prompts': 'Allowlist common read-only commands', loop: 'Run a prompt on an interval', schedule: 'Scheduled cloud agents (routines)', 'claude-api': 'Claude API and SDK reference', 'workflow-authoring': 'Write a multi-agent workflow', run: "Launch this project's app", 'run-skill-generator': 'Generate a run skill', 'plugin-authoring': 'Build a mod or plugin',
+  advisor: 'Ask the advisor model', 'auto-mode-setup': 'Set up auto mode', autocompact: 'Toggle auto-compaction', color: 'Set the session color', 'output-style': 'Change output style', fast: 'Toggle fast mode', focus: 'Focus mode', heapdump: 'Write a heap dump', import: 'Import from another tool', 'reload-plugins': 'Reload plugins', 'reload-skills': 'Reload skills',
+  ultrareview: 'Deep cloud code review', 'usage-credits': 'Usage credits', 'extra-usage': 'Extra usage', insights: 'Insights about your usage', recap: 'Recap the session', 'skill-doctor': 'Diagnose skills', goal: 'Set a goal for the session', 'list-agents': 'List agents', 'team-onboarding': 'Team onboarding', 'design-consent': 'Design consent', 'design-revoke': 'Revoke design consent',
+  'anthropic-skills:built-in-browser': 'Use the built-in browser', 'anthropic-skills:chrome-browser': 'Drive Chrome', 'anthropic-skills:computer-use': 'Control the desktop', 'anthropic-skills:deep-research': 'Multi-source research report', 'anthropic-skills:docs': 'Create and edit docs', 'anthropic-skills:docx': 'Word documents', 'anthropic-skills:google-workspace': 'Google Docs, Sheets, Slides',
+  'anthropic-skills:import-memory': 'Import memory from another assistant', 'anthropic-skills:morning': 'Morning brief', 'anthropic-skills:pdf': 'Work with PDFs', 'anthropic-skills:pptx': 'PowerPoint decks', 'anthropic-skills:skill-creator': 'Create and test skills', 'anthropic-skills:xlsx': 'Spreadsheets' };
+function cmdList() {
+  const m = new Map(Object.entries(LOCAL).map(([n, v]) => [n, v[0]]));
+  [...Object.keys(PASS), ...S.cmds].forEach(n => { if (!m.has(n) && !n.startsWith('__')) m.set(n, PASS[n] || ((S.skills || []).includes(n) ? 'Skill' : 'Claude Code command')); });
+  return [...m].sort((a, b) => a[0].localeCompare(b[0]));
+}
+let csel = 0, clist = [];
+function showCmds() {
+  const v = $('#in').value, p = $('#cmds'); fmode = false;
+  if (!v.startsWith('/') || /\s/.test(v)) { p.style.display = 'none'; return; }
+  const q = v.slice(1).toLowerCase();
+  clist = cmdList().filter(([n]) => n.toLowerCase().includes(q)).sort((a, b) => b[0].startsWith(q) - a[0].startsWith(q) || a[0].localeCompare(b[0])).slice(0, 40);
+  if (!clist.length) { p.style.display = 'none'; return; }
+  csel = Math.min(csel, clist.length - 1);
+  p.innerHTML = clist.map(([n, d], i) => `<div class="mi cmd ${i === csel ? 'sel' : ''}" data-n="${esc(n)}"><b>/${esc(n)}${(S.skills || []).includes(n) ? '<small class="tag">skill</small>' : ''}</b><small>${esc(d)}</small></div>`).join('');
+  p.querySelectorAll('.mi').forEach(el => el.onmousedown = e => { e.preventDefault(); $('#in').value = '/' + el.dataset.n + ' '; p.style.display = 'none'; $('#in').focus(); });
+  p.style.display = 'block'; const s = p.querySelector('.sel'); if (s) s.scrollIntoView({block:'nearest'});
+}
+
+/* ---------- sending ---------- */
+const showAll = {};
+let att = [], fmode = false, flist = [], fsel = 0, hi = -1;
+const hist = (() => { try { return JSON.parse(localStorage.getItem('hist') || '[]'); } catch (e) { return []; } })();
+const clearInput = () => { $('#in').value = ''; resize(); $('#box').classList.remove('bang'); };
+const stopChat = () => { const c = chats[cur]; if (c) c.queue = []; renderQueue(); post({type:'stop', chat:cur}); };
+function renderAtt() {
+  $('#att').innerHTML = att.map((a, i) => `<div class="th2"><img src="${a.url}"><button data-i="${i}">✕</button></div>`).join('');
+  $('#att').querySelectorAll('button').forEach(b => b.onclick = () => { att.splice(+b.dataset.i, 1); renderAtt(); });
+}
+function addFiles(files) {
+  for (const f of files) if (f.type.startsWith('image/')) { const r = new FileReader(); r.onload = () => { att.push({type:f.type, data:String(r.result).split(',')[1], url:r.result}); renderAtt(); }; r.readAsDataURL(f); }
+}
+function renderQueue() {
+  const c = chats[cur], q = $('#queue');
+  q.innerHTML = ((c && c.queue) || []).map((m, i) => `<div><span>Queued: ${esc(m.text || '[image]')}</span><button data-i="${i}" title="Remove">✕</button></div>`).join('');
+  q.querySelectorAll('button').forEach(b => b.onclick = () => { c.queue.splice(+b.dataset.i, 1); renderQueue(); });
+}
+function send() {
+  const text = $('#in').value.trim(), c = chats[cur];
+  if (!c) return;
+  if (!text && !att.length) { if (c.busy) stopChat(); return; }
+  $('#cmds').style.display = 'none';
+  if (text) { if (hist[hist.length - 1] !== text) hist.push(text); hist.splice(0, hist.length - 100); try { localStorage.setItem('hist', JSON.stringify(hist)); } catch (e) {} } hi = -1;
+  const m = text.match(/^\/(\S+)\s*([\s\S]*)$/);
+  if (m && LOCAL[m[1]]) { clearInput(); LOCAL[m[1]][1](m[2].trim()); return; }
+  if (text[0] === '!' && text.length > 1 && isCode(c)) { clearInput(); runBang(c, text.slice(1).trim()); return; }
+  const images = att; att = []; renderAtt(); clearInput();
+  if (c.busy) { (c.queue = c.queue || []).push({text, images}); renderQueue(); return; }
+  dispatch(c.id, text, images);
+}
+function dispatch(id, text, images) {
+  const c = chats[id]; if (!c) return;
+  if (!c.items.length) c.title = (text || 'Image').slice(0, 44);
+  const uid = crypto.randomUUID(); mine.add(uid);
+  pushItem(id, {k:'user', text, uid, after:c.lastAsst || null, imgs: images.length || undefined}); if (id === cur) scrollEnd(true); setBusy(id, true); persistChat(id);
+  const full = (c.ctx || '') + text; c.ctx = ''; c.items.forEach(i => { if (i.resume) i.resume = false; });
+  const resumeAt = c.resumeAt; c.resumeAt = null;
+  post({type:'send', chat:id, text:full, uuid:uid, kind:kindOf(c), cwd:c.cwd || home, mode:c.mode || S.settings.mode, session:c.session, resumeAt, images:images.map(a => ({type:a.type, data:a.data}))});
+}
+function runBang(c, cmd) {
+  const id = 'bang-' + crypto.randomUUID();
+  pushItem(c.id, {k:'tool', id, name:'Bash', input:{command:cmd}, result:null, bang:true}); scrollEnd(true); persistChat(c.id);
+  post({type:'bang', chat:c.id, id, cmd, cwd:c.cwd || home});
+}
+function drainQueue(id) {
+  const c = chats[id]; if (!c || !c.queue || !c.queue.length || c.busy) return;
+  const n = c.queue.shift(); if (id === cur) renderQueue(); dispatch(id, n.text, n.images || []);
+}
+function resize() { const i = $('#in'); i.style.height = 'auto'; i.style.height = Math.min(i.scrollHeight, 220) + 'px'; }
+
+/* @file mentions */
+function tokenAt() {
+  const i = $('#in'), before = i.value.slice(0, i.selectionStart), m = before.match(/(^|\s)@([^\s@]*)$/);
+  return m ? { q:m[2], start:before.length - m[2].length - 1, end:i.selectionStart } : null;
+}
+function showFiles() {
+  const p = $('#cmds');
+  p.innerHTML = flist.map((f, i) => { const b = f.split('/').pop(); return `<div class="mi cmd ${i === fsel ? 'sel' : ''}" data-i="${i}"><b>${esc(b)}</b><small>${esc(f)}</small></div>`; }).join('');
+  p.querySelectorAll('.mi').forEach(el => el.onmousedown = e => { e.preventDefault(); pickFile(+el.dataset.i); });
+  p.style.display = 'block'; const s = p.querySelector('.sel'); if (s) s.scrollIntoView({block:'nearest'});
+}
+function pickFile(i) {
+  const t = tokenAt(), inp = $('#in'); if (!t) return;
+  const ins = '@' + flist[i] + ' ';
+  inp.value = inp.value.slice(0, t.start) + ins + inp.value.slice(t.end); inp.selectionStart = inp.selectionEnd = t.start + ins.length;
+  fmode = false; $('#cmds').style.display = 'none'; inp.focus(); resize();
+}
+
+/* permission / question / plan cards */
+/* rewind */
+const rewindPending = {};
+function restoreConv(id, uid) {
+  const c = chats[id], idx = c ? c.items.findIndex(x => x.k === 'user' && x.uid === uid) : -1; if (idx < 0) return toast('That message is no longer in this chat', true);
+  const it = c.items[idx]; c.items.splice(idx);
+  if (it.after) c.resumeAt = it.after; else { c.session = null; c.resumeAt = null; }
+  c.lastAsst = it.after || null; c.tasks = {}; delete st[id]; setBusy(id, false);
+  post({type:'resetproc', chat:id}); persistChat(id); renderAll();
+  if (id === cur) { $('#in').value = it.text || ''; resize(); $('#in').focus(); }
+  toast('Conversation restored. Edit the message and send it again');
+}
+function rewindResult(id, p) {
+  if (!p.dry) { const mode = rewindPending[p.uid]; delete rewindPending[p.uid]; if (!p.ok) return toast(p.error || 'Could not restore files', true); toast('Files restored'); if (mode === 'both') restoreConv(id, p.uid); return; }
+  const canFiles = p.ok && p.files.length, n = p.files.length, d = document.createElement('div'); d.className = 'msg pc';
+  d.innerHTML = `<div class="ph2"><span>Rewind to before this message?</span><small>${canFiles ? n + ' file' + (n === 1 ? '' : 's') + ' changed since' : p.ok ? 'no file changes since' : esc(p.error || 'files unavailable')}</small></div>${canFiles ? `<div class="pbody"><pre class="cmd">${esc(p.files.map(f => f.replace(home, '~')).join('\n'))}</pre></div>` : ''}<div class="opts"></div>`;
+  const o = d.querySelector('.opts'), btn = (t, fn, pr) => { const b = document.createElement('button'); b.className = 'opt' + (pr ? ' primary' : ''); b.textContent = t; b.onclick = () => { d.remove(); fn(); }; o.appendChild(b); };
+  if (canFiles) btn('Restore code and conversation', () => { rewindPending[p.uid] = 'both'; post({type:'rewind', chat:id, uid:p.uid, dry:false}); }, true);
+  if (canFiles) btn('Restore code only', () => post({type:'rewind', chat:id, uid:p.uid, dry:false}));
+  btn('Restore conversation only', () => restoreConv(id, p.uid), !canFiles); btn('Cancel', () => {});
+  if (id === cur) { $('#col').appendChild(d); scrollEnd(true); }
+}
+
+const permEls = new Map(), permOpts = new Map();
+function expirePerms(id) { const c = chats[id]; if (!c) return; for (const it of c.items) if (it.k === 'perm' && it.status === 'wait') { it.status = 'gone'; redrawPerm(it); } }
+function redrawPerm(it) { const old = permEls.get(it.rid); if (old && old.isConnected) old.replaceWith(permEl(it)); }
+function answerPerm(it, allow, o) {
+  o = o || {}; const c = chats[it.chat]; if (!c || it.status !== 'wait') return;
+  post({type:'perm_reply', chat:it.chat, rid:it.rid, allow, input:o.input || it.input, perms:o.perms, message:o.message});
+  it.status = allow ? 'allow' : 'deny'; it.summary = o.summary || (allow ? 'Allowed' : 'Denied');
+  if (o.mode) { c.mode = o.mode; post({type:'setmode', chat:it.chat, mode:o.mode}); renderComposer(); }
+  permOpts.delete(it.rid); redrawPerm(it); renderList(); persistChat(it.chat); if (it.chat === cur) $('#in').focus();
+}
+const ruleOf = sg => sg.rules.map(r => r.ruleContent ? `${r.toolName}(${r.ruleContent})` : r.toolName).join(', ');
+function permEl(it) {
+  const d = document.createElement('div'), inp = it.input || {}; permEls.set(it.rid, d);
+  const waiting = it.status === 'wait'; d.className = 'msg pc' + (waiting ? '' : ' done');
+  const ask = it.tool === 'AskUserQuestion', plan = it.tool === 'ExitPlanMode';
+  const title = ask ? 'Claude has a question' : plan ? 'Ready to code?' : `Allow <b>${esc(it.tool)}</b>?`;
+  let sub = ask ? '' : plan ? 'Review the plan below' : esc(it.desc && it.tool !== 'Bash' ? it.desc : it.blocked ? it.blocked : '');
+  let body = '';
+  if (ask) {
+    it.sel = it.sel || {}; it.other = it.other || {};
+    body = (inp.questions || []).map((q, qi) => `<div class="q" data-qi="${qi}"><h4>${q.header ? `<span class="chipx">${esc(q.header)}</span>` : ''}${esc(q.question)}</h4>` +
+      (q.options || []).map(o => `<div class="qo ${q.multiSelect ? 'multi' : ''} ${(it.sel[qi] || []).includes(o.label) ? 'on' : ''}" data-l="${esc(o.label)}"><i></i><span><b>${esc(o.label)}</b>${o.description ? `<small>${esc(o.description)}</small>` : ''}</span></div>`).join('') +
+      `<input class="why" data-o="${qi}" placeholder="Other…" value="${esc(it.other[qi] || '')}"></div>`).join('');
+  } else if (plan) body = `<div class="plan">${md(inp.plan || '')}</div>`;
+  else if (it.tool === 'Bash') body = `<pre class="cmd">${esc(inp.command || '')}</pre>${it.desc ? `<div style="color:var(--dim);font-size:12.5px">${esc(it.desc)}</div>` : ''}`;
+  else if (EDIT_TOOLS[it.tool]) { const df = toolDiff({name:it.tool, input:inp}); sub = esc(inp.file_path || ''); body = `<div class="df">${df.html}</div>`; }
+  else body = `<pre class="cmd">${esc(JSON.stringify(inp, null, 2).slice(0, 1500))}</pre>`;
+  if (!waiting) {
+    const sum = it.status === 'gone' ? 'Expired (the run ended before this was answered)' : ask && it.status === 'allow' ? 'Answered' : (it.status === 'allow' ? '✓ ' : '✕ ') + (it.summary || '');
+    d.innerHTML = `<div class="ph2"><span>${title}</span>${sub ? `<small>${sub}</small>` : ''}</div><div class="pbody">${ask ? '' : body}</div><div class="res">${esc(sum)}</div>`;
+    if (ask && it.status === 'allow') d.querySelector('.pbody').innerHTML = (inp.questions || []).map(q => `<div class="q"><h4>${esc(q.question)}</h4><div style="color:var(--dim)">→ ${esc((it.answers || {})[q.question] || '')}</div></div>`).join('');
+    if (plan) d.querySelector('.plan').style.maxHeight = '160px';
+    return d;
+  }
+  d.innerHTML = `<div class="ph2"><span>${title}</span>${sub ? `<small>${sub}</small>` : ''}</div><div class="pbody">${body}</div><div class="opts"></div>`;
+  const opts = d.querySelector('.opts'), fns = [];
+  const add = (label, fn, primary) => { const b = document.createElement('button'); b.className = 'opt' + (primary ? ' primary' : ''); b.innerHTML = `<kbd>${fns.length + 1}</kbd><span>${label}</span>`; b.onclick = fn; opts.appendChild(b); fns.push(fn); };
+  const why = ph => { const w = document.createElement('input'); w.className = 'why'; w.placeholder = ph; opts.appendChild(w); return w; };
+  if (ask) {
+    d.querySelectorAll('.q').forEach(qe => {
+      const qi = +qe.dataset.qi, q = inp.questions[qi];
+      qe.querySelectorAll('.qo').forEach(el => el.onclick = () => {
+        const l = el.dataset.l, cur2 = it.sel[qi] || [];
+        if (q.multiSelect) it.sel[qi] = cur2.includes(l) ? cur2.filter(x => x !== l) : [...cur2, l]; else { it.sel[qi] = [l]; it.other[qi] = ''; qe.querySelector('.why').value = ''; }
+        qe.querySelectorAll('.qo').forEach(o => o.classList.toggle('on', it.sel[qi].includes(o.dataset.l)));
+      });
+      qe.querySelector('.why').oninput = e => { it.other[qi] = e.target.value; if (!q.multiSelect && e.target.value) { it.sel[qi] = []; qe.querySelectorAll('.qo').forEach(o => o.classList.remove('on')); } };
+    });
+    const submit = () => {
+      const answers = {}; let ok = true;
+      (inp.questions || []).forEach((q, qi) => { const parts = [...(it.sel[qi] || [])]; if ((it.other[qi] || '').trim()) parts.push(it.other[qi].trim()); if (!parts.length) ok = false; answers[q.question] = parts.join(', '); });
+      if (!ok) return toast('Answer every question first', true);
+      it.answers = answers; answerPerm(it, true, {input:{...inp, answers}, summary:'Answered'});
+    };
+    add('Submit answers', submit, true);
+    add('Skip', () => answerPerm(it, false, {message:'The user skipped this question.', summary:'Skipped'}));
+    d.querySelectorAll('.why').forEach(w => w.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+  } else if (plan) {
+    add('Yes, and auto-accept edits', () => answerPerm(it, true, {perms:[{type:'setMode', mode:'acceptEdits', destination:'session'}], mode:'acceptEdits', summary:'Plan approved, edits auto-accepted'}), true);
+    add('Yes, and manually approve edits', () => answerPerm(it, true, {perms:[{type:'setMode', mode:'default', destination:'session'}], mode:'default', summary:'Plan approved, edits need approval'}));
+    const w = why('No, keep planning: tell Claude what to change (Enter)');
+    w.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); answerPerm(it, false, {message:'The user rejected the plan' + (w.value.trim() ? ': ' + w.value.trim() : '. Keep planning.'), summary:w.value.trim() || 'Plan rejected'}); } };
+    fns.push(() => w.focus());
+  } else {
+    add('Yes', () => answerPerm(it, true), true);
+    const rule = (it.sugg || []).find(x => x.type === 'addRules'), mode = (it.sugg || []).find(x => x.type === 'setMode');
+    if (rule) add(`Yes, and don't ask again for <code>${esc(ruleOf(rule).slice(0, 80))}</code>`, () => answerPerm(it, true, {perms:[rule], summary:"Allowed, won't ask again"}));
+    if (mode) add(mode.mode === 'acceptEdits' ? 'Yes, allow all edits this session' : `Yes, and switch to ${esc(modeName(mode.mode))} for this session`, () => answerPerm(it, true, {perms:[mode], mode:mode.mode, summary:'Allowed (' + modeName(mode.mode) + ')'}));
+    const w = why("No: tell Claude what to do differently (Enter)");
+    const deny = () => answerPerm(it, false, {message:"The user doesn't want to proceed with this tool use." + (w.value.trim() ? ' User feedback: ' + w.value.trim() : ''), summary:w.value.trim() ? 'Denied: ' + w.value.trim() : 'Denied'});
+    w.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); deny(); } };
+    fns.push(() => w.focus());
+  }
+  permOpts.set(it.rid, fns);
+  return d;
+}
+document.addEventListener('keydown', e => {
+  if (/^[1-9]$/.test(e.key) && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName) && $('#modal').style.display !== 'flex') {
+    const c = chats[cur], it = c && [...c.items].reverse().find(x => x.k === 'perm' && x.status === 'wait');
+    const fns = it && permOpts.get(it.rid); if (fns && fns[+e.key - 1] && it.tool !== 'AskUserQuestion') { e.preventDefault(); fns[+e.key - 1](); }
+  }
+});
+
+$('#in').addEventListener('input', () => {
+  csel = 0; resize(); showCmds();
+  const v = $('#in').value; $('#box').classList.toggle('bang', v[0] === '!' && isCode(chats[cur]));
+  const t = tokenAt(); if (t && v[0] !== '/' && isCode(chats[cur])) post({type:'files', chat:cur, cwd:(chats[cur] || {}).cwd || home, q:t.q});
+});
+$('#in').addEventListener('paste', e => { const fs = [...(e.clipboardData.files || [])].filter(f => f.type.startsWith('image/')); if (fs.length) { e.preventDefault(); addFiles(fs); } });
+$('#attbtn').innerHTML = ico('clip'); $('#attbtn').onclick = () => $('#attfile').click();
+$('#attfile').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
+const MODE_CYCLE = ['default', 'acceptEdits', 'plan'];
+$('#in').addEventListener('keydown', e => {
+  const open = $('#cmds').style.display === 'block', inp = $('#in');
+  if (fmode && open) {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); fsel = (fsel + (e.key === 'ArrowDown' ? 1 : flist.length - 1)) % flist.length; showFiles(); return; }
+    if (e.key === 'Tab' || (e.key === 'Enter' && !e.shiftKey)) { e.preventDefault(); e.stopImmediatePropagation(); pickFile(fsel); return; }
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); fmode = false; $('#cmds').style.display = 'none'; return; }
+  }
+  if (e.key === 'Tab' && e.shiftKey && !open) {
+    e.preventDefault(); const c = chats[cur]; if (!isCode(c)) return;
+    const m = c.mode || S.settings.mode, n = MODE_CYCLE[(MODE_CYCLE.indexOf(m) + 1) % MODE_CYCLE.length];
+    c.mode = n; persist(); renderComposer(); post({type:'setmode', chat:cur, mode:n}); toast('Permission mode: ' + modeName(n)); return;
+  }
+  if (!open && e.key === 'ArrowUp' && inp.selectionStart === 0 && inp.selectionEnd === 0 && hist.length && hi < hist.length - 1) { e.preventDefault(); hi++; inp.value = hist[hist.length - 1 - hi]; resize(); return; }
+  if (!open && e.key === 'ArrowDown' && hi >= 0 && inp.selectionStart === inp.value.length) { e.preventDefault(); hi--; inp.value = hi < 0 ? '' : hist[hist.length - 1 - hi]; resize(); return; }
+  if (open && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) { e.preventDefault(); csel = (csel + (e.key === 'ArrowDown' ? 1 : clist.length - 1)) % clist.length; showCmds(); return; }
+  if (open && (e.key === 'Tab' || (e.key === 'Enter' && !e.shiftKey && inp.value.slice(1) !== clist[csel][0]))) { e.preventDefault(); inp.value = '/' + clist[csel][0] + ' '; $('#cmds').style.display = 'none'; return; }
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { if ($('#modal').style.display === 'flex') closePanel(); else if (chats[cur] && chats[cur].busy) stopChat(); } });
+$('#sendb').onclick = send; $('#new').onclick = newChat;
+document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => { tab = b.dataset.t; const n = visible().find(c => c.items.length); n ? select(n.id) : newChat(); });
+
+/* ---------- command palette + shortcuts ---------- */
+let pal = [], psel = 0;
+function palItems() {
+  const it = [{l:'New session', h:'Ctrl+N', run:newChat}, {l:'Settings', h:'Ctrl+,', run:() => openPanel('general')}, {l:'Toggle session panel', run:() => $('#drbtn').click()}, {l:'Keyboard shortcuts', run:() => sys(SHORTCUTS)}];
+  PAGES.forEach(([k, n]) => it.push({l:'Settings: ' + n, run:() => openPanel(k)}));
+  allThemes().forEach(t => it.push({l:'Theme: ' + t[1], run:() => applyTheme(t[0])}));
+  it.push({l:'Next theme', h:'Ctrl+Shift+T', run:nextTheme}, {l:'Split view', h:'Ctrl+\\', run:toggleSplit}, {l:'Toggle sidebar', h:'Ctrl+B', run:() => toggleSidebar()},
+    {l:'Export chat as Markdown', run:() => exportChat('md')}, {l:'Export chat as HTML', run:() => exportChat('html')}, {l:'Export chat as PDF', run:() => exportChat('pdf')},
+    {l:'Appearance settings', run:() => openPanel('appearance')}, {l:'Desktop settings', run:() => openPanel('desktop')}, {l:'Full screen', h:'F11', run:() => post({type:'fullscreen'})});
+  visible().concat(Object.values(chats).filter(c => kindOf(c) !== tab && c.items.length)).sort((a, b) => b.t - a.t).slice(0, 40).forEach(c => it.push({l:'Chat: ' + c.title, h:kindOf(c), run:() => { tab = kindOf(c); select(c.id); }}));
+  cmdList().forEach(([n, d]) => it.push({l:'/' + n, h:d, run:() => { $('#in').value = '/' + n + ' '; $('#in').focus(); showCmds(); }}));
+  return it;
+}
+function palRender() {
+  const q = $('#palin').value.toLowerCase().split(/\s+/).filter(Boolean);
+  pal = palItems().filter(x => q.every(w => (x.l + ' ' + (x.h || '')).toLowerCase().includes(w))).slice(0, 40); psel = Math.min(psel, Math.max(0, pal.length - 1));
+  $('#pallist').innerHTML = pal.map((x, i) => `<div class="mi ${i === psel ? 'sel' : ''}" data-i="${i}"><span class="tx"><b>${esc(x.l)}</b></span>${x.h ? `<small>${esc(x.h)}</small>` : ''}</div>`).join('') || '<div class="mi"><span class="tx"><small>No matches</small></span></div>';
+  $('#pallist').querySelectorAll('.mi[data-i]').forEach(el => el.onmousedown = e => { e.preventDefault(); palRun(+el.dataset.i); });
+  const sel = $('#pallist').querySelector('.sel'); if (sel) sel.scrollIntoView({block:'nearest'});
+}
+function palOpen() { $('#pal').style.display = 'flex'; $('#palin').value = ''; psel = 0; palRender(); $('#palin').focus(); }
+function palClose() { $('#pal').style.display = 'none'; if ($('#modal').style.display !== 'flex') $('#in').focus(); }
+function palRun(i) { const x = pal[i]; palClose(); if (x) x.run(); }
+$('#palin').oninput = () => { psel = 0; palRender(); };
+$('#palin').onkeydown = e => {
+  if (e.key === 'Escape') { e.preventDefault(); palClose(); }
+  else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); psel = (psel + (e.key === 'ArrowDown' ? 1 : pal.length - 1)) % Math.max(1, pal.length); palRender(); }
+  else if (e.key === 'Enter') { e.preventDefault(); palRun(psel); }
+};
+$('#pal').onmousedown = e => { if (e.target === $('#pal')) palClose(); };
+const SHORTCUTS = 'Shortcuts:\n  Ctrl+K   command palette\n  Ctrl+N   new session\n  Ctrl+L   focus the message box\n  Ctrl+,   settings\n  Ctrl+B   toggle sidebar\n  Ctrl+W   close the window (to the tray if enabled)\n  Ctrl+Q   quit\n  Ctrl+F   search chats\n  Ctrl+\\   split view\n  Ctrl+1 / Ctrl+2   Chat / Code\n  Ctrl+= / Ctrl+-   bigger / smaller text (Ctrl+0 resets)\n  Ctrl+Shift+T   next theme\n  F11      full screen\n  Ctrl+/   this list\n  Shift+Tab  cycle permission mode\n  Esc      stop the current run\n  ↑ / ↓    earlier prompts\n  @file    mention a file   !cmd  run a shell command';
+document.addEventListener('keydown', e => {
+  if (!e.ctrlKey || e.altKey || e.metaKey) return;
+  const k = e.key.toLowerCase(), go2 = f => { e.preventDefault(); e.stopPropagation(); f(); };
+  if (k === 'k') go2(() => $('#pal').style.display === 'flex' ? palClose() : palOpen());
+  else if (k === 'n') go2(newChat);
+  else if (k === 'l') go2(() => $('#in').focus());
+  else if (k === ',') go2(() => openPanel('general'));
+  else if (k === '/') go2(() => sys(SHORTCUTS));
+  else if (k === 'b') go2(() => toggleSidebar());
+  else if (k === 'f') go2(() => { toggleSidebar(false); $('#search').focus(); });
+}, true);
+
+/* ---------- settings window ---------- */
+const HOOK_EVENTS = ['PreToolUse', 'PostToolUse', 'UserPromptSubmit', 'Stop', 'SubagentStop', 'SessionStart', 'SessionEnd', 'Notification', 'PreCompact'];
+const PAGES = [['general', 'General', 'cog'], ['model', 'Model', 'cpu'], ['config', 'Claude Code', 'code'], ['perms', 'Permissions', 'shield'], ['remote', 'Remote Control', 'remote'], ['usage', 'Usage', 'gauge'], ['memory', 'Memory', 'doc'], ['mcp', 'MCP servers', 'code'], ['hooks', 'Hooks', 'refresh'], ['advanced', 'Advanced', 'tool'], ['about', 'About', 'info']];
+function openPanel(p) { closePops(); $('#modal').style.display = 'flex'; go(p); }
+function closePanel() { $('#modal').style.display = 'none'; }
+$('#modal').onclick = e => { if (e.target.id === 'modal') closePanel(); };
+function go(p) { panel = p; if (p === 'mcp') { S.mcp = null; post({type:'mcp_list'}); } post({type:'getfile', which:'settings'}); if (p === 'memory') post({type:'getfile', which:'memory'}); if (p === 'usage') post({type:'refresh_usage'}); showPage(); }
+const swH = (id, on) => `<label class="sw"><input type="checkbox" data-id="${id}" ${on ? 'checked' : ''}><i></i></label>`;
+const selH = (id, opts, val) => `<select class="sel" data-id="${id}">${opts.map(([v, l]) => `<option value="${esc(v)}" ${String(val ?? '') === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>`;
+const setRow = (t, d, c) => `<div class="set"><div class="tx"><b>${t}</b>${d ? `<small>${d}</small>` : ''}</div>${c}</div>`;
+const CONFIG = [
+  ['permissions.defaultMode', 'Default permission mode', 'How Claude handles actions that need approval', 'enum', [['', 'Default'], ['acceptEdits', 'Accept edits'], ['plan', 'Plan mode'], ['bypassPermissions', 'Bypass permissions']], ''],
+  ['alwaysThinkingEnabled', 'Always-on thinking', 'Let Claude think before every response', 'bool', null, false],
+  ['includeCoAuthoredBy', 'Co-authored-by trailer', 'Add “Co-Authored-By: Claude” to commits Claude makes', 'bool', null, true],
+  ['outputStyle', 'Output style', 'Adjust how Claude responds', 'enum', [['', 'Default'], ['Explanatory', 'Explanatory'], ['Learning', 'Learning']], ''],
+  ['autoUpdatesChannel', 'Auto-update channel', 'Which release stream Claude Code updates from', 'enum', [['latest', 'Latest'], ['stable', 'Stable']], 'latest'],
+  ['cleanupPeriodDays', 'Keep transcripts for (days)', 'Older conversations are deleted automatically', 'num', null, 30],
+  ['enableAllProjectMcpServers', 'Approve all project MCP servers', 'Trust MCP servers defined in project .mcp.json files', 'bool', null, false],
+];
+function showPage(keep) {
+  const b = $('#pbody'), sc = b.scrollTop, s = S.settings, c = cfg();
+  $('#pnav').innerHTML = '<h3>Settings</h3>' + PAGES.map(([k, l, i]) => `<button data-k="${k}" class="${k === panel ? 'on' : ''}">${ico(i)}${l}</button>`).join('');
+  $('#pnav').querySelectorAll('button').forEach(x => x.onclick = () => go(x.dataset.k));
+  b.innerHTML = `<button class="ib" id="pclose">${ico('x')}</button>` + PAGE[panel](s, c);
+  $('#pclose').onclick = closePanel; bindPage(b, s, c); if (PAGE_BIND[panel]) PAGE_BIND[panel](b); if (keep) b.scrollTop = sc;
+}
+const PAGE_BIND = {};   // per-page event wiring, registered by pages.js
+const PAGE = {
+  general: s => `<div class="ph">General</div><p class="pd">How Claude Linux looks and where it works.</p>
+    <div class="card">${setRow('Theme and appearance', 'Colors, fonts, background and animations', '<button class="btn g" data-go="appearance">Open</button>')}</div>
+    <div class="sec">Workspace</div><div class="card">
+        ${setRow('Default folder', 'Where new Code sessions start', `<input class="txt" data-id="cwd" value="${esc(s.cwd || '')}" placeholder="${esc(home)}">`)}
+    ${setRow('Default permission mode', 'Used by new Code sessions', selH('mode', MODES.map(m => [m[0], m[1]]), s.mode))}
+    ${setRow('Desktop notifications', 'When Claude needs you or finishes a long task while this window is in the background', swH('notify', s.notify !== false))}</div>
+    <div class="sec">Additional folders</div><textarea class="ta" data-id="addDirs" rows="3" placeholder="One folder per line. Claude may access these in every Code session.">${esc((s.addDirs || []).join('\n'))}</textarea>
+    <div class="sec">Extra instructions</div><textarea class="ta" data-id="appendPrompt" rows="4" placeholder="Appended to Claude's system prompt in Code sessions.">${esc(s.appendPrompt || '')}</textarea>`,
+  model: s => `<div class="ph">Model</div><p class="pd">Pick the model and how hard it thinks. Applies from your next message.</p><div class="card">
+    ${MODELS.map(([id, n, d]) => `<div class="opt ${(s.model || '') === id ? 'on' : ''}" data-model="${id}"><span class="rd"></span><div class="tx"><b>${esc(n)}</b><small>${esc(id ? d : (S.model ? 'Currently ' + modelName(S.model) : d))}</small></div></div>`).join('')}</div>
+    <div class="sec">Context and effort</div><div class="card">
+    ${setRow('Extended context', '1M-token context window (where the model supports it)', swH('long', s.long))}
+    ${setRow('Reasoning effort', 'How much Claude thinks before answering', selH('effort', EFFORTS, s.effort))}
+    ${setRow('Fallback model', 'Used automatically if the main model is overloaded', selH('fallback', [['', 'None'], ...MODELS.slice(1, 5).map(m => [m[0], m[1]])], s.fallback))}
+    ${setRow('Maximum turns', '0 means no limit per request', `<input class="num" type="number" min="0" data-id="maxTurns" value="${s.maxTurns || 0}">`)}</div>`,
+  config: (s, c) => `<div class="ph">Claude Code</div><p class="pd">Saved to <code>~/.claude/settings.json</code> and used by Claude Code everywhere.</p>
+    <input class="search" id="cfgq" placeholder="Search settings">
+    <div class="card" id="cfglist">${CONFIG.map(([k, t, d, ty, opts, def]) => { const v = pick(c, k), val = v === undefined ? def : v;
+      return `<div class="set" data-q="${esc((t + ' ' + d).toLowerCase())}"><div class="tx"><b>${t}</b><small>${d}</small></div>${ty === 'bool' ? swH('c:' + k, val) : ty === 'num' ? `<input class="num" type="number" data-id="c:${k}" value="${val}">` : selH('c:' + k, opts, val)}</div>`; }).join('')}</div>
+    <p class="pd" style="margin-top:14px">Anything else (hooks, environment variables, status line, MCP servers) is in <a href="#" data-go="advanced" style="color:var(--accent)">Advanced</a>.</p>`,
+  perms: (s, c) => { const pm = c.permissions || {}; return `<div class="ph">Permissions</div><p class="pd">Rules Claude Code follows in every session. Examples: <code>Bash(git status)</code>, <code>Read(~/projects/**)</code>, <code>Edit</code>.</p>
+    ${['allow', 'ask', 'deny'].map(k => `<div class="sec">${k === 'allow' ? 'Always allow' : k === 'ask' ? 'Always ask' : 'Always deny'}</div><textarea class="ta" rows="4" data-p="${k}" placeholder="One rule per line">${esc((pm[k] || []).join('\n'))}</textarea>`).join('')}
+    <div style="margin-top:16px"><button class="btn" id="psave">Save permissions</button></div>`; },
+  mcp: () => { const m = S.mcp;
+    const rows = !m ? '<p class="pd">Checking servers…</p>' : m.error ? `<p class="pd">${esc(m.error)}</p>` : m.rows.map(r => { const ok = /connected/i.test(r.status), auth = /auth/i.test(r.status);
+      return `<div class="hk"><span class="ev" style="color:var(--fg)">${esc(r.name)}</span><code title="${esc(r.target)}">${esc(r.target)}</code><span class="mst ${ok ? 'ok' : auth ? 'warn' : 'bad'}">${esc(r.status.replace(/^[^\w]+/, ''))}</span><button data-mrm="${esc(r.name)}" title="Remove">✕</button></div>`; }).join('') || '<p class="pd">No MCP servers configured.</p>';
+    return `<div class="ph">MCP servers</div><p class="pd">Tools and data sources Claude can use. Servers that need sign-in must be authenticated once in a terminal: run <code>claude</code>, then <code>/mcp</code>.</p>${rows}
+    <div class="sec">Add a server</div><div class="hform">
+      <input class="ta" id="mname" placeholder="Name, e.g. github" spellcheck="false">
+      <select class="sel" id="mtr"><option value="stdio">Local command (stdio)</option><option value="http">Remote (http)</option><option value="sse">Remote (sse)</option></select>
+      <input class="ta" id="mtarget" placeholder="Command (npx -y @scope/server) or URL" spellcheck="false">
+      <select class="sel" id="mscope"><option value="user">All my projects</option><option value="local">This folder only (local)</option><option value="project">Shared with the project</option></select>
+      <div><button class="btn" id="madd">Add server</button></div></div>`; },
+  hooks: (s, c) => { const h = c.hooks || {}, rows = [];
+    Object.entries(h).forEach(([ev, arr]) => (arr || []).forEach((g, gi) => (g.hooks || []).forEach((x, hi) => rows.push(`<div class="hk"><span class="ev">${esc(ev)}</span>${g.matcher ? `<span>${esc(g.matcher)}</span>` : ''}<code title="${esc(x.command || x.prompt || x.url || '')}">${esc(x.command || x.prompt || x.url || x.type)}</code><button data-hdel="${esc(ev)}|${gi}|${hi}" title="Remove">✕</button></div>`))));
+    return `<div class="ph">Hooks</div><p class="pd">Shell commands Claude Code runs automatically at points in its lifecycle (for example after every file edit). They apply to every session, here and in the terminal.</p>
+    ${rows.join('') || '<p class="pd">No hooks yet.</p>'}
+    <div class="sec">Add a hook</div><div class="hform">
+      <select class="sel" id="hev">${HOOK_EVENTS.map(e => `<option>${e}</option>`).join('')}</select>
+      <input class="ta" id="hmatch" placeholder="Matcher (optional), e.g. Edit|Write or Bash" spellcheck="false">
+      <input class="ta" id="hcmd" placeholder="Command, e.g. prettier --write &quot;$CLAUDE_PROJECT_DIR&quot;" spellcheck="false">
+      <div><button class="btn" id="hadd">Add hook</button></div></div>`; },
+  remote: () => { const on = Object.values(chats).filter(c => c.rc && c.rc.on);
+    return `<div class="ph">Remote Control</div><p class="pd">Remote Control is per chat, like <code>/remote-control</code> in Claude Code. Turn it on in a Code chat from the Session panel (or type <code>/remote-control</code>) to continue that chat from claude.ai/code or the Claude app, or to let someone on your account join it.</p>
+    <div class="card">${on.length ? on.map(c => `<div class="set"><div class="tx"><b>${esc(c.title)}</b><small>${c.rc.state === 'connected' ? 'Connected' : 'Connecting…'} · ${esc(c.cwd || '')}</small></div><button class="btn g" data-open="${esc(c.rc.url || '')}" ${c.rc.url ? '' : 'disabled'}>Open</button><button class="btn red" data-rcoff="${c.id}">Turn off</button></div>`).join('') : setRow('No chats are remote-controlled', 'Open a Code chat and use the toggle in its Session panel.', '')}</div>
+    <p class="pd" style="margin-top:14px">Requires a Claude subscription login (not an API key). Everything runs on this computer with your account; the other device only sends and reads messages.</p><button class="btn g" data-open="https://claude.ai/code">Open claude.ai/code</button>`; },
+  usage: () => `<div class="ph">Usage</div><p class="pd">Plan usage limits for your account, read from Claude Code (the same numbers as <code>/usage</code>).</p><div class="card" style="padding:6px 18px 14px">${usageBlock()}<div class="uf"><span>${S.usage && S.usage.ts ? 'Last updated: ' + ago(S.usage.ts) : ''}</span><button class="btn g" id="urefresh2">Refresh</button></div></div>
+    ${S.usage && S.usage.text ? `<div class="sec">Details from Claude Code</div><pre class="raw">${esc(S.usage.text)}</pre>` : ''}`,
+  memory: () => { const f = S.files.memory; return `<div class="ph">Memory</div><p class="pd">${f ? esc(f.path) : 'Loading…'} — instructions Claude reads in every session.</p><textarea class="ta big" id="raw" spellcheck="false">${f ? esc(f.text) : ''}</textarea><div style="margin-top:12px"><button class="btn" id="rsave" data-w="memory">Save</button></div>`; },
+  advanced: () => { const f = S.files.settings; return `<div class="ph">Advanced</div><p class="pd">${f ? esc(f.path) : 'Loading…'} — every Claude Code setting (hooks, env, MCP servers, status line…) as JSON.</p><textarea class="ta big" id="raw" spellcheck="false">${f ? esc(f.text) : ''}</textarea><div style="margin-top:12px"><button class="btn" id="rsave" data-w="settings">Save</button></div>`; },
+  about: () => `<div class="ph">About</div><p class="pd">Claude Linux is a desktop window around Claude Code v${esc(S.version)}.</p><div class="card">${setRow('Claude Linux version', esc(S.appVersion || ''), '<button class="btn g" data-upd="check">Check for updates</button>')}${setRow('Chat', 'No tools; Claude cannot touch this computer', '')}${setRow('Code', 'Full Claude Code tools in the folder you choose', '')}${setRow('Account', S.account && S.account.loggedIn ? esc((S.account.plan || '') + ' plan · signed in with ' + (S.account.method === 'claude.ai' ? 'your Claude subscription' : S.account.method)) : 'Checking…', '')}${setRow('Chats are stored in', '<code>~/.local/share/claude-linux/chats/</code>', '')}</div>`,
+};
+function bindPage(b, s, c) {
+  b.querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
+  b.querySelectorAll('[data-open]').forEach(a => a.onclick = () => a.dataset.open && post({type:'open_url', url:a.dataset.open}));
+  b.querySelectorAll('[data-theme-pick]').forEach(a => a.onclick = () => { applyTheme(a.dataset.themePick); showPage(true); });
+  b.querySelectorAll('[data-rcoff]').forEach(a => a.onclick = () => { const id = a.dataset.rcoff, c = chats[id]; c.rc = {on:false}; post({type:'rc_chat', chat:id, on:false}); renderRC(); showPage(true); });
+  b.querySelectorAll('[data-model]').forEach(o => o.onclick = () => { setSetting('model', o.dataset.model); showPage(true); });
+  b.querySelectorAll('[data-id]').forEach(el => el.onchange = () => {
+    const id = el.dataset.id, ty = el.type; let v = ty === 'checkbox' ? el.checked : ty === 'number' ? (parseInt(el.value) || 0) : el.value;
+    if (id === 'rcmode') return;
+    if (id.startsWith('c:')) { const k = id.slice(2); cset(k, v); if (k === 'permissions.defaultMode' && v) setSetting('mode', v); return; }
+    if (id === 'addDirs') v = v.split('\n').map(x => x.trim()).filter(Boolean);
+    setSetting(id, v);
+    if (id === 'mode') cset('permissions.defaultMode', v);
+  });
+  const q = b.querySelector('#cfgq'); if (q) q.oninput = () => b.querySelectorAll('#cfglist .set').forEach(r => r.classList.toggle('hide', !r.dataset.q.includes(q.value.toLowerCase())));
+  const ps = b.querySelector('#psave'); if (ps) ps.onclick = () => { const j = cfg(); j.permissions = j.permissions || {}; b.querySelectorAll('[data-p]').forEach(el => { const v = el.value.split('\n').map(x => x.trim()).filter(Boolean); if (v.length) j.permissions[el.dataset.p] = v; else delete j.permissions[el.dataset.p]; }); post({type:'putfile', which:'settings', text: JSON.stringify(j, null, 2) + '\n'}); };
+  const rs = b.querySelector('#rsave'); if (rs) rs.onclick = () => post({type:'putfile', which:rs.dataset.w, text:$('#raw').value});
+  b.querySelectorAll('[data-mrm]').forEach(x => x.onclick = () => { S.mcp = null; showPage(true); post({type:'mcp_remove', name:x.dataset.mrm}); });
+  const ma = b.querySelector('#madd'); if (ma) ma.onclick = () => { const name = $('#mname').value.trim(), target = $('#mtarget').value.trim(); if (!name || !target) return toast('Enter a name and a command or URL', true); S.mcp = null; post({type:'mcp_add', name, target, transport:$('#mtr').value, scope:$('#mscope').value}); showPage(true); };
+  b.querySelectorAll('[data-hdel]').forEach(x => x.onclick = () => {
+    const [ev, gi, hi] = x.dataset.hdel.split('|'), j = cfg(), g = j.hooks && j.hooks[ev] && j.hooks[ev][+gi]; if (!g) return;
+    g.hooks.splice(+hi, 1); if (!g.hooks.length) j.hooks[ev].splice(+gi, 1); if (!j.hooks[ev].length) delete j.hooks[ev]; if (!Object.keys(j.hooks).length) delete j.hooks;
+    post({type:'putfile', which:'settings', text:JSON.stringify(j, null, 2) + '\n'});
+  });
+  const ha = b.querySelector('#hadd'); if (ha) ha.onclick = () => {
+    const ev = $('#hev').value, m = $('#hmatch').value.trim(), cmd = $('#hcmd').value.trim(); if (!cmd) return toast('Enter a command', true);
+    const j = cfg(); j.hooks = j.hooks || {}; (j.hooks[ev] = j.hooks[ev] || []).push({...(m ? {matcher:m} : {}), hooks:[{type:'command', command:cmd}]});
+    post({type:'putfile', which:'settings', text:JSON.stringify(j, null, 2) + '\n'});
+  };
+  const u2 = b.querySelector('#urefresh2'); if (u2) u2.onclick = () => post({type:'refresh_usage'});
+}
+/* ---------- settings pages: Appearance and Desktop ---------- */
+PAGES.splice(1, 0, ['appearance', 'Appearance', 'palette']);
+PAGES.splice(PAGES.findIndex(p => p[0] === 'advanced'), 0, ['desktop', 'Desktop', 'remote']);
+
+const SYNTAX_THEMES = [['auto', 'Match the theme'], ['monokai', 'Monokai'], ['github', 'GitHub'], ['onedark', 'One Dark'], ['dracula', 'Dracula'], ['nord', 'Nord'], ['solarized', 'Solarized'], ['catppuccin', 'Catppuccin']];
+const SYNTAX_DEMO = '```python\n# greet someone\nclass Greeter:\n    def hello(self, name):\n        return f"Hi {name}! {42}"\n```';
+const range = (key, lo, hi, step, val, fmtv) => `<input type="range" data-ap-range="${key}" min="${lo}" max="${hi}" step="${step}" value="${val}"><span class="val" data-val="${key}">${fmtv(val)}</span>`;
+const apRow = (t, d, c) => `<div class="ap-row"><div class="tx"><b>${t}</b>${d ? `<small>${d}</small>` : ''}</div>${c}</div>`;
+
+function themeTile(id, name, cols, on, adaptive) {
+  return `<div class="tc ${adaptive ? 'ad ' : ''}${on ? 'on' : ''}" data-ap-theme="${id}"><div class="pv"><i style="background:${cols[0] || 'var(--bg)'}"></i><i style="background:${cols[1] || 'var(--card)'}"></i><i style="background:${cols[2] || 'var(--accent)'}"></i></div><b>${esc(name)}</b></div>`;
+}
+
+PAGE.appearance = s => {
+  const k = KDE.scheme, ct = { ...CUSTOM_DEFAULT, ...(s.customTheme || {}) }, themeOpts = THEMES.map(t => [t[0], t[1]]);
+  const adaptivePreview = { system:k ? [k.view, k.button, k.accent || k.fg] : [], auto:['#262624', '#faf9f5', '#d97757'], custom:[ct.bg, ct.card, ct.accent] };
+  const accOn = safeColor(s.accent);
+  return `<div class="ph">Appearance</div><p class="pd">Colors, fonts, background and motion. Changes apply immediately.</p>
+    <div class="sec" style="margin-top:0">Theme</div>
+    <div class="themes">${ADAPTIVE.map(([id, n]) => themeTile(id, n, adaptivePreview[id], s.theme === id, true)).join('')}</div>
+    <div class="tgroup">Built in</div>
+    <div class="themes">${THEMES.map(([id, n, c]) => themeTile(id, n, c, s.theme === id, false)).join('')}</div>
+    ${s.theme === 'auto' ? `<div class="card" style="margin-top:12px">${apRow('When Plasma is dark', 'Theme used with a dark color scheme', selH('autoDark', themeOpts, s.autoDark || 'dark'))}${apRow('When Plasma is light', 'Theme used with a light color scheme', selH('autoLight', themeOpts, s.autoLight || 'light'))}</div>` : ''}
+    ${s.theme === 'system' ? `<div class="card" style="margin-top:12px">${apRow('Colors come from Plasma', k ? 'Scheme: ' + esc(k.name || 'unnamed') + '. Change it in System Settings and this window follows.' : 'Plasma\'s colors could not be read, so Dark or Light is used instead.', '')}${apRow('Use Plasma\'s accent color', 'Otherwise the accent stays orange (or the one you pick below)', swH('kdeAccent', !!s.kdeAccent))}</div>` : ''}
+
+    <div class="sec">Accent color</div>
+    <div class="card"><div class="swatches"><button class="swc none ${accOn ? '' : 'on'}" data-ap-accent="" title="Theme default"></button>${ACCENTS.map(c => `<button class="swc ${accOn === c ? 'on' : ''}" style="background:${c}" data-ap-accent="${c}" title="${c}"></button>`).join('')}
+      <label style="display:flex;align-items:center;gap:8px;margin-left:6px;color:var(--dim);font-size:13px">Custom <input type="color" data-id="accent" value="${accOn || '#d97757'}"></label></div>
+      <div class="note">Right-click a chat in the sidebar to give that chat, or every chat in its folder, its own color.</div></div>
+
+    <div class="sec">Custom theme</div>
+    <div class="card"><div class="cgrid">${BASE_KEYS.map(key => `<label>${BASE_LABELS[key]}<input type="color" data-ap-ct="${key}" value="${ct[key]}"></label>`).join('')}</div>
+      <div style="padding:0 16px 14px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" data-ap-act="use-custom">Use custom theme</button><button class="btn g" data-ap-act="from-current">Start from current colors</button>
+        <button class="btn g" data-ap-act="export">Export as file</button><button class="btn g" data-ap-act="import-file">Import file…</button></div>
+      <div style="padding:0 16px 14px"><textarea class="ta" id="imptext" rows="2" placeholder="Or paste a theme here (JSON) and press Import"></textarea><div style="margin-top:8px"><button class="btn g" data-ap-act="import-paste">Import pasted theme</button></div></div></div>
+
+    <div class="sec">Typography and layout</div>
+    <div class="card">
+      ${apRow('Font', 'Any installed font. Leave empty for Inter.', `<input class="txt" list="fontlist" data-id="font" value="${esc(s.font || '')}" placeholder="Inter"><datalist id="fontlist">${(S.fonts || []).map(f => `<option value="${esc(f)}">`).join('')}</datalist>`)}
+      ${apRow('Code font', 'Used for code and the terminal-style theme', `<input class="txt" list="fontlist" data-id="monoFont" value="${esc(s.monoFont || '')}" placeholder="JetBrains Mono">`)}
+      ${apRow('Text size', 'Also Ctrl+= and Ctrl+-', range('fontSize', 12, 20, 1, +s.fontSize || 15, v => v + ' px'))}
+      ${apRow('Chat width', 'How wide the conversation column is', range('chatWidth', 560, 1200, 20, +s.chatWidth || 800, v => v + ' px'))}</div>
+
+    <div class="sec">Background and window</div>
+    <div class="card">
+      ${apRow('Background', 'Drawn behind the whole window', selH('bgMode', [['none', 'None'], ['aurora', 'Aurora (drifting glow)'], ['particles', 'Particles'], ['gradient', 'Gradient'], ['image', 'Picture']], s.bgMode || 'none'))}
+      ${s.bgMode === 'gradient' ? apRow('Gradient', '', selH('bgGradient', Object.keys(GRADIENTS).map(g => [g, g[0].toUpperCase() + g.slice(1)]), s.bgGradient || 'dusk')) : ''}
+      ${s.bgMode === 'image' ? apRow('Picture', esc(s.bgImage ? s.bgImage.split('/').pop() : 'No picture chosen'), '<button class="btn g" data-ap-act="pick-bg">Choose…</button>') : ''}
+      ${s.bgMode === 'image' || s.bgMode === 'gradient' ? apRow('Dim the background', 'Makes text easier to read', range('bgDim', 0, 0.9, 0.05, +s.bgDim || 0, v => Math.round(v * 100) + '%')) : ''}
+      ${apRow('See-through window', 'The window lets your desktop show through. If your desktop blurs windows behind them (KDE\'s Blur effect), this looks frosted.', swH('glass', !!s.glass))}
+      ${s.glass ? apRow('Window opacity', '', range('glassOpacity', 0.4, 1, 0.02, +s.glassOpacity || 0.82, v => Math.round(v * 100) + '%')) : ''}</div>
+
+    <div class="sec">Animation</div>
+    <div class="card">
+      ${apRow('Motion', 'Reduced turns animations off. "Follow system" respects your desktop\'s animation setting.', selH('motion', [['system', 'Follow system'], ['full', 'Full'], ['reduced', 'Reduced']], s.motion || 'system'))}
+      ${apRow('Animation speed', '1× is normal; higher is faster', range('animSpeed', 0.5, 2, 0.25, +s.animSpeed || 1, v => (+v).toFixed(2).replace(/\.?0+$/, '') + '×'))}
+      ${apRow('When a long task finishes', 'Only for runs that took more than a few seconds', selH('celebrate', [['glow', 'Soft glow'], ['confetti', 'Confetti'], ['off', 'Nothing']], s.celebrate ?? 'glow'))}</div>
+
+    <div class="sec">Code blocks</div>
+    <div class="card">
+      ${apRow('Syntax colors', 'Dark-only schemes fall back to the theme on light themes', selH('syntax', SYNTAX_THEMES, s.syntax || 'auto'))}
+      ${apRow('Line numbers', '', swH('codeNums', !!s.codeNums))}${apRow('Wrap long lines', '', swH('codeWrap', !!s.codeWrap))}
+      <div style="padding:0 16px 14px" class="demo">${md(SYNTAX_DEMO)}</div></div>`;
+};
+
+PAGE.desktop = s => {
+  const k = KDE.scheme, hk = S.hotkeyState;
+  const hkText = !s.hotkey ? 'Off' : !hk ? 'Asking your desktop…' : !hk.ok ? esc(hk.msg || 'Your desktop declined') : hk.msg ? 'Key: ' + esc(hk.msg) : 'Registered. Choose the key with the button, or in System Settings > Shortcuts > Claude Linux.';
+  return `<div class="ph">Desktop</div><p class="pd">How Claude Linux fits into Plasma.</p>
+    <div class="sec" style="margin-top:0">Tray and taskbar</div><div class="card">
+      ${setRow('Tray icon', 'Shows in the system tray. It turns to "needs attention" when Claude is waiting for you.', swH('tray', s.tray !== false))}
+      ${setRow('Close to the tray', 'Closing the window keeps Claude (and running tasks) alive in the tray. Needs the tray icon.', swH('closeToTray', !!s.closeToTray))}
+      ${setRow('Taskbar badge and progress', 'The number of running chats, a progress bar from Claude\'s todo list, and a highlight when it needs you', swH('taskbar', s.taskbar !== false))}</div>
+    <div class="sec">Global shortcut</div><div class="card">
+      ${setRow('Show or hide with a key', hkText, swH('hotkey', !!s.hotkey))}
+      ${s.hotkey && hk && hk.ok ? setRow('Change the key', 'Opens the desktop\'s own shortcut dialog', '<button class="btn g" data-ap-act="hotkey-config">Choose key…</button>') : ''}</div>
+    <div class="sec">Notifications</div><div class="card">
+      ${setRow('Desktop notifications', 'When Claude needs you or finishes a long task while this window is in the background', swH('notify', s.notify !== false))}</div>
+    <div class="sec">Plasma</div><div class="card">
+      ${setRow('Color scheme', k ? esc(k.name || 'unnamed') + (k.dark ? ' (dark)' : ' (light)') : 'Not found', '')}
+      ${setRow('Window buttons', 'Taken from your KDE titlebar settings: ' + (esc(KDE.buttons || '') || 'defaults'), '')}</div>
+    <p class="pd" style="margin-top:14px">Tip: <code>run.sh --new</code> (or the "New session" entry when you right-click the launcher) opens a fresh session in the running window.</p>`;
+};
+
+EXTRA.hotkey = p => { S.hotkeyState = p; if ($('#modal').style.display === 'flex' && panel === 'desktop') showPage(true); };
+EXTRA.fonts = p => { S.fonts = p.fonts || []; const dl = $('#fontlist'); if (dl) dl.innerHTML = S.fonts.map(f => `<option value="${esc(f)}">`).join(''); };
+EXTRA.bgimage = p => { setSetting('bgImage', p.path); setSetting('bgMode', 'image'); if ($('#modal').style.display === 'flex' && panel === 'appearance') showPage(true); };
+
+const refreshAppearancePage = () => { if ($('#modal').style.display === 'flex' && panel === 'appearance') showPage(true); };
+PAGE_BIND.desktop = b => {
+  b.querySelectorAll('[data-ap-act="hotkey-config"]').forEach(x => x.onclick = () => post({type:'hotkey_configure'}));
+  b.querySelectorAll('[data-id="hotkey"]').forEach(x => x.addEventListener('change', () => { S.hotkeyState = null; setTimeout(() => panel === 'desktop' && showPage(true), 50); }));
+};
+PAGE_BIND.appearance = b => {
+  if (!S.fonts && !S.fontsAsked) { S.fontsAsked = true; post({type:'fonts'}); }
+  b.querySelectorAll('[data-ap-theme]').forEach(t => t.onclick = () => { applyTheme(t.dataset.apTheme); showPage(true); });
+  b.querySelectorAll('[data-ap-accent]').forEach(t => t.onclick = () => { setSetting('accent', t.dataset.apAccent); showPage(true); });
+  // sliders: preview while dragging, save when released
+  b.querySelectorAll('[data-ap-range]').forEach(r => {
+    const key = r.dataset.apRange, label = b.querySelector(`[data-val="${key}"]`), f = { fontSize:v => v + ' px', chatWidth:v => v + ' px', bgDim:v => Math.round(v * 100) + '%', glassOpacity:v => Math.round(v * 100) + '%', animSpeed:v => (+v).toFixed(2).replace(/\.?0+$/, '') + '×' }[key];
+    r.oninput = () => { S.settings[key] = +r.value; label.textContent = f(+r.value); applyAppearance(); };
+    r.onchange = () => setSetting(key, +r.value);
+  });
+  b.querySelectorAll('select[data-id]').forEach(sel => sel.addEventListener('change', () => { if (['bgMode', 'glass', 'autoDark', 'autoLight'].includes(sel.dataset.id)) setTimeout(refreshAppearancePage, 30); }));
+  b.querySelectorAll('input[data-id="glass"],input[data-id="kdeAccent"]').forEach(x => x.addEventListener('change', () => setTimeout(refreshAppearancePage, 30)));
+  // custom theme colors: live preview, saved on change
+  b.querySelectorAll('[data-ap-ct]').forEach(inp => {
+    inp.oninput = () => { S.settings.customTheme = { ...CUSTOM_DEFAULT, ...(S.settings.customTheme || {}), [inp.dataset.apCt]: inp.value }; if (S.settings.theme === 'custom') applyAppearance(); };
+    inp.onchange = () => setSetting('customTheme', { ...CUSTOM_DEFAULT, ...(S.settings.customTheme || {}), [inp.dataset.apCt]: inp.value });
+  });
+  const act = {
+    'use-custom':() => { setSetting('customTheme', { ...CUSTOM_DEFAULT, ...(S.settings.customTheme || {}) }); applyTheme('custom'); showPage(true); },
+    'from-current':() => { setSetting('customTheme', currentPalette()); applyTheme('custom'); showPage(true); toast('Copied the current colors into your custom theme'); },
+    'export':exportTheme,
+    'import-file':() => post({type:'pickjson'}),
+    'import-paste':() => importThemeText(($('#imptext') || {}).value || ''),
+    'pick-bg':() => post({type:'pickimage'}),
+  };
+  b.querySelectorAll('[data-ap-act]').forEach(x => { const f = act[x.dataset.apAct]; if (f) x.onclick = f; });
+};
+/* ---------- motion and effects: ripples, backgrounds, celebrations, taskbar status ---------- */
+const motionOff = () => document.documentElement.dataset.motion === 'reduced';
+
+/* press ripples */
+const RIPPLE_SEL = '.btn,#new,#sendb,.pill,.seg button,#tabs button,.opt,.ib,.tc';
+document.addEventListener('pointerdown', e => {
+  if (motionOff() || e.button > 0) return;
+  const t = e.target.closest && e.target.closest(RIPPLE_SEL); if (!t || t.disabled) return;
+  const r = t.getBoundingClientRect(), d = Math.max(r.width, r.height) * 2;
+  const s = document.createElement('span'); s.className = 'ripple';
+  s.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d / 2}px;top:${e.clientY - r.top - d / 2}px`;
+  t.appendChild(s); setTimeout(() => s.remove(), 800);
+});
+
+/* animated or image background behind the whole app */
+const GRADIENTS = { dusk:['#2b1055', '#7597de', '#d97757'], ocean:['#0f2027', '#2c5364', '#4ca1af'], forest:['#0b3d2e', '#2d6a4f', '#95d5b2'], ember:['#1a0000', '#8a1c1c', '#ff7a18'],
+  mono:['#0d0d0d', '#2a2a2a', '#555555'], neon:['#0d0221', '#541388', '#ff2a6d'], sakura:['#3a1c71', '#d76d77', '#ffaf7b'] };
+let bgKey = '', pRaf = 0, pOnResize = null;
+const fileUrl = p => 'file://' + String(p).split('/').map(encodeURIComponent).join('/');
+function stopParticles() { cancelAnimationFrame(pRaf); pRaf = 0; if (pOnResize) { removeEventListener('resize', pOnResize); pOnResize = null; } }
+function applyBackground() {
+  const s = S.settings || {}, root = document.documentElement, mode = ['aurora', 'particles', 'gradient', 'image'].includes(s.bgMode) ? s.bgMode : 'none';
+  const acc = varRGB('--accent') || [217, 119, 87];
+  const key = JSON.stringify([mode, s.bgGradient, s.bgImage, s.bgDim, mode === 'particles' ? acc : 0, root.dataset.motion]);
+  if (key === bgKey) return; bgKey = key;
+  stopParticles(); let el = $('#bgfx');
+  if (mode === 'none' || (mode === 'image' && !s.bgImage)) { root.classList.remove('fx'); if (el) el.remove(); return; }
+  if (!el) { el = document.createElement('div'); el.id = 'bgfx'; document.body.prepend(el); }
+  root.classList.add('fx'); el.className = mode; el.innerHTML = ''; el.style.cssText = '';
+  el.style.setProperty('--dim', String(clamp(+s.bgDim || 0, 0, .9)));
+  root.style.setProperty('--sa', mode === 'image' || mode === 'gradient' ? '.66' : '.8');
+  if (mode === 'aurora') el.innerHTML = '<i></i><i></i><i></i>';
+  else if (mode === 'gradient') { const g = GRADIENTS[s.bgGradient] || GRADIENTS.dusk; el.style.background = `linear-gradient(135deg,${g[0]},${g[1]},${g[2]},${g[0]})`; el.style.backgroundSize = '300% 300%'; }
+  else if (mode === 'image') el.style.backgroundImage = `url("${fileUrl(s.bgImage)}")`;
+  else if (mode === 'particles') startParticles(el, acc);
+}
+function startParticles(host, rgb) {
+  const cv = document.createElement('canvas'); host.appendChild(cv); const g = cv.getContext('2d'); let w = 0, h = 0, last = 0;
+  const dpr = Math.min(devicePixelRatio || 1, 2), dots = [];
+  const size = () => { w = cv.width = Math.round(innerWidth * dpr); h = cv.height = Math.round(innerHeight * dpr); };
+  size(); pOnResize = size; addEventListener('resize', size);
+  for (let i = 0; i < 70; i++) dots.push({ x:Math.random() * w, y:Math.random() * h, r:(.7 + Math.random() * 1.9) * dpr, vy:-(.08 + Math.random() * .3) * dpr, vx:(Math.random() - .5) * .12 * dpr, p:Math.random() * 6.28 });
+  const draw = (t, move) => {
+    g.clearRect(0, 0, w, h);
+    for (const d of dots) {
+      if (move) { d.x += d.vx; d.y += d.vy; if (d.y < -10) { d.y = h + 10; d.x = Math.random() * w; } }
+      g.fillStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${(.18 + .32 * (.5 + .5 * Math.sin(t / 900 + d.p))).toFixed(3)})`;
+      g.beginPath(); g.arc(d.x, d.y, d.r, 0, 6.2832); g.fill();
+    }
+  };
+  if (motionOff()) { draw(0, false); return; }
+  const frame = t => {
+    if (!cv.isConnected) return; pRaf = requestAnimationFrame(frame);
+    if (document.hidden || t - last < 33) return;   // about 30 fps, and nothing while the window is hidden
+    last = t; draw(t, true);
+  };
+  pRaf = requestAnimationFrame(frame);
+}
+
+/* celebrating a finished long task */
+function confetti() {
+  if (motionOff()) return;
+  const cv = document.createElement('canvas'); cv.id = 'confetti'; document.body.appendChild(cv);
+  const dpr = Math.min(devicePixelRatio || 1, 2), W = cv.width = Math.round(innerWidth * dpr), H = cv.height = Math.round(innerHeight * dpr), g = cv.getContext('2d');
+  const base = varRGB('--accent') || [217, 119, 87], pal = [toHex(base), '#ffd166', '#06d6a0', '#118ab2', '#ef476f', '#ffffff'];
+  const sb = $('#sendb').getBoundingClientRect(), ox = (sb.left + sb.width / 2) * dpr, oy = sb.top * dpr;
+  const ps = Array.from({ length:110 }, () => { const a = -Math.PI / 2 + (Math.random() - .5) * 1.5, v = (6 + Math.random() * 10) * dpr;
+    return { x:ox, y:oy, vx:Math.cos(a) * v, vy:Math.sin(a) * v, w:(5 + Math.random() * 6) * dpr, h:(3 + Math.random() * 5) * dpr, r:Math.random() * 6.28, vr:(Math.random() - .5) * .4, c:pal[(Math.random() * pal.length) | 0] }; });
+  const t0 = performance.now(); setTimeout(() => cv.remove(), 4000);
+  (function frame(t) {
+    const k = t - t0; g.clearRect(0, 0, W, H);
+    for (const p of ps) { p.vy += .35 * dpr; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr; g.save(); g.globalAlpha = Math.max(0, 1 - k / 2200); g.translate(p.x, p.y); g.rotate(p.r); g.fillStyle = p.c; g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); g.restore(); }
+    if (k < 2200 && cv.isConnected) requestAnimationFrame(frame); else cv.remove();
+  })(t0);
+}
+function celebrate(id) {
+  const mode = (S.settings || {}).celebrate ?? 'glow';
+  if (mode === 'off' || id !== cur || motionOff()) return;
+  if (Date.now() - (spinStart[id] || Date.now()) < (celebrate.minMs ?? 6000)) return;   // only for runs that took a while
+  for (const el of [$('#box'), $('#sendb')]) { el.classList.remove('glow'); void el.offsetWidth; el.classList.add('glow'); setTimeout(() => el.classList.remove('glow'), 1600); }
+  if (mode === 'confetti') confetti();
+}
+
+/* what the desktop shows: taskbar badge and progress, tray attention */
+let lastStatus = '', statusT = 0;
+function reportStatus() {
+  const cs = Object.values(chats), busy = cs.filter(c => c.busy).length;
+  const waiting = cs.filter(c => c.items.some(x => x.k === 'perm' && x.status === 'wait')).length;
+  let progress = null; const pick = chats[cur] && chats[cur].busy ? chats[cur] : cs.find(c => c.busy);
+  if (pick) {                                  // real progress, when Claude keeps a todo list
+    const td = [...pick.items].reverse().find(x => x.k === 'tool' && x.name === 'TodoWrite'), todos = td && td.input && td.input.todos;
+    if (Array.isArray(todos) && todos.length) progress = todos.filter(t => t.status === 'completed').length / todos.length;
+  }
+  const key = busy + '|' + waiting + '|' + progress; if (key === lastStatus) return; lastStatus = key;
+  post({type:'status', busy, waiting, progress});
+}
+function reportStatusSoon() { clearTimeout(statusT); statusT = setTimeout(reportStatus, 250); }
+
+EXTRA.newsession = () => newChat();
+EXTRA.appstate = p => { S.appstate = p; };
+
+$('#sbtn').innerHTML = ico('sidebar'); $('#sbtn').onclick = () => toggleSidebar();
+/* ---------- split view: a second chat beside the main one ---------- */
+S.split = null;
+const splitOpen = {};      // tool card id -> opened by the user in the split pane
+let splitT = 0, splitFresh = false;
+function toggleSplit() { if (S.split) closeSplit(); else pickSplit(); }
+function pickSplit() {
+  const others = Object.values(chats).filter(c => c.id !== cur && c.items.length).sort((a, b) => b.t - a.t).slice(0, 14);
+  if (!others.length) return toast('Start a second chat first, then split the view to see both');
+  listMenu($('#splbtn'), [{ head:'Show beside this chat' }, ...others.map(c => ({ label:c.title, sub:kindOf(c) === 'chat' ? 'Chat' : ((c.cwd || '').split('/').filter(Boolean).pop() || ''), run:() => openSplit(c.id) }))], false, 340);
+}
+function openSplit(id) { S.split = id; splitFresh = true; renderSplit(); }
+function closeSplit() { S.split = null; renderSplit(); }
+function scheduleSplit() { if (splitT) return; splitT = setTimeout(() => { splitT = 0; renderSplit(); }, 250); }
+function renderSplit() {
+  const app = $('#app');
+  if (S.split === cur) S.split = null;       // opening that chat in the main pane ends the split
+  const c = S.split && chats[S.split];
+  if (!c) { S.split = null; app.classList.remove('splitting'); $('#scol').innerHTML = ''; return; }
+  app.classList.add('splitting'); $('#stitle').textContent = c.title + (c.busy ? '  ·  working…' : '');
+  const sc = $('#sscroll'), col = $('#scol'), atEnd = splitFresh || sc.scrollHeight - sc.scrollTop - sc.clientHeight < 140, was = sc.scrollTop;
+  col.innerHTML = '';
+  for (const it of c.items.slice(-80)) {
+    const d = document.createElement('div');
+    if (it.k === 'user') { d.className = 'msg user'; d.textContent = it.text; }
+    else if (it.k === 'text') { d.className = 'msg asst'; d.innerHTML = md(it.text); }
+    else if (it.k === 'think') { d.className = 'msg'; d.innerHTML = `<details class="think"><summary>Thinking</summary><div>${esc(it.text)}</div></details>`; }
+    else if (it.k === 'tool') { const [cls, html] = toolHTML(it), open = splitOpen[it.id] ?? OPEN_TOOL(it); d.className = 'msg ' + cls + (open ? ' open noanim' : ''); d.dataset.tid = it.id; d.innerHTML = html; }
+    else if (it.k === 'perm') { if (it.status !== 'wait') continue; d.className = 'msg sys'; d.textContent = 'Waiting for your answer in that chat: ' + (it.tool || 'permission'); }
+    else if (it.k === 'div') { d.className = 'msg divider'; d.textContent = it.text; }
+    else if (it.k === 'err') { d.className = 'msg errtxt'; d.textContent = it.text; }
+    else { d.className = 'msg sys'; d.textContent = it.text; }
+    col.appendChild(d);
+  }
+  sc.scrollTop = atEnd ? sc.scrollHeight : was; splitFresh = false;
+}
+$('#scol').addEventListener('click', e => { const th = e.target.closest('.th'); if (th) { const el = th.parentElement; splitOpen[el.dataset.tid] = !el.classList.contains('open'); } });
+$('#splbtn').innerHTML = ico('split'); $('#splbtn').onclick = e => { e.stopPropagation(); toggleSplit(); };
+$('#sswap').innerHTML = ico('swap'); $('#sswap').onclick = () => { const o = S.split; if (!o) return; S.split = cur; tab = kindOf(chats[o]); select(o); };
+$('#sclose').innerHTML = ico('x'); $('#sclose').onclick = closeSplit;
+/* ---------- export a chat: Markdown (done in Python), HTML, or PDF ---------- */
+const DOC_CSS = `
+.pdoc { font:11pt/1.55 "Inter","Noto Sans",system-ui,sans-serif; color:#1b1b1b; max-width:820px; margin:0 auto; }
+.pdoc h1 { font-size:20pt; margin:0 0 4px; } .pdoc h2 { font-size:15pt; } .pdoc h3 { font-size:12.5pt; } .pdoc h2, .pdoc h3 { margin:1em 0 .4em; }
+.pdoc .meta { color:#777; font-size:9.5pt; margin-bottom:14px; }
+.pdoc .u { background:#f1efe8; border-radius:8px; padding:8px 12px; margin:12px 0; break-inside:avoid; }
+.pdoc .u b { display:block; font-size:8.5pt; color:#9a5b3f; text-transform:uppercase; letter-spacing:.05em; }
+.pdoc .a { margin:10px 0; } .pdoc .a p { margin:0 0 .7em; } .pdoc ul, .pdoc ol { padding-left:1.4em; } .pdoc a { color:#9a5b3f; }
+.pdoc code { font:9.5pt "JetBrains Mono","DejaVu Sans Mono",monospace; background:#f3f1ea; padding:0 4px; border-radius:3px; border:0; }
+.pdoc .cb { border:1px solid #ddd; border-radius:6px; margin:.6em 0; background:#f7f6f1; overflow:hidden; }
+.pdoc .cb .ch { display:flex; justify-content:space-between; font-size:8.5pt; color:#777; padding:3px 10px; border-bottom:1px solid #e4e1d6; } .pdoc .cb .copy { display:none; }
+.pdoc pre { margin:0; padding:8px 12px; white-space:pre-wrap; word-break:break-word; font:9pt/1.45 "JetBrains Mono","DejaVu Sans Mono",monospace; }
+.pdoc .cb pre code { background:none; padding:0; font-size:inherit; }
+.pdoc .tk-c { color:#6e7781; font-style:italic; } .pdoc .tk-s { color:#1a7f37; } .pdoc .tk-n { color:#9a6700; } .pdoc .tk-k { color:#b4452a; } .pdoc .tk-f { color:#6639ba; } .pdoc .tk-t, .pdoc .tk-v { color:#0a6ea8; }
+.pdoc .tk-a { background:#e6f6ea; display:inline-block; width:100%; } .pdoc .tk-d { background:#fde8e8; display:inline-block; width:100%; }
+.pdoc .tl { font-size:9.5pt; margin:6px 0; color:#444; break-inside:avoid; } .pdoc .tl pre { background:#f7f6f1; border:1px solid #e4e1d6; border-radius:5px; margin-top:3px; font-size:8.5pt; color:#555; }
+.pdoc .e { color:#b00020; border:1px solid #e9b5be; border-radius:6px; padding:6px 10px; } .pdoc details.t { color:#666; font-size:9.5pt; margin:6px 0; } .pdoc hr { border:0; border-top:1px dashed #ccc; margin:16px 0; }
+`;
+function chatHTML(c) {
+  const out = [`<h1>${esc(c.title)}</h1><div class="meta">${esc(new Date(c.t).toLocaleString())}${c.cwd && kindOf(c) !== 'chat' ? ' · ' + esc(c.cwd) : ''}</div>`];
+  for (const it of c.items) {
+    if (it.k === 'user') out.push(`<div class="u"><b>You</b>${esc(it.text).replace(/\n/g, '<br>')}</div>`);
+    else if (it.k === 'text') out.push(`<div class="a">${md(it.text)}</div>`);
+    else if (it.k === 'think') out.push(`<details class="t"><summary>Thinking</summary><div>${esc(it.text)}</div></details>`);
+    else if (it.k === 'tool') out.push(`<div class="tl"><b>${esc(it.name)}</b> <code>${esc(String(toolArg(it.input || {})).slice(0, 200))}</code>${it.result ? `<pre>${esc(trimLines(String(it.result), 25))}</pre>` : ''}</div>`);
+    else if (it.k === 'err') out.push(`<div class="e">${esc(it.text)}</div>`);
+    else if (it.k === 'div') out.push(`<hr><div class="meta">${esc(it.text)}</div>`);
+    else if (it.k === 'sys') out.push(`<div class="meta">${esc(it.text)}</div>`);
+  }
+  return out.join('\n');
+}
+const fullHTML = c => `<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(c.title)}</title>\n<style>body{margin:0;padding:28px 18px;background:#fff}${DOC_CSS}</style></head>\n<body><div class="pdoc">${chatHTML(c)}</div></body></html>\n`;
+function endPrint() { for (const s of ['#printdoc', '#printstyle']) { const e = $(s); if (e) e.remove(); } }
+function printChat(c) {
+  endPrint();
+  const st = document.createElement('style'); st.id = 'printstyle'; st.textContent = DOC_CSS; document.head.appendChild(st);
+  const d = document.createElement('div'); d.id = 'printdoc'; d.className = 'pdoc'; d.innerHTML = chatHTML(c); document.body.appendChild(d);
+  toast('Creating the PDF…'); post({type:'pdf', name:c.title});
+}
+function exportChat(fmt) {
+  const c = chats[cur]; if (!c || !c.items.length) return toast('Nothing to export yet', true);
+  fmt = String(fmt || 'md').trim().toLowerCase();
+  if (fmt === 'md' || fmt === 'markdown') return post({type:'export', chat:cur});
+  if (fmt === 'html') return post({type:'savetext', name:c.title, ext:'.html', text:fullHTML(c)});
+  if (fmt === 'pdf') return printChat(c);
+  toast('Use /export md, /export html or /export pdf', true);
+}
+EXTRA.pdf_done = p => { endPrint(); toast(p.text, !p.ok); };
+/* ---------- drop files anywhere on the window: images are attached, other files become @mentions ---------- */
+let dragDepth = 0;
+const hasFiles = e => e.dataTransfer && [...(e.dataTransfer.types || [])].some(t => t === 'Files' || t === 'text/uri-list');
+function dropPaths(dt) {
+  return (dt.getData('text/uri-list') || '').split(/\r?\n/).map(l => l.trim()).filter(l => l.startsWith('file://'))
+    .map(l => { try { return decodeURIComponent(new URL(l).pathname); } catch (e) { return ''; } }).filter(Boolean);
+}
+function mentionPaths(paths) {
+  const cwd = (chats[cur] || {}).cwd || home, inp = $('#in');
+  const toks = paths.map(p => { const r = p.startsWith(cwd + '/') ? p.slice(cwd.length + 1) : p; return /\s/.test(r) ? '@"' + r + '"' : '@' + r; });
+  inp.value += (inp.value && !/\s$/.test(inp.value) ? ' ' : '') + toks.join(' ') + ' '; resize(); inp.focus();
+  if (tab === 'chat') toast('Added the path. Chat mode cannot read files; switch to Code to let Claude open them.');
+}
+function handleDrop(dt) {
+  const files = [...dt.files], imgs = files.filter(f => f.type.startsWith('image/')); if (imgs.length) addFiles(imgs);
+  const names = new Set(imgs.map(f => f.name)), paths = dropPaths(dt).filter(p => !names.has(p.split('/').pop()));
+  if (paths.length) mentionPaths(paths);
+  else if (!imgs.length && files.length) toast('Could not read where that file lives. Drag it from the file manager.', true);
+}
+document.addEventListener('dragenter', e => { if (hasFiles(e)) { dragDepth++; $('#dropz').classList.add('on'); } });
+document.addEventListener('dragleave', e => { if (hasFiles(e) && --dragDepth <= 0) { dragDepth = 0; $('#dropz').classList.remove('on'); } });
+document.addEventListener('dragover', e => { if (hasFiles(e)) e.preventDefault(); });
+document.addEventListener('drop', e => { if (!hasFiles(e)) return; e.preventDefault(); dragDepth = 0; $('#dropz').classList.remove('on'); handleDrop(e.dataTransfer); });
+/* ---------- more keyboard shortcuts (the first set lives in palette.js) ---------- */
+function zoom(d) { setSetting('fontSize', clamp((+S.settings.fontSize || 15) + d, 11, 24)); }
+function switchTab(t) { tab = t; const n = visible().find(c => c.items.length); n ? select(n.id) : newChat(); }
+document.addEventListener('keydown', e => {
+  if (e.key === 'F11') { e.preventDefault(); post({type:'fullscreen'}); return; }
+  if (!e.ctrlKey || e.altKey || e.metaKey) return;
+  const k = e.key, go = f => { e.preventDefault(); e.stopPropagation(); f(); };
+  if (k === '\\') go(toggleSplit);
+  else if (k === '=' || k === '+') go(() => zoom(1));
+  else if (k === '-' || k === '_') go(() => zoom(-1));
+  else if (k === '0') go(() => setSetting('fontSize', 15));
+  else if (k === 'w') go(() => post({type:'close'}));
+  else if (k === 'q') go(() => post({type:'quit'}));
+  else if (k === '1') go(() => switchTab('chat'));
+  else if (k === '2') go(() => switchTab('code'));
+  else if ((k === 'T' || k === 't') && e.shiftKey) go(nextTheme);
+}, true);
+/* ---------- "New Update Required": download and install a new version, with a progress bar ---------- */
+Object.assign(IC, { download:'<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>' });
+const UPD = { p:null };
+const mb = n => (n / 1048576).toFixed(1) + ' MB';
+function renderUpdate() {
+  const p = UPD.p, m = $('#updmodal'), box = $('#updbox');
+  if (!p || p.state === 'dismissed') { m.classList.remove('on'); return; }
+  const required = p.required !== false, later = !required && p.state !== 'ready' && p.state !== 'downloading';
+  const head = (t, s) => `<div class="uicon">${ico('download')}</div><h2>${t}</h2><p class="usub">${s}</p>`;
+  const laterBtn = later ? '<button class="btn g" data-upd="later">Later</button>' : '';
+  let h = '';
+  if (p.state === 'available') {
+    h = head(required ? 'New Update Required' : 'New update available', `Claude Linux ${esc(p.version)} is ready${p.current ? ` (you have ${esc(p.current)})` : ''}.`)
+      + (p.notes ? `<div class="unotes">${esc(p.notes)}</div>` : '')
+      + (p.canInstall === false ? `<p class="uerr">This copy was not set up with the installer, so it cannot update itself. Run the installer again to update.</p><div class="uact"><button class="btn g" data-upd="later">Close</button></div>`
+        : `<div class="uact"><button class="btn" data-upd="download">Download now</button>${laterBtn}</div>`);
+  } else if (p.state === 'downloading') {
+    const pct = p.total ? Math.min(100, Math.round(p.done / p.total * 100)) : 0;
+    h = head('Downloading update…', `Claude Linux ${esc(p.version || '')}`) + `<div class="ubar busy"><i style="width:${p.total ? pct : 8}%"></i></div><div class="unum">${p.total ? `${pct}%  ·  ${mb(p.done)} of ${mb(p.total)}` : mb(p.done || 0)}</div><div class="uact"><button class="btn" disabled>Downloading…</button></div>`;
+  } else if (p.state === 'ready') {
+    h = head('Update installed', `Claude Linux ${esc(p.version)} is ready. Restart to start using it.`) + `<div class="ubar"><i style="width:100%"></i></div><div class="unum">100%</div><div class="uact"><button class="btn" data-upd="restart">Restart now</button></div>`;
+  } else if (p.state === 'error') {
+    h = head(required ? 'Update Required' : 'Update problem', 'The update could not be installed.') + `<p class="uerr">${esc(p.message || 'Something went wrong.')}</p><div class="uact"><button class="btn" data-upd="${p.retry === 'check' ? 'check' : 'download'}">Try again</button>${required ? '<button class="btn g" data-upd="quit">Quit</button>' : laterBtn}</div>`;
+  }
+  box.innerHTML = h; m.classList.add('on');
+  const barEl = box.querySelector('.ubar i'); if (barEl && p.state === 'downloading' && p.total) barEl.style.width = Math.min(100, p.done / p.total * 100) + '%';
+}
+EXTRA.update = p => {
+  if (p.state === 'current') return toast('You have the latest version (' + p.version + ')');
+  if (p.state === 'disabled') return toast('Updates are not set up for this copy');
+  UPD.p = { ...(p.state === 'available' ? {} : UPD.p), ...p }; renderUpdate();
+};
+$('#updmodal').addEventListener('click', e => {
+  const b = e.target.closest('[data-upd]'); if (!b) return; const a = b.dataset.upd;
+  if (a === 'download') post({type:'update_download'});
+  else if (a === 'restart') post({type:'update_restart'});
+  else if (a === 'check') post({type:'update_check'});
+  else if (a === 'quit') post({type:'quit'});
+  else if (a === 'later') { UPD.p = null; renderUpdate(); }
+});
+PAGE_BIND.about = b => b.querySelectorAll('[data-upd="check"]').forEach(x => x.onclick = () => post({type:'update_check'}));
+setInterval(() => { renderUsage(); }, 60000);
+$('#new').innerHTML = ico('plus') + 'New session'; $('#setbtn').innerHTML = ico('gear') + 'Settings';
+post({type:'ready'});
+</script>
+</body>
+</html>

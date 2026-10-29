@@ -1,0 +1,15 @@
+/* ---------- the update dialog ---------- */
+#updmodal { position:fixed; inset:0; z-index:300; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.6); -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px); }
+#updmodal.on { display:flex; animation:rise calc(.2s*var(--sp)) ease both; }
+#updbox { width:min(460px,92vw); background:var(--card); border:1px solid var(--faint); border-radius:18px; box-shadow:var(--shadow); padding:26px 28px 24px; text-align:center; }
+#updbox .uicon { width:44px; height:44px; margin:0 auto 12px; color:var(--accent); } #updbox .uicon svg { width:44px; height:44px; }
+#updbox h2 { margin:0 0 4px; font-size:21px; font-weight:600; }
+#updbox .usub { color:var(--dim); font-size:14px; margin:0 0 14px; }
+#updbox .unotes { text-align:left; background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:10px 14px; font-size:13.5px; color:var(--fg); max-height:140px; overflow:auto; white-space:pre-wrap; margin:0 0 16px; }
+#updbox .uerr { color:var(--red); font-size:13.5px; margin:0 0 14px; }
+#updbox .ubar { height:10px; border-radius:999px; background:var(--faint); overflow:hidden; margin:4px 0 6px; }
+#updbox .ubar i { display:block; height:100%; width:0; border-radius:999px; background:var(--accent); transition:width calc(.15s*var(--sp)) linear; }
+#updbox .ubar.busy i { background-image:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent); background-size:200% 100%; animation:shimmer calc(1.4s*var(--sp)) linear infinite; }
+#updbox .unum { color:var(--dim); font:12.5px var(--mono); margin:0 0 14px; min-height:18px; }
+#updbox .uact { display:flex; gap:10px; justify-content:center; }
+#updbox .btn { min-width:140px; } #updbox .btn:disabled { opacity:.5; cursor:default; transform:none; }

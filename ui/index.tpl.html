@@ -1,0 +1,93 @@
+<!doctype html>
+<html data-theme="dark">
+<head>
+<meta charset="utf-8">
+<title>Claude Linux</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+<!--#include css/themes.css-->
+<!--#include css/layout.css-->
+<!--#include css/ui.css-->
+<!--#include css/cards.css-->
+<!--#include css/fx.css-->
+<!--#include css/update.css-->
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="side"><div id="sidein">
+    <div class="brand"><svg viewBox="0 0 24 24"><path fill="#d97757" d="%%LOGO%%"/></svg>Claude Linux</div>
+    <button id="new"></button>
+    <input id="search" placeholder="Search chats" spellcheck="false">
+    <div id="list"></div>
+    <div id="sidefoot">
+      <button class="sbtn" id="setbtn"></button>
+    </div>
+  </div></div>
+  <div id="main">
+    <div id="top">
+      <button class="ib" id="sbtn" title="Toggle sidebar (Ctrl+B)"></button>
+      <div id="tabs"><button data-t="chat">Chat</button><button data-t="code">Code</button></div>
+      <div id="title"></div>
+      <div class="chip hide" id="taskchip" title="Background agents"></div>
+      <div class="chip hide" id="rcchip" title="Remote Control for this chat"></div>
+      <div class="chip" id="usage" title="Plan usage limits"></div>
+      <button class="ib" id="splbtn" title="Split view (Ctrl+\)"></button>
+      <button class="ib" id="drbtn" title="Session panel"></button>
+    </div>
+    <div id="scroll"><div id="col"></div></div>
+    <div id="bar"><div id="wrap">
+      <div id="cmds" class="pop"></div>
+      <div id="status"></div>
+      <div id="queue"></div>
+      <div id="box">
+        <div id="att"></div>
+        <textarea id="in" rows="1" autofocus></textarea>
+        <div id="row">
+          <button class="pill" id="dirbtn"></button>
+          <button class="pill" id="modebtn"></button>
+          <button class="pill" id="attbtn" title="Attach image (or paste / drop one)"></button><input type="file" id="attfile" accept="image/*" multiple hidden>
+          <span class="sp"></span>
+          <button class="pill" id="modelbtn"></button>
+          <button id="sendb"></button>
+        </div>
+      </div>
+    </div></div>
+  </div>
+  <section id="split"><div id="shead"><span class="stt" id="stitle"></span><button class="ib" id="sswap" title="Swap with the main chat"></button><button class="ib" id="sclose" title="Close split view"></button></div><div id="sscroll"><div id="scol"></div></div></section>
+  <aside id="drawer"></aside>
+</div>
+<div id="menu" class="pop"></div>
+<div id="upop" class="pop"></div>
+<div id="modal"><div id="panel"><div id="pnav"></div><div id="pbody"></div></div></div>
+<div id="pal"><div id="palbox"><input id="palin" placeholder="Type a command, chat, or setting…" spellcheck="false"><div id="pallist"></div></div></div>
+<div id="dropz"><div>Drop files to attach<small>Images are attached; other files are added as @mentions</small></div></div>
+<div id="updmodal"><div id="updbox"></div></div>
+<div id="toast"></div>
+<script>
+<!--#include js/core.js-->
+<!--#include js/models.js-->
+<!--#include js/helpers.js-->
+<!--#include js/appearance.js-->
+<!--#include js/usage.js-->
+<!--#include js/popups.js-->
+<!--#include js/chats.js-->
+<!--#include js/messages.js-->
+<!--#include js/busy.js-->
+<!--#include js/events.js-->
+<!--#include js/slash.js-->
+<!--#include js/send.js-->
+<!--#include js/cards.js-->
+<!--#include js/palette.js-->
+<!--#include js/settings.js-->
+<!--#include js/pages.js-->
+<!--#include js/fx.js-->
+<!--#include js/split.js-->
+<!--#include js/export.js-->
+<!--#include js/dnd.js-->
+<!--#include js/keys.js-->
+<!--#include js/update.js-->
+<!--#include js/boot.js-->
+</script>
+</body>
+</html>

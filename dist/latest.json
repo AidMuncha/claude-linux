@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0",
+  "url": "claude-linux-1.0.0.tar.gz",
+  "sha256": "97e772bb7b6923d950d5f4a532d00761d39cf0b91797b21737a9656eff597652",
+  "signature": "HYrHZwQQfKuJr/ODSDlT0SHjpGd4X046r5ewer4KwJ6aIHBx+rTC254AAxtaurY66Q6d3wms+1SYx/5qjz8gAQ==",
+  "size": 144148,
+  "notes": "First public release",
+  "required": true
+}

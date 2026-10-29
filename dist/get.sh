@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Claude Linux one-line installer. Downloads the latest signed release, verifies it, and installs it for this user.
+#   curl -fsSL https://raw.githubusercontent.com/AidMuncha/claude-linux/main/dist/get.sh | bash
+# Add `-s -- --uninstall` after `bash` to remove it. Nothing is installed unless the checksum AND the author's signature are correct.
+set -euo pipefail
+MANIFEST="https://raw.githubusercontent.com/AidMuncha/claude-linux/main/dist/latest.json"
+for c in curl python3 openssl tar; do command -v "$c" >/dev/null || { echo "Missing '$c' - please install it and run this again."; exit 1; }; done
+T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
+cat > "$T/pub.pem" <<'PUB'
+-----BEGIN PUBLIC KEY-----
+MCowBQYDK2VwAyEAPlv20j+cIp1QzoyOHsgKXUEDd5orzEVTOLE0XIjo6gA=
+-----END PUBLIC KEY-----
+PUB
+echo "Looking up the latest Claude Linux..."
+curl -fsSL --max-time 20 "$MANIFEST" -o "$T/latest.json" || { echo "Could not reach $MANIFEST"; exit 1; }
+read -r VERSION URL SHA SIG < <(python3 - "$T/latest.json" "$MANIFEST" <<'PY'
+import json, re, sys, urllib.parse
+m = json.load(open(sys.argv[1]))
+assert re.fullmatch(r"\d+\.\d+\.\d+", m["version"]) and re.fullmatch(r"[0-9a-f]{64}", m["sha256"]) and re.fullmatch(r"[A-Za-z0-9+/=]+", m["signature"])
+url = urllib.parse.urljoin(sys.argv[2], m["url"])
+assert url.startswith("https://") or url.startswith("http://127.0.0.1"), "download must be https"
+print(m["version"], url, m["sha256"], m["signature"])
+PY
+) || { echo "The release information looks wrong; not installing."; exit 1; }
+echo "Downloading Claude Linux $VERSION..."
+curl -fsSL --max-time 300 --max-filesize 62914560 "$URL" -o "$T/pkg.tgz" || { echo "Download failed."; exit 1; }
+[ "$(sha256sum "$T/pkg.tgz" | cut -d' ' -f1)" = "$SHA" ] || { echo "The download is damaged (checksum mismatch); not installing."; exit 1; }
+echo "$SIG" | base64 -d > "$T/pkg.sig"
+openssl pkeyutl -verify -pubin -inkey "$T/pub.pem" -rawin -in "$T/pkg.tgz" -sigfile "$T/pkg.sig" >/dev/null 2>&1 \
+  || { echo "The package is not signed by the Claude Linux author; not installing."; exit 1; }
+mkdir "$T/src"; tar -xzf "$T/pkg.tgz" -C "$T/src" --no-same-owner
+bash "$T/src/install.sh" "$@"

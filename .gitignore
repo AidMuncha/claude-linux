@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.backup*
+*.pem
+!claude_linux/update_pubkey.pem
+claude-linux-installer.sh
+.claude/settings.local.json
