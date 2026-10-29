@@ -1,9 +1,9 @@
 {
-  "version": "1.0.1",
-  "url": "claude-linux-1.0.1.tar.gz",
-  "sha256": "cdef334b8ce3a79a18a111806cb04752d9c48ecdfd5ccee78fed7fcb3146e597",
-  "signature": "xInBBRC4pqoQ0IpW+Oyj6Ve1p+Lo0zQ+clBkXfEkWCkrr/NW8jaWa6hACIr8go103HMaKXplm68tsCYGiR5lDg==",
-  "size": 144406,
-  "notes": "Clearer message if the Claude CLI is missing, stricter install checks, tidier startup",
+  "version": "1.0.2",
+  "url": "claude-linux-1.0.2.tar.gz",
+  "sha256": "5000b2945e8a7d504455ea96d2eb8985a55320dfb664c51b9ad2fddefbedcad8",
+  "signature": "u+M/6KUQoo52G0HEl7dRtCPvHTKQowXAh6fFO6BgDZgkSacq95aL5xWh3y4+vDrMcSC5pqJecLJVyLAlv1/iBQ==",
+  "size": 149626,
+  "notes": "New sign-in page: sign in with your Claude account in the browser and land right back in the app. One-click Claude Code install if it is missing.",
   "required": true
 }

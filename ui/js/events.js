@@ -98,7 +98,7 @@ window.fromPy = (name, p) => {
   if (name === 'cmds') { S.cmds = p.commands || []; S.skills = p.skills || []; return; }
   if (name === 'sysmsg') return sys(p.text);
   if (name === 'usage') { S.usage = p; renderUsage(); if ($('#modal').style.display === 'flex' && panel === 'usage') showPage(true); return; }
-  if (name === 'account') { S.account = p; if (S.drawer) renderRC(); if ($('#modal').style.display === 'flex' && panel === 'about') showPage(true); return; }
+  if (name === 'account') { S.account = p; renderLogin(); if (S.drawer) renderRC(); if ($('#modal').style.display === 'flex' && panel === 'about') showPage(true); return; }
   if (name === 'file') { S.files[p.which] = p; if ($('#modal').style.display === 'flex' && ['config', 'perms', 'advanced', 'memory', 'hooks'].includes(panel)) showPage(true); return; }
   if (name === 'cwd') { if (chats[cur]) setCwd(p.path); return; }
   const id = p.chat; if (!chats[id]) return;

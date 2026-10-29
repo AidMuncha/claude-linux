@@ -1,6 +1,7 @@
 """Everything that is not GTK: settings, chats, and the Claude Code CLI processes."""
 import json
 import os
+import re
 import shlex
 import shutil
 import subprocess
@@ -528,7 +529,132 @@ class Core:
                 self.push("account", {"loggedIn": d.get("loggedIn"), "method": d.get("authMethod"),
                                       "plan": d.get("subscriptionType"), "email": d.get("email")})
             except Exception as e:
-                self.push("account", {"loggedIn": None, "error": str(e)})
+                missing = not (os.path.isfile(CLAUDE) and os.access(CLAUDE, os.X_OK))
+                self.push("account", {"loggedIn": None, "error": str(e), "missing": missing})
+        threading.Thread(target=run, daemon=True).start()
+
+    # ---------- signing in: `claude auth login` opens the browser; we wait for it, then bring the window back ----------
+    URL_RE = re.compile(r"https://[^\s\"'<>]+")
+
+    def auth_ok(self):
+        try:
+            out = subprocess.run([CLAUDE, "auth", "status"], capture_output=True, text=True, timeout=30, cwd=HOME, stdin=subprocess.DEVNULL).stdout
+            return bool(json.loads(out).get("loggedIn"))
+        except Exception:
+            return False
+
+    def h_login(self, m):
+        if getattr(self, "_login", None) and self._login.poll() is None:
+            return
+        flag = "--console" if m.get("mode") == "console" else "--claudeai"
+        try:
+            proc = subprocess.Popen([CLAUDE, "auth", "login", flag], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=HOME)
+        except OSError as e:
+            self.push("login", {"state": "error", "message": "Could not start the sign-in: %s" % e})
+            return
+        self._login, self._login_cancelled = proc, False
+        self.push("login", {"state": "waiting"})
+
+        def read():
+            """Reads the CLI's output as it arrives (its 'Paste code' prompt has no newline), looking for the sign-in link and that prompt."""
+            seen_url, asked, buf = None, False, ""
+            fd = proc.stdout.fileno()
+            while True:
+                try:
+                    chunk = os.read(fd, 4096)
+                except OSError:
+                    break
+                if not chunk:
+                    break
+                buf = (buf + chunk.decode("utf-8", "replace"))[-4000:]
+                m2 = self.URL_RE.search(buf)
+                if m2 and m2.group(0).rstrip(".,)") != seen_url:
+                    seen_url = m2.group(0).rstrip(".,)")
+                    self.push("login", {"state": "waiting", "url": seen_url, "needCode": asked})
+                if not asked and re.search(r"paste code here", buf, re.I):
+                    asked = True      # the browser cannot hand the sign-in back by itself: the user has to paste the code the page shows
+                    self.push("login", {"state": "waiting", "url": seen_url, "needCode": True})
+        threading.Thread(target=read, daemon=True).start()
+
+        def watch():
+            start, last = time.time(), 0.0
+            limit = float(os.environ.get("CL_LOGIN_TIMEOUT", "600"))
+            while proc.poll() is None and time.time() - start < limit:
+                time.sleep(0.3)
+                if time.time() - last > float(os.environ.get("CL_LOGIN_POLL", "4")):
+                    last = time.time()
+                    if self.auth_ok():            # signed in even though the CLI is still wrapping up
+                        proc.terminate()
+                        break
+            if self._login_cancelled:
+                return
+            timed_out = proc.poll() is None
+            if timed_out:
+                proc.kill()
+            if not timed_out and self.auth_ok():
+                self.push("login", {"state": "done"})
+                self.h_account({})
+                self.refresh_usage()
+                self.h_cmds({})
+                if self.app and hasattr(self.app, "show_window"):
+                    GLib.idle_add(lambda: self.app.show_window() and False)      # back to the app, in front of the browser
+            else:
+                self.push("login", {"state": "error", "message": "Sign-in timed out. Please try again." if timed_out else
+                                    "Sign-in did not finish. Please try again."})
+        threading.Thread(target=watch, daemon=True).start()
+
+    CODE_RE = re.compile(r"[A-Za-z0-9_\-#.~%+/=]{8,600}")
+
+    def h_login_code(self, m):
+        proc = getattr(self, "_login", None)
+        code = str(m.get("code", "")).strip()
+        if not (proc and proc.poll() is None):
+            return
+        if not self.CODE_RE.fullmatch(code):
+            self.push("toast", {"text": "That does not look like a sign-in code. Copy the whole code from the browser page.", "err": True})
+            return
+        try:
+            proc.stdin.write((code + "\n").encode())
+            proc.stdin.flush()
+        except OSError:
+            pass
+
+    def h_login_cancel(self, m):
+        proc = getattr(self, "_login", None)
+        if proc and proc.poll() is None:
+            self._login_cancelled = True
+            proc.terminate()
+        self.push("login", {"state": "idle"})
+
+    INSTALL_CMD = "curl -fsSL https://claude.ai/install.sh | bash"
+
+    def h_install_cli(self, m):
+        """One click for a fresh machine: runs Anthropic's own installer and reports its last output line."""
+        if getattr(self, "_installing", False):
+            return
+        self._installing = True
+
+        def run():
+            self.push("login", {"state": "installing", "line": "Starting…"})
+            tail = []
+            try:
+                p = subprocess.Popen(["bash", "-c", os.environ.get("CL_INSTALL_CMD") or self.INSTALL_CMD], stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                                     stderr=subprocess.STDOUT, text=True, cwd=HOME)
+                for line in p.stdout:
+                    line = line.strip()
+                    if line:
+                        tail = (tail + [line])[-6:]
+                        self.push("login", {"state": "installing", "line": line[:140]})
+                rc = p.wait()
+            except OSError as e:
+                rc, tail = 1, [str(e)]
+            if rc == 0 and os.path.isfile(CLAUDE) and os.access(CLAUDE, os.X_OK):
+                self.push("toast", {"text": "Claude Code installed"})
+                self.h_account({})
+                self.push("login", {"state": "idle"})
+            else:
+                self.push("login", {"state": "error", "message": "The install did not finish: " + (tail[-1] if tail else "no output"), "retry": "install"})
+            self._installing = False
         threading.Thread(target=run, daemon=True).start()
 
     # ---------- claude processes ----------

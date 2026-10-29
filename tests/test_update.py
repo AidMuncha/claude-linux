@@ -15,6 +15,7 @@ from gi.repository import GLib
 import updsrv
 from claude_linux import update
 from claude_linux.core import Core
+from claude_linux.version import VERSION
 
 
 def pump_until(cond, seconds=8.0):
@@ -48,7 +49,7 @@ class Versions(unittest.TestCase):
         for bad in ("1.2", "a.b.c", "", "1.2.3.4", "1.2.3-beta"):
             with self.assertRaises(update.UpdateError):
                 update.parse_version(bad)
-        self.assertTrue(update.is_newer("1.0.1", "1.0.0"))
+        self.assertTrue(update.is_newer("99.0.1", "1.0.0"))
         self.assertTrue(update.is_newer("1.10.0", "1.9.9"))
         self.assertFalse(update.is_newer("1.0.0", "1.0.0"))
         self.assertFalse(update.is_newer("0.9.9", "1.0.0"))
@@ -66,7 +67,7 @@ class World(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.w = updsrv.World()
-        cls.m = cls.w.make("1.0.1", notes="Notes here")
+        cls.m = cls.w.make("99.0.1", notes="Notes here")
         os.environ["CL_UPDATE_PUBKEY"] = cls.w.pub
 
     @classmethod
@@ -75,25 +76,25 @@ class World(unittest.TestCase):
         cls.w.close()
 
     def tgz(self):
-        return os.path.join(self.w.dist, "claude-linux-1.0.1.tar.gz")
+        return os.path.join(self.w.dist, "claude-linux-99.0.1.tar.gz")
 
 
 class Manifest(World):
     def test_release_output(self):
         m = json.load(open(os.path.join(self.w.dist, "latest.json")))
-        self.assertEqual((m["version"], m["url"], m["required"], m["notes"]), ("1.0.1", "claude-linux-1.0.1.tar.gz", True, "Notes here"))
+        self.assertEqual((m["version"], m["url"], m["required"], m["notes"]), ("99.0.1", "claude-linux-99.0.1.tar.gz", True, "Notes here"))
         self.assertEqual(m["size"], os.path.getsize(self.tgz()))
         with tarfile.open(self.tgz()) as t:
             names = t.getnames()
         for need in ("app.py", "claude_linux/update.py", "claude_linux/update_pubkey.pem", "ui/index.html", "ui/js/update.js"):
             self.assertIn(need, names)
         self.assertFalse([n for n in names if "__pycache__" in n or n.startswith("tests") or "private" in n])
-        self.assertIn('VERSION = "1.0.1"', open(os.path.join(self.w.root, "claude_linux/version.py")).read())
+        self.assertIn('VERSION = "99.0.1"', open(os.path.join(self.w.root, "claude_linux/version.py")).read())
 
     def test_fetch_valid_manifest_resolves_relative_url(self):
         m = update.fetch_manifest(self.w.url)
-        self.assertEqual(m["version"], "1.0.1")
-        self.assertEqual(m["url"], self.w.url.replace("latest.json", "claude-linux-1.0.1.tar.gz"))
+        self.assertEqual(m["version"], "99.0.1")
+        self.assertEqual(m["url"], self.w.url.replace("latest.json", "claude-linux-99.0.1.tar.gz"))
         self.assertTrue(m["required"])
 
     def test_fetch_rejects_bad_manifests(self):
@@ -128,7 +129,7 @@ class Signatures(World):
     def test_signature_from_a_different_key_is_rejected(self):
         other = updsrv.World()
         self.addCleanup(other.close)
-        m = other.make("1.0.1")
+        m = other.make("99.0.1")
         self.assertFalse(update.verify_signature(self.tgz(), m["signature"]))
 
     def test_garbage_signatures_are_rejected(self):
@@ -187,7 +188,7 @@ class Install(World):
     def test_full_update_replaces_the_app_and_keeps_the_old_copy(self):
         seen = []
         update.download_and_install(self.manifest, self.target, lambda d, t: seen.append((d, t)))
-        self.assertIn('"1.0.1"', self.version_of(self.target))
+        self.assertIn('"99.0.1"', self.version_of(self.target))
         self.assertIn('"1.0.0"', self.version_of(self.target + ".old"))
         self.assertTrue(seen and seen[-1][0] == seen[-1][1] == self.manifest["size"])
         self.assertFalse(os.path.exists(self.target + ".new"))
@@ -203,9 +204,9 @@ class Install(World):
     def test_unsigned_update_is_not_installed_even_with_a_correct_checksum(self):
         other = updsrv.World()
         self.addCleanup(other.close)
-        evil = other.make("1.0.1")
-        evil_tgz = os.path.join(other.dist, "claude-linux-1.0.1.tar.gz")
-        mf = dict(self.manifest, url="http://127.0.0.1:%d/claude-linux-1.0.1.tar.gz" % other.server.server_address[1], sha256=evil["sha256"], signature=evil["signature"])
+        evil = other.make("99.0.1")
+        evil_tgz = os.path.join(other.dist, "claude-linux-99.0.1.tar.gz")
+        mf = dict(self.manifest, url="http://127.0.0.1:%d/claude-linux-99.0.1.tar.gz" % other.server.server_address[1], sha256=evil["sha256"], signature=evil["signature"])
         self.assertTrue(os.path.exists(evil_tgz))
         with self.assertRaisesRegex(update.UpdateError, "not signed"):
             update.download_and_install(mf, self.target)
@@ -262,7 +263,7 @@ class CoreChecks(World):
         c.start_update_checks()
         self.assertTrue(pump_until(self.updates))
         u = self.updates()[0]
-        self.assertEqual((u["state"], u["version"], u["current"], u["notes"], u["required"]), ("available", "1.0.1", "1.0.0", "Notes here", True))
+        self.assertEqual((u["state"], u["version"], u["current"], u["notes"], u["required"]), ("available", "99.0.1", VERSION, "Notes here", True))
 
     def test_background_check_is_silent_when_up_to_date_or_offline_or_unconfigured(self):
         old = os.path.join(self.w.dist, "latest.json")
@@ -305,7 +306,7 @@ class CoreChecks(World):
         states = [u["state"] for u in self.updates()]
         self.assertEqual(states[-1], "ready", self.updates()[-1])
         self.assertIn("downloading", states)
-        self.assertIn('"1.0.1"', open(os.path.join(target, "claude_linux/version.py")).read())
+        self.assertIn('"99.0.1"', open(os.path.join(target, "claude_linux/version.py")).read())
 
     def test_download_without_an_announced_update_does_nothing(self):
         c = self.core(self.w.url)
@@ -347,14 +348,14 @@ class GetScript(World):
     def test_installs_the_latest_signed_release(self):
         r, home = self.run_get()
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertIn('"1.0.1"', self.installed_version(home))
+        self.assertIn('"99.0.1"', self.installed_version(home))
         self.assertTrue(os.access(os.path.join(home, ".local/bin/claude-linux"), os.X_OK))
         self.assertTrue(os.path.exists(os.path.join(home, ".local/share/applications/dev.nein.ClaudeLinux.desktop")))
 
     def test_works_when_piped_like_curl_pipe_bash(self):
         r, home = self.run_get(piped=True)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertIn('"1.0.1"', self.installed_version(home))
+        self.assertIn('"99.0.1"', self.installed_version(home))
 
     def test_running_it_again_updates_in_place_and_keeps_user_data(self):
         r, home = self.run_get()
@@ -373,7 +374,7 @@ class GetScript(World):
 
     def refuse(self, mutate):
         saved = open(os.path.join(self.w.dist, "latest.json")).read()
-        tgz = os.path.join(self.w.dist, "claude-linux-1.0.1.tar.gz")
+        tgz = os.path.join(self.w.dist, "claude-linux-99.0.1.tar.gz")
         saved_tgz = open(tgz, "rb").read()
         try:
             mutate(saved, tgz)
@@ -392,8 +393,8 @@ class GetScript(World):
     def test_refuses_a_package_signed_by_someone_else(self):
         other = updsrv.World()
         self.addCleanup(other.close)
-        m = other.make("1.0.1")
-        evil = open(os.path.join(other.dist, "claude-linux-1.0.1.tar.gz"), "rb").read()
+        m = other.make("99.0.1")
+        evil = open(os.path.join(other.dist, "claude-linux-99.0.1.tar.gz"), "rb").read()
 
         def mutate(saved, tgz):
             open(tgz, "wb").write(evil)

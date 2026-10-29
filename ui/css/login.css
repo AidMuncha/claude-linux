@@ -1,0 +1,19 @@
+/* ---------- the sign-in page ---------- */
+#loginpage { position:fixed; inset:0; z-index:250; display:none; align-items:center; justify-content:center; background:var(--bg); }
+html.fx #loginpage, html.glass #loginpage { background:color-mix(in srgb,var(--bg) 88%,transparent); -webkit-backdrop-filter:blur(var(--blur)); backdrop-filter:blur(var(--blur)); }
+#loginpage.on { display:flex; animation:rise calc(.3s*var(--sp)) ease both; }
+#loginpage.leaving { animation:fadeout calc(.5s*var(--sp)) ease both; }
+@keyframes fadeout { to { opacity:0; transform:scale(1.02); } }
+#loginbox { width:min(440px,92vw); text-align:center; padding:10px 20px; }
+#loginbox .llogo { width:64px; height:64px; margin:0 auto 18px; color:var(--accent); } #loginbox .llogo svg { width:64px; height:64px; }
+#loginbox .llogo.spin svg { animation:breathe calc(1.8s*var(--sp)) ease-in-out infinite; }
+#loginbox h1 { font-size:28px; font-weight:500; margin:0 0 8px; letter-spacing:-.01em; }
+#loginbox .lsub { color:var(--dim); font-size:15px; margin:0 0 24px; line-height:1.55; }
+#loginbox .btn { min-width:240px; padding:12px 22px; font-size:15px; border-radius:12px; }
+#loginbox .lalt { display:block; margin:16px auto 0; background:none; border:0; color:var(--dim); cursor:pointer; font-size:13px; text-decoration:underline; text-underline-offset:3px; }
+#loginbox .lalt:hover { color:var(--fg); }
+#loginbox .lnote { color:var(--dim); font-size:12.5px; margin-top:18px; line-height:1.5; }
+#loginbox .lerr { color:var(--red); font-size:14px; margin:0 0 18px; }
+#loginbox .lrow { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:4px; }
+#loginbox .lline { color:var(--dim); font:12.5px var(--mono); margin:0 0 20px; min-height:18px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#loginbox .ltick { width:64px; height:64px; margin:0 auto 18px; color:var(--green); } #loginbox .ltick svg { width:64px; height:64px; stroke-width:2; }

@@ -14,6 +14,8 @@ import unittest
 from gi.repository import Gio, GLib
 
 ROOT = os.path.dirname(env.HERE)
+sys.path.insert(0, ROOT)
+from claude_linux.version import VERSION  # noqa: E402
 APP = os.path.join(ROOT, "app.py")
 CTX = GLib.MainContext.default()
 
@@ -367,6 +369,49 @@ class WindowAndTray(Base):
         r.finish()
 
 
+class SignIn(Base):
+    def test_signed_out_user_signs_in_in_the_browser_and_lands_back_in_the_app(self):
+        tmp = tempfile.mkdtemp(prefix="cl-auth-")
+        self.addCleanup(shutil.rmtree, tmp, True)
+        auth, go = os.path.join(tmp, "auth"), os.path.join(tmp, "go")
+        r = self.run_app("""
+            const page = () => document.getElementById('loginpage').classList.contains('on');
+            await until(page, 20000);
+            const welcome = document.getElementById('loginbox').innerText;
+            document.querySelector('#loginbox [data-lg=login]').click();
+            await until(() => LG.url, 20000);
+            log({stage:'waiting', welcome, waiting:document.getElementById('loginbox').innerText, url:LG.url});
+            await until(() => !page(), 30000);
+            post({type:'appstate'}); await until(() => S.appstate);
+            log({stage:'back', loggedIn:S.account.loggedIn, plan:S.account.plan, visible:S.appstate.visible, inputFocusable:!!document.getElementById('in')});
+            post({type:'quit'});
+        """, settings={"tray": False}, extra_env={"FAKE_AUTH": auth, "FAKE_AUTH_GO": go, "CL_LOGIN_POLL": "0.5"})
+        waiting = r.wait_log(1, timeout=60)
+        self.assertIn("Welcome to Claude Linux", waiting["welcome"])
+        self.assertIn("Finish signing in", waiting["waiting"])
+        self.assertTrue(waiting["url"].startswith("https://claude.ai/oauth/authorize"))
+        self.assertFalse(os.path.exists(auth), "not signed in until the browser step is done")
+        open(go, "w").close()
+        back = r.wait_log(2, timeout=60)
+        self.assertEqual((back["loggedIn"], back["plan"], back["visible"]), (True, "max", True))
+        self.assertTrue(os.path.exists(auth))
+        self.assertEqual(r.finish(), 0)
+        self.no_problems(r)
+
+    def test_already_signed_in_never_sees_the_page(self):
+        r = self.run_app("""await sleep(2500); log({shown:document.getElementById('loginpage').classList.contains('on')}); post({type:'quit'});""", settings={"tray": False})
+        self.assertFalse(r.wait_log()["shown"])
+        r.finish()
+
+    def test_a_computer_without_the_cli_gets_the_install_page(self):
+        r = self.run_app("""await sleep(2000); log({shown:document.getElementById('loginpage').classList.contains('on'), text:document.getElementById('loginbox').innerText}); post({type:'quit'});""",
+                         settings={"tray": False}, extra_env={"CL_CLAUDE": "/nonexistent/claude"}, delay=300)
+        log = r.wait_log()
+        self.assertTrue(log["shown"])
+        self.assertIn("Install Claude Code", log["text"])
+        r.finish()
+
+
 class SelfUpdate(Base):
     """A real app finds a signed update on a local web server, downloads it with progress, installs it and restarts."""
 
@@ -374,7 +419,7 @@ class SelfUpdate(Base):
     def setUpClass(cls):
         import updsrv
         cls.w = updsrv.World()
-        cls.w.make("1.0.1", notes="Shiny new things")
+        cls.w.make("99.0.1", notes="Shiny new things")
 
     @classmethod
     def tearDownClass(cls):
@@ -403,12 +448,12 @@ class SelfUpdate(Base):
         """, target, marker)
         log = r.wait_log(timeout=60)
         self.assertIn("New Update Required", log["first"])
-        self.assertIn("1.0.1", log["first"])
+        self.assertIn("99.0.1", log["first"])
         self.assertIn("Shiny new things", log["first"])
         self.assertIn("Update installed", log["last"])
-        self.assertEqual(log["version"], "1.0.0")
+        self.assertEqual(log["version"], VERSION)
         self.assertEqual(r.finish(), 0, "the app must quit by itself after Restart now")
-        self.assertIn('"1.0.1"', open(os.path.join(target, "claude_linux/version.py")).read())
+        self.assertIn('"99.0.1"', open(os.path.join(target, "claude_linux/version.py")).read())
         self.assertIn('"1.0.0"', open(os.path.join(target + ".old", "claude_linux/version.py")).read())
         self.assertTrue(pump(8, lambda: os.path.exists(marker)), "the replacement copy must be started")
         self.no_problems(r)
@@ -418,7 +463,7 @@ class SelfUpdate(Base):
         import updsrv
         evil = updsrv.World()
         self.addCleanup(evil.close)
-        evil.make("1.0.1")
+        evil.make("99.0.1")
         target = self.w.installed_copy("e2e-evil-%d" % time.time_ns())
         self.addCleanup(shutil.rmtree, target, True)
         # evil author's package + checksum, but announced to an app that trusts the *real* test key
