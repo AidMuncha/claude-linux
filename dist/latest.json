@@ -1,9 +1,9 @@
 {
-  "version": "1.1.1",
-  "url": "claude-linux-1.1.1.tar.gz",
-  "sha256": "ff9ad1599d304036f06d487008a79eb1860b39b65fe4ca06cefd8d6791f8a135",
-  "signature": "rQyUKEUwp6Erfmj9F8ikSXmwsPwF53uBB6zPbsBWoWKp0/pJWnO68Sao/iNWnhg+7vKKe+d8LJ+3NX2gMofkDw==",
-  "size": 246338,
-  "notes": "Meet Jarvis: a voice and text assistant that hears you, talks back, reads your screen with a hologram, moves the mouse like a person, launches your Steam games and apps. Type /jarvis or /jarvistextmode. The installer now sets up Python, GTK and the other requirements for you.",
-  "required": false
+  "version": "1.1.2",
+  "url": "claude-linux-1.1.2.tar.gz",
+  "sha256": "d49f5a724adefab70085489447981856544cb7c21e8987cff5b38eb25218a421",
+  "signature": "CKnX6hrGsozyY71KYNzdgfgKXjyPpjtTXXiIJ6Bf42lmGbbGKrLPfdL30yhVeCmp9nXgqFBh8eA/+KjnzwbRDw==",
+  "size": 246672,
+  "notes": "Fixes the window freezing so nothing could be clicked on some computers (NVIDIA graphics, some Ubuntu/Mint setups).",
+  "required": true
 }
