@@ -13,6 +13,7 @@ from gi.repository import Gio, GLib
 
 from .paths import CLAUDE, CLAUDE_FILES, CHATDIR, CMDS, EXPORT_DIR, HOME, SETTINGS
 from .settings import DEFAULTS
+from .jarvis import Jarvis
 from . import update
 from .util import load_chats, parse_usage, read_json, write_json
 from .version import VERSION
@@ -30,6 +31,8 @@ class Core:
         self.usage = None
         self._fcache = {}
         self._update_started, self.update_manifest, self._update_busy = False, None, False
+        self.jarvis = Jarvis(push, self.too_risky)
+        self.jarvis.cfg = lambda key, default=None: self.settings.get(key, default)     # the Jarvis page in Settings
 
     # ---------- persistence ----------
     def save_settings(self):
@@ -62,6 +65,9 @@ class Core:
             return "?"
 
     def handle(self, m):
+        if str(m.get("type")).startswith("jarvis_"):
+            self.jarvis.handle(m)
+            return
         fn = getattr(self, "h_" + str(m.get("type")), None)
         if fn:
             fn(m)
@@ -85,6 +91,21 @@ class Core:
         c.pop("busy", None)
         self.chats[m["id"]] = c
         self.save_chats_soon(m["id"])
+
+    def h_autotitle(self, m):
+        """Names a session the way Claude Code does: a short title made from the first exchange (one small, cheap request)."""
+        def run():
+            ask = ("Write a 2 to 6 word title for this coding session. Reply with only the title: no quotes, no trailing period.\n\n"
+                   "User: %s\n\nAssistant: %s" % ((m.get("text") or "")[:600], (m.get("reply") or "")[:600]))
+            try:
+                out = subprocess.run([CLAUDE, "-p", ask, "--model", "haiku", "--no-session-persistence"], capture_output=True, text=True,
+                                     timeout=60, cwd=HOME, stdin=subprocess.DEVNULL).stdout
+                title = (out.strip().splitlines() or [""])[0].strip(" \"'`*#.")[:60]
+                if title:
+                    self.push("autotitle", {"chat": m["chat"], "title": title})
+            except Exception:
+                pass
+        threading.Thread(target=run, daemon=True).start()
 
     def h_delete(self, m):
         self.chats.pop(m["id"], None)
@@ -286,10 +307,12 @@ class Core:
         GLib.idle_add(self.app.quit)
 
     # ---------- real usage: `/usage` is answered locally by the CLI (no tokens, no cost) ----------
-    def refresh_usage(self):
-        if self._usage_busy:
+    def refresh_usage(self, force=False):
+        # Each refresh starts a whole extra Claude process, so after a turn it runs at most once a minute (that was slowing the next input down).
+        if self._usage_busy or (not force and time.time() - getattr(self, "_usage_at", 0) < 60):
             return
         self._usage_busy = True
+        self._usage_at = time.time()
 
         def run():
             try:
@@ -304,7 +327,7 @@ class Core:
         threading.Thread(target=run, daemon=True).start()
 
     def h_refresh_usage(self, m):
-        self.refresh_usage()
+        self.refresh_usage(force=True)
 
     # ---------- Remote Control: per chat, same as /remote-control in Claude Code ----------
     def ctl(self, cid, request, prefix="rc-", rid=None):
@@ -666,6 +689,7 @@ class Core:
     def kill_all(self):
         for c in list(self.procs):
             self.kill(c)
+        self.jarvis.stop()
 
     def model_arg(self):
         s = self.settings
@@ -683,8 +707,9 @@ class Core:
                     "files or shell. Answer conversationally; if they need actions on their PC, suggest "
                     "switching to Code mode."]
         else:
-            cmd += ["--permission-mode", chat.get("mode") or s["mode"], "--permission-prompt-tool", "stdio"]
-            for d in s["addDirs"]:
+            # the flag only makes Bypass selectable later (switching a running session to it is refused without it); it does not turn it on
+            cmd += ["--permission-mode", chat.get("mode") or s["mode"], "--allow-dangerously-skip-permissions", "--permission-prompt-tool", "stdio"]
+            for d in (["/"] if chat.get("cwd") == "universal" else []) + s["addDirs"]:
                 cmd += ["--add-dir", d]
             if s["appendPrompt"]:
                 cmd += ["--append-system-prompt", s["appendPrompt"]]
@@ -736,6 +761,35 @@ class Core:
             self.enable_rc(cid, chat)
         return p
 
+    # In Bypass mode nothing asks, except commands that could wipe the disk or the home folder.
+    RISKY = re.compile(
+        r"(\brm\b(?=[^;&|\n]*\s(?:-\w*[rR]\w*|--recursive)\b)[^;&|\n]*\s(?:--no-preserve-root|(?:/|/\*|~/?\*?|\$HOME/?\*?|\$\{HOME\}/?\*?|/home/?\*?|/var/home/?\*?|/etc|/usr|/boot|/var)/?)(?:\s|$|;|&|\|))"
+        r"|\bmkfs(?:\.\w+)?\b|\bwipefs\b|\bblkdiscard\b|\bshred\b[^;&|\n]*\s/dev/"
+        r"|\bdd\b[^;&|\n]*\bof=/dev/(?:sd|nvme|vd|mmcblk|hd)|>\s*/dev/(?:sd|nvme|vd|mmcblk|hd)"
+        r"|:\s*\(\s*\)\s*\{\s*:\s*\|\s*:\s*&\s*\}\s*;\s*:"
+        r"|\b(?:chmod|chown)\b[^;&|\n]*\s-\w*R\w*\s[^;&|\n]*\s/(?:\s|$)")
+
+    @classmethod
+    def too_risky(cls, tool, tinput):
+        return tool == "Bash" and bool(cls.RISKY.search(str((tinput or {}).get("command", ""))))
+
+    def auto_allow(self, cid, ev, r):
+        """Answers a permission request itself when the chat is in Bypass mode and the action isn't one of the dangerous few."""
+        p = self.procs.get(cid)
+        if not p or p.get("mode") != "bypassPermissions":
+            return False
+        tool = r.get("tool_name")
+        if tool in ("AskUserQuestion", "ExitPlanMode") or self.too_risky(tool, r.get("input")):   # questions and plans need a person
+            return False
+        msg = {"type": "control_response", "response": {"subtype": "success", "request_id": ev.get("request_id"),
+                                                        "response": {"behavior": "allow", "updatedInput": r.get("input") or {}}}}
+        try:
+            p["proc"].stdin.write(json.dumps(msg) + "\n")
+            p["proc"].stdin.flush()
+            return True
+        except Exception:
+            return False
+
     def reader(self, cid, proc):
         try:
             for line in proc.stdout:
@@ -749,6 +803,8 @@ class Core:
                 if typ == "control_request":
                     r = ev.get("request", {})
                     if r.get("subtype") == "can_use_tool":
+                        if self.auto_allow(cid, ev, r):
+                            continue
                         self.notify("Claude needs your input", f'{r.get("tool_name")} · {(self.chats.get(cid) or {}).get("title", "")}', cid)
                         self.push("perm", {"chat": cid, "rid": ev.get("request_id"), "tool": r.get("tool_name"),
                                            "input": r.get("input") or {}, "desc": r.get("description", ""),
@@ -800,7 +856,7 @@ class Core:
 
     def h_send(self, m):
         cid, text = m["chat"], (m.get("text") or "").strip()
-        if (not text and not m.get("images")) or cid in self.busy:
+        if not text and not m.get("images"):
             return
         chat = self.chats.setdefault(cid, {})
         for k in ("kind", "cwd", "mode", "session", "resumeAt"):

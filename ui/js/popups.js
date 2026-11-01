@@ -33,8 +33,12 @@ function modelMenu() {
 $('#modelbtn').onclick = e => { e.stopPropagation(); modelMenu(); };
 $('#modebtn').onclick = e => { e.stopPropagation(); const c = chats[cur]; listMenu($('#modebtn'), [{head:'Permission mode'}, ...MODES.map(([v, l, d]) => ({label:l, sub:d, on:(c.mode || S.settings.mode) === v, run: () => { c.mode = v; persist(); renderComposer(); post({type:'setmode', chat:cur, mode:v}); }}))], true, 360); };
 $('#dirbtn').onclick = e => {
-  e.stopPropagation(); const rec = [...new Set([home, ...Object.values(chats).map(c => c.cwd).filter(Boolean)])];
-  listMenu($('#dirbtn'), [{label:'Choose a folder…', accent:true, run: () => post({type:'pickdir', start:(chats[cur] || {}).cwd})}, {sep:1}, {head:'Recent'}, ...rec.map(r => ({label: r.split('/').filter(Boolean).pop() || '/', sub:r, on:(chats[cur] || {}).cwd === r, run: () => setCwd(r)}))], true, 380);
+  e.stopPropagation(); const rec = [...new Set(Object.values(chats).map(c => c.cwd).filter(x => x && x !== UNIVERSAL))];
+  listMenu($('#dirbtn'), [{label:'Choose a folder…', accent:true, run: () => post({type:'pickdir', start:(chats[cur] || {}).cwd})}, {label:'Universal', sub:'Works across your whole PC, no single folder', on:(chats[cur] || {}).cwd === UNIVERSAL, run: () => setCwd(UNIVERSAL)}, {sep:1}, {head:'Recent'}, ...rec.map(r => ({label: r.split('/').filter(Boolean).pop() || '/', sub:r, on:(chats[cur] || {}).cwd === r, run: () => setCwd(r)}))], true, 380);
 };
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-pick]'); if (!b) return;
+  if (b.dataset.pick === 'dir') post({type:'pickdir', start:home}); else setCwd(b.dataset.pick);
+});
 function setCwd(p) { if (chats[cur]) { chats[cur].cwd = p; persist(); renderComposer(); if (!chats[cur].items.length) renderChat(); } }
 

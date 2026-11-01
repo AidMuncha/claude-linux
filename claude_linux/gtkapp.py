@@ -10,6 +10,7 @@ gi.require_version("Gdk", "4.0")
 gi.require_version("Gtk", "4.0")
 gi.require_version("WebKit", "6.0")
 from gi.repository import Gdk, Gio, GLib, Gtk, WebKit  # noqa: E402
+import cairo  # noqa: E402
 
 from . import kde  # noqa: E402
 from .core import Core  # noqa: E402
@@ -74,6 +75,10 @@ class App(Gtk.Application):
         display = Gdk.Display.get_default()
         Gtk.IconTheme.get_for_display(display).add_search_path(ICON_DIR)
         Gtk.StyleContext.add_provider_for_display(display, self._chrome_css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        hud_css = Gtk.CssProvider()
+        css = b"window.jarvis-hud, window.jarvis-hud.background { background: transparent; box-shadow: none; border: none; }"
+        hud_css.load_from_data(css, len(css)) if not hasattr(hud_css, "load_from_string") else hud_css.load_from_string(css.decode())
+        Gtk.StyleContext.add_provider_for_display(display, hud_css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
         self.win = win = Gtk.ApplicationWindow(application=self, title="Claude Linux")
         self.bar = Gtk.HeaderBar()
         self.bar.set_decoration_layout(kde.window_buttons())
@@ -90,6 +95,10 @@ class App(Gtk.Application):
         ws.set_enable_developer_extras(True)
         ws.set_enable_smooth_scrolling(True)
         self._q, self._lock, self._sched = [], threading.Lock(), False
+        self.hud = self.hud_web = self.hud_mode = None          # Jarvis' always-on-top window
+        self.hud_ready, self._hud_q, self._hud_rect, self._hud_state = False, [], None, None
+        self.screen_win = self.screen_web = None                # the see-through overlay where the reading highlight is drawn
+        self.screen_ready, self._screen_q = False, []
         self.web.set_background_color(Gdk.RGBA(0.15, 0.15, 0.14, 1))
         self.core = Core(self.js, self)
         self.apply_chrome({"bg": "#262624", "side": "#1f1e1d", "fg": "#faf9f5", "line": "#34332f"})
@@ -190,6 +199,15 @@ class App(Gtk.Application):
     def on_msg(self, _ucm, value):
         m = json.loads(value.to_json(0))
         kind = m.get("type")
+        if str(kind).startswith("jarvis_"):
+            if kind == "jarvis_start":
+                GLib.idle_add(lambda: self.show_hud(m.get("mode")) and False)
+            elif kind == "jarvis_hudrect":
+                self._hud_rect = m
+                GLib.idle_add(lambda: self.apply_hud_rect() and False)
+                return
+            self.core.handle(m)
+            return
         if kind == "jserr":
             print("JS ERROR:", m.get("text"), file=sys.stderr, flush=True)
             return
@@ -343,9 +361,108 @@ class App(Gtk.Application):
     def flush(self):
         with self._lock:
             items, self._q, self._sched = self._q, [], False
+        hud = [i for i in items if i[0] == "jarvis"]
+        scr = [i for i in items if i[0] == "jarvis_screen"]
+        items = [i for i in items if i[0] not in ("jarvis", "jarvis_screen")]
+        for i in scr:
+            if i[1].get("ev") == "words" and not self.screen_win:
+                self.show_screen()
+        if scr and self.screen_web:
+            if self.screen_ready:
+                self.screen_web.evaluate_javascript(f"window.fromPyBatch({json.dumps(scr)})", -1, None, None, None, None, None)
+            else:
+                self._screen_q += scr
+        if any(i[1].get("ev") == "close" for i in scr):
+            GLib.timeout_add(100, lambda: self.hide_screen() and False)
+        for i in hud:
+            if i[1].get("ev") == "state":
+                self._hud_state = i[1]
         if items:
             self.web.evaluate_javascript(f"window.fromPyBatch({json.dumps(items)})", -1, None, None, None, None, None)
+        if hud:
+            if any(i[1].get("ev") == "state" and i[1].get("state") == "off" for i in hud):
+                self._hud_state = None
+                GLib.idle_add(lambda: (self.hide_hud(), self.hide_screen()) and False)
+            elif self.hud_web and self.hud_ready:
+                self.hud_web.evaluate_javascript(f"window.fromPyBatch({json.dumps(hud)})", -1, None, None, None, None, None)
+            elif self.hud_web:
+                self._hud_q += hud                  # the page is still loading
         return False
+
+    # ---------- Jarvis' window: transparent, always on top, bottom-left of the screen ----------
+    # KWin does the placing (claude_linux/kwin_activity.js looks for the title "Jarvis HUD"): Wayland apps cannot position or raise themselves.
+    def show_hud(self, mode):
+        mode = "text" if mode == "text" else ("voice" if mode == "voice" else (self.hud_mode or "voice"))
+        if self.hud and self.hud_mode == mode:
+            return
+        self.hide_hud()
+        self.core.jarvis.activity.start()       # loads the KWin script that places this window; without it the window opens mid-screen
+        self.hud_mode, self.hud_ready, self._hud_q, self._hud_rect = mode, False, [], None
+        self._hud_state = self._hud_state or {"ev": "state", "state": "waiting"}
+        ucm = WebKit.UserContentManager()
+        ucm.register_script_message_handler("bridge", None)
+        ucm.connect("script-message-received::bridge", self.on_msg)
+        web = self.hud_web = WebKit.WebView(user_content_manager=ucm)
+        web.set_background_color(Gdk.RGBA(0, 0, 0, 0))
+        web.connect("load-changed", self._hud_loaded)
+        web.load_uri("file://" + os.path.join(HERE, "ui", "hud.html"))
+        win = self.hud = Gtk.Window(application=self, title="Jarvis HUD" if mode == "voice" else "Jarvis HUD text", decorated=False,
+                                    resizable=False, default_width=500, default_height=700)
+        win.add_css_class("jarvis-hud")
+        win.set_child(web)
+        win.connect("map", lambda *_: self.apply_hud_rect())
+        win.present()
+
+    def _hud_loaded(self, web, event):
+        if event == WebKit.LoadEvent.FINISHED and web is self.hud_web:
+            self.hud_ready = True
+            queued, self._hud_q = self._hud_q, []
+            first = [["jarvis", dict(self._hud_state, mode=self.hud_mode)]]     # a fresh page starts from the latest state, whatever it missed
+            web.evaluate_javascript(f"window.fromPyBatch({json.dumps(first + queued)})", -1, None, None, None, None, None)
+
+    def apply_hud_rect(self):
+        """Only the parts of the window that are drawn as controls take clicks; everything else passes through to what is underneath."""
+        m, win = self._hud_rect or {"rects": [{"x": 0, "y": 560, "w": 150, "h": 140}]}, self.hud     # until the page reports, only the orb's corner takes clicks
+        surface = win.get_surface() if win else None
+        if not surface:
+            return
+        region = cairo.Region()
+        for r in m.get("rects") or []:
+            region.union(cairo.RectangleInt(max(0, int(r["x"])), max(0, int(r["y"])), int(r["w"]), int(r["h"])))
+        surface.set_input_region(region)
+
+    def show_screen(self):
+        """A transparent window over the whole monitor that ignores the mouse; KWin sizes and raises it (kwin_activity.js looks for the title)."""
+        self.screen_ready, self._screen_q = False, []
+        ucm = WebKit.UserContentManager()
+        ucm.register_script_message_handler("bridge", None)
+        ucm.connect("script-message-received::bridge", self.on_msg)
+        web = self.screen_web = WebKit.WebView(user_content_manager=ucm)
+        web.set_background_color(Gdk.RGBA(0, 0, 0, 0))
+        web.connect("load-changed", self._screen_loaded)
+        web.load_uri("file://" + os.path.join(HERE, "ui", "screen.html"))
+        win = self.screen_win = Gtk.Window(application=self, title="Jarvis Screen", decorated=False, resizable=False, default_width=1920, default_height=1080)
+        win.add_css_class("jarvis-hud")
+        win.set_child(web)
+        win.connect("map", lambda *_: win.get_surface() and win.get_surface().set_input_region(cairo.Region()))
+        win.present()
+
+    def _screen_loaded(self, web, event):
+        if event == WebKit.LoadEvent.FINISHED and web is self.screen_web:
+            self.screen_ready = True
+            queued, self._screen_q = self._screen_q, []
+            if queued:
+                web.evaluate_javascript(f"window.fromPyBatch({json.dumps(queued)})", -1, None, None, None, None, None)
+
+    def hide_screen(self):
+        win, self.screen_win, self.screen_web, self.screen_ready, self._screen_q = self.screen_win, None, None, False, []
+        if win:
+            win.destroy()
+
+    def hide_hud(self):
+        win, self.hud, self.hud_web, self.hud_mode, self.hud_ready, self._hud_q = self.hud, None, None, None, False, []
+        if win:
+            win.destroy()
 
     def pickdir(self, start=""):
         dlg = Gtk.FileDialog(title="Choose working folder")

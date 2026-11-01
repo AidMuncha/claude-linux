@@ -4,7 +4,7 @@ const LOCAL = {
   help: ['Show all commands', () => sys('Commands:\n' + cmdList().map(([n, d]) => `  /${n.padEnd(18)} ${d}`).join('\n'))],
   clear: ['Start a fresh conversation', () => newChat()], new: ['Start a new session', () => newChat()],
   resume: ['Pick a previous conversation', () => listMenu($('#title'), visible().filter(c => c.items.length).slice(0, 12).map(c => ({label:c.title, run: () => select(c.id)})), false, 360)],
-  rename: ['Rename: /rename <title>', a => { if (a && chats[cur]) { chats[cur].title = a; persist(); renderList(); } else sys('Usage: /rename <new title>'); }],
+  rename: ['Rename: /rename <title>', a => { if (a && chats[cur]) { chats[cur].title = a; chats[cur].renamed = true; persist(); renderList(); } else sys('Usage: /rename <new title>'); }],
   model: ['Choose the model', a => { if (a) { setSetting('model', a); sys('Model set to ' + a); } else modelMenu(); }],
   effort: ['Reasoning effort: /effort [low|medium|high|xhigh|max|auto]', a => { if (a) { setSetting('effort', a === 'auto' ? '' : a); sys('Effort set to ' + a); } else modelMenu(); }],
   rewind: ['Restore files to an earlier message', () => { const c = chats[cur], us = c ? c.items.filter(x => x.k === 'user' && x.uid).slice(-12).reverse() : []; if (!isCode(c) || !us.length) return sys('Nothing to rewind yet. Rewind restores files Claude changed after one of your messages.'); listMenu($('#title'), us.map(u => ({label:(u.text || '[image]').slice(0, 60), run: () => post({type:'rewind', chat:cur, uid:u.uid, dry:true})})), false, 380); }],

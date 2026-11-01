@@ -1,8 +1,11 @@
 /* ---------- chats ---------- */
 const kindOf = c => c.kind || 'code';
+const UNIVERSAL = 'universal';   // a session that works across the whole PC instead of inside one folder
+const dirName = c => !c.cwd ? 'Choose folder' : c.cwd === UNIVERSAL ? 'Universal' : (c.cwd.split('/').filter(Boolean).pop() || '/');
+const cwdOf = c => !c || !c.cwd || c.cwd === UNIVERSAL ? home : c.cwd;   // a real folder, for things that need one
 function newChat() {
   const id = crypto.randomUUID();
-  chats[id] = { id, title:'New session', kind:tab, session:null, items:[], t:Date.now(), cwd:S.settings.cwd || home, mode:S.settings.mode || 'acceptEdits' };
+  chats[id] = { id, title:'New session', kind:tab, session:null, items:[], t:Date.now(), cwd:tab === 'code' ? '' : home, mode:S.settings.mode || 'acceptEdits' };
   select(id);
 }
 function select(id) { cur = id; renderAll(); $('#in').focus(); }
@@ -18,12 +21,36 @@ function dayGroup(t) { const d = new Date(t), n = new Date(); const diff = Math.
 let sq = '';
 $('#search').oninput = e => { sq = e.target.value.trim().toLowerCase(); renderList(); };
 $('#search').onkeydown = e => { if (e.key === 'Escape') { e.target.value = ''; sq = ''; renderList(); e.target.blur(); } };
+/* Like Claude Code: after the first reply, a short title is made from the first exchange (unless you renamed the session). */
+function autoName(id) {
+  const c = chats[id]; if (!c || c.named || c.renamed || !isCode(c)) return;
+  const u = c.items.find(i => i.k === 'user'), a = c.items.find(i => i.k === 'text' && i.text); if (!u || !a) return;
+  c.named = true; post({type:'autotitle', chat:id, text:u.text, reply:a.text});
+}
+const projectOf = c => !c.cwd ? 'New session' : dirName(c);
+let shut = {}; try { shut = JSON.parse(localStorage.getItem('shutProjects') || '{}'); } catch (e) {}
 function renderList() {
   const l = $('#list'); l.innerHTML = ''; let last = '';
-  visible().filter(c => !sq || c.title.toLowerCase().includes(sq) || c.items.some(i => i.text && String(i.text).toLowerCase().includes(sq))).forEach(c => {
-    const g = dayGroup(c.t); if (g !== last) { l.insertAdjacentHTML('beforeend', `<div class="grp">${g}</div>`); last = g; }
+  const hits = visible().filter(c => !sq || c.title.toLowerCase().includes(sq) || c.items.some(i => i.text && String(i.text).toLowerCase().includes(sq)));
+  const byProject = tab === 'code', seen = {};
+  if (byProject) {   // projects (folders) ordered by their most recent session, sessions newest first inside each
+    const order = []; hits.forEach(c => { const k = c.cwd || ''; if (!seen[k]) { seen[k] = []; order.push(k); } seen[k].push(c); });
+    hits.length = 0; order.forEach(k => hits.push(...seen[k]));
+  }
+  hits.forEach(c => {
+    const g = byProject ? (c.cwd || '') : dayGroup(c.t);
+    if (g !== last) {
+      if (byProject) {
+        const shutNow = !sq && shut[g], h = document.createElement('div'); h.className = 'grp proj' + (shutNow ? ' shut' : ''); h.title = g === UNIVERSAL ? 'Works across your whole PC' : g;
+        h.innerHTML = `${ico('folder')}<span class="pn">${esc(projectOf(c))}</span><span class="pc">${seen[g].length}</span>`;
+        h.onclick = () => { shut[g] = !shut[g]; try { localStorage.setItem('shutProjects', JSON.stringify(shut)); } catch (e) {} renderList(); };
+        l.appendChild(h);
+      } else l.insertAdjacentHTML('beforeend', `<div class="grp">${g}</div>`);
+      last = g;
+    }
+    if (byProject && !sq && shut[g] && c.id !== cur) return;
     const snip = sq && !c.title.toLowerCase().includes(sq) ? snippet(c, sq) : '', col = safeColor(chatColor(c));
-    const d = document.createElement('div'); d.className = 'chat' + (c.id === cur ? ' active' : '') + (snip ? ' hasSnip' : '');
+    const d = document.createElement('div'); d.className = 'chat' + (byProject ? ' inproj' : '') + (c.id === cur ? ' active' : '') + (snip ? ' hasSnip' : '');
     d.oncontextmenu = e => { e.preventDefault(); e.stopPropagation(); colorMenu(e, c); };
     d.innerHTML = (col ? `<span class="cdot" style="background:${col}"></span>` : '') + (snip ? `<span class="snip">${snip}</span>` : '') + `<span class="t">${esc(c.title)}</span>${c.items.some(x => x.k === 'perm' && x.status === 'wait') ? '<span class="bz ask" title="Waiting for you"></span>' : c.busy ? '<span class="bz"></span>' : ''}<button class="x" title="Delete">${ico('x')}</button>`;
     d.onclick = () => select(c.id);
@@ -43,7 +70,7 @@ function snippet(c, q) {
 function renderComposer() {
   const c = chats[cur] || {}, isChat = tab === 'chat', s = S.settings;
   $('#dirbtn').classList.toggle('hide', isChat); $('#modebtn').classList.toggle('hide', isChat);
-  $('#dirbtn').innerHTML = ico('folder') + `<span>${esc(((c.cwd || home) || '/').split('/').filter(Boolean).pop() || '/')}</span>`; $('#dirbtn').title = c.cwd || home;
+  $('#dirbtn').innerHTML = ico('folder') + `<span>${esc(dirName(c))}</span>`; $('#dirbtn').title = !c.cwd ? 'Choose a folder for this session' : c.cwd === UNIVERSAL ? 'Universal: works across your whole PC' : c.cwd; $('#dirbtn').classList.toggle('need', !isChat && !c.cwd);
   $('#modebtn').innerHTML = ico('shield') + `<span>${esc(modeName(c.mode || s.mode))}</span>`;
   const nm = modelName(s.model) || (S.model ? modelName(S.model) : 'Default'), ef = s.effort ? ' · ' + effortName(s.effort) : '';
   $('#modelbtn').innerHTML = `<span>${esc(nm + (s.long && s.model ? ' (1M)' : '') + ef)}</span>` + ico('down');
@@ -70,7 +97,7 @@ function renderDrawer() {
     ${Object.keys(c.tasks || {}).length ? `<div class="dsec"><h4>Background agents</h4>${Object.values(c.tasks).reverse().slice(0, 12).map(x => `<div class="task"><span class="d ${x.status === 'running' ? 'run' : /fail|error|kill|stop/.test(x.status) ? 'bad' : 'ok'}"></span><span class="tx" title="${esc(x.desc)}">${x.type ? '<b>' + esc(x.type) + '</b> · ' : ''}${esc(x.desc)}</span>${x.status === 'running' ? `<button data-stop="${esc(x.id)}">Stop</button>` : ''}</div>`).join('')}</div>` : ''}
     <div class="dsec"><h4>This session</h4>
       <div class="kv"><span>Model</span><span>${esc(modelName(S.settings.model) || (S.model ? modelName(S.model) : 'Default'))}</span></div>
-      <div class="kv"><span>Folder</span><span title="${esc(c.cwd || home)}">${esc(((c.cwd || home).split('/').filter(Boolean).pop()) || '/')}</span></div>
+      <div class="kv"><span>Folder</span><span title="${esc(c.cwd === UNIVERSAL ? 'Whole PC' : cwdOf(c))}">${esc(dirName(c))}</span></div>
       <div class="kv"><span>Permissions</span><span>${esc(modeName(c.mode || S.settings.mode))}</span></div>
       <div class="kv"><span>Input / output</span><span>${fmt(t.i)} / ${fmt(t.o)}</span></div>
       <div class="kv"><span>Cache read / written</span><span>${fmt(t.cr)} / ${fmt(t.cc)}</span></div></div>

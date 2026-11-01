@@ -102,7 +102,8 @@ window.fromPy = (name, p) => {
   if (name === 'file') { S.files[p.which] = p; if ($('#modal').style.display === 'flex' && ['config', 'perms', 'advanced', 'memory', 'hooks'].includes(panel)) showPage(true); return; }
   if (name === 'cwd') { if (chats[cur]) setCwd(p.path); return; }
   const id = p.chat; if (!chats[id]) return;
-  if (name === 'done') { expirePerms(id); settleTools(id, 'No result: the command was interrupted or did not run.'); setBusy(id, false); persistChat(id); if (id === cur) $('#in').focus(); drainQueue(id); }
+  if (name === 'done') { expirePerms(id); settleTools(id, 'No result: the command was interrupted or did not run.'); setBusy(id, false); persistChat(id); if (id === cur) $('#in').focus(); drainQueue(id); autoName(id); }
+  else if (name === 'autotitle') { const c = chats[id]; if (!c.renamed) { c.title = p.title; renderList(); persistChat(id); } }
   else if (name === 'error') { expirePerms(id); settleTools(id, 'No result: the command crashed or was interrupted.'); pushItem(id, {k:'err', text:p.text, resume:!!chats[id].session}); setBusy(id, false); scrollEnd(); persistChat(id); }
   else if (name === 'meta_init') { chats[id].session = p.session; S.model = p.model; if (p.commands && p.commands.length) S.cmds = p.commands; renderComposer(); }
   else if (name === 'event') handle(id, p.ev);

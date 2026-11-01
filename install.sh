@@ -18,6 +18,34 @@ if [ "${1:-}" = "--uninstall" ]; then
   exit 0
 fi
 
+# ---- install missing system requirements (Python, GTK4, WebKitGTK, audio/voice tools) with the distro's package manager ----
+SUDO=""; [ "$(id -u)" -ne 0 ] && command -v sudo >/dev/null && SUDO="sudo"
+install_requirements() {
+  local req="" opt="" mgr="" inst=""
+  if   command -v apt-get >/dev/null; then mgr=apt;    inst="$SUDO apt-get install -y"
+       req="python3 python3-pip python3-venv python3-gi gir1.2-gtk-4.0 gir1.2-webkit-6.0 curl openssl tar"
+       opt="espeak-ng pulseaudio-utils ydotool xdotool"
+  elif command -v dnf >/dev/null; then mgr=dnf;        inst="$SUDO dnf install -y"
+       req="python3 python3-pip python3-gobject gtk4 webkitgtk6.0 curl openssl tar"
+       opt="espeak-ng pulseaudio-utils ydotool xdotool"
+  elif command -v pacman >/dev/null; then mgr=pacman;  inst="$SUDO pacman -S --needed --noconfirm"
+       req="python python-pip python-gobject gtk4 webkitgtk-6.0 curl openssl tar"
+       opt="espeak-ng libpulse ydotool xdotool"
+  elif command -v zypper >/dev/null; then mgr=zypper;  inst="$SUDO zypper --non-interactive install"
+       req="python3 python3-pip python3-gobject typelib-1_0-Gtk-4_0 typelib-1_0-WebKit-6_0 curl openssl tar"
+       opt="espeak-ng pulseaudio-utils ydotool xdotool"
+  else echo "Unknown Linux distribution: please install Python 3, pip, GTK 4 and WebKitGTK 6 (with their Python bindings) yourself."; return 0; fi
+  if command -v rpm-ostree >/dev/null && [ -e /run/ostree-booted ]; then
+    echo "Immutable system (Bazzite/Silverblue style) detected: Python, GTK4 and WebKitGTK come preinstalled, skipping package installs."; return 0
+  fi
+  if [ -z "$SUDO" ] && [ "$(id -u)" -ne 0 ]; then echo "No sudo available: cannot install system packages automatically."; return 0; fi
+  echo "Installing requirements with $mgr (may ask for your password)..."
+  [ "$mgr" = apt ] && $SUDO apt-get update -y >/dev/null 2>&1 || true
+  $inst $req || echo "Some required packages could not be installed; the check below will say what is missing."
+  for p in $opt; do $inst "$p" >/dev/null 2>&1 || echo "(optional package '$p' not available, Jarvis may be limited)"; done
+}
+install_requirements
+
 echo "Checking requirements..."
 python3 - <<'PY' || { echo "Cannot continue. Needs Python 3 with GTK 4.10+ and WebKitGTK 6 (2.40+): Python 3 with GTK 4 and WebKitGTK 6 (python3-gobject, webkitgtk6.0). On Fedora/Bazzite they are preinstalled; on Ubuntu: sudo apt install python3-gi gir1.2-gtk-4.0 gir1.2-webkit-6.0"; exit 1; }
 import gi

@@ -24,7 +24,7 @@ const BASE_LABELS = { bg:'Background', side:'Sidebar', card:'Cards', fg:'Text', 
 const CUSTOM_DEFAULT = { bg:'#262624', side:'#1f1e1d', card:'#30302e', fg:'#faf9f5', dim:'#a8a59c', accent:'#d97757', green:'#5fbf79', red:'#f0707f', yellow:'#e6c07b' };
 const ACCENTS = ['#d97757', '#e5484d', '#f76b15', '#ffb224', '#46a758', '#12a594', '#3e63dd', '#8e4ec6', '#d6409f', '#7d8590'];
 const APPEARANCE_KEYS = new Set(['theme', 'autoDark', 'autoLight', 'accent', 'kdeAccent', 'customTheme', 'projectColors', 'font', 'monoFont', 'fontSize', 'chatWidth',
-  'bgMode', 'bgGradient', 'bgImage', 'bgDim', 'glass', 'glassOpacity', 'motion', 'animSpeed', 'syntax', 'codeNums', 'codeWrap']);
+  'bgMode', 'bgGradient', 'bgImage', 'bgDim', 'grid', 'glass', 'glassOpacity', 'motion', 'animSpeed', 'syntax', 'codeNums', 'codeWrap']);
 const SANS_STACK = '"Inter","Segoe UI","Cantarell","Noto Sans",system-ui,-apple-system,sans-serif';
 const MONO_STACK = '"JetBrains Mono","Cascadia Code","Fira Code","DejaVu Sans Mono",monospace';
 let KDE = { scheme:null, buttons:'' };      // Plasma's colors, pushed by Python and refreshed when the user changes scheme
@@ -99,7 +99,7 @@ function applyAppearance() {
   if (s.syntax && s.syntax !== 'auto') root.dataset.syntax = s.syntax; else root.removeAttribute('data-syntax');
   // window
   root.classList.toggle('glass', !!s.glass); st.setProperty('--ga', String(clamp(+s.glassOpacity || .82, .3, 1)));
-  applyBackground();
+  applyBackground(); applyGrid();
   const px = (n, d) => toHex(varRGB(n) || d);
   const msg = { type:'chrome', bg:px('--bg', [38, 38, 36]), side:px('--side', [31, 30, 29]), fg:px('--fg', [250, 249, 245]), line:px('--line', [52, 51, 47]), glass:!!s.glass, opacity:clamp(+s.glassOpacity || .82, .3, 1) };
   const mk = JSON.stringify(msg); if (mk !== chromeKey) { chromeKey = mk; post(msg); }

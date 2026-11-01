@@ -2,7 +2,10 @@
 function hero() {
   const c = chats[cur] || {};
   return tab === 'chat' ? `<div class="hero">${LOGO}<h1>How can I help?</h1><p>Chat mode — Claude can't touch your computer.</p></div>`
-    : `<div class="hero">${LOGO}<h1>What are we building?</h1><p>Code mode in <b>${esc(c.cwd || home)}</b></p></div>`;
+    : !c.cwd ? `<div class="hero">${LOGO}<h1>Where should we work?</h1><p>Pick a folder for this session, or go Universal to work across your whole PC.</p>
+        <div class="pick"><button class="btn" data-pick="dir">Choose a folder…</button><button class="btn g" data-pick="${UNIVERSAL}">Universal</button>
+        ${[...new Set(Object.values(chats).map(x => x.cwd).filter(x => x && x !== UNIVERSAL))].slice(0, 4).map(r => `<button class="btn g" data-pick="${esc(r)}" title="${esc(r)}">${esc(r.split('/').filter(Boolean).pop() || '/')}</button>`).join('')}</div></div>`
+    : `<div class="hero">${LOGO}<h1>What are we building?</h1><p>${c.cwd === UNIVERSAL ? 'Universal: works across your whole PC' : 'Code mode in <b>' + esc(c.cwd) + '</b>'}</p></div>`;
 }
 function renderChat() {
   const col = $('#col'); col.innerHTML = ''; toolEls = {};

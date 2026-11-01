@@ -108,7 +108,7 @@ document.addEventListener('keydown', e => {
 $('#in').addEventListener('input', () => {
   csel = 0; resize(); showCmds();
   const v = $('#in').value; $('#box').classList.toggle('bang', v[0] === '!' && isCode(chats[cur]));
-  const t = tokenAt(); if (t && v[0] !== '/' && isCode(chats[cur])) post({type:'files', chat:cur, cwd:(chats[cur] || {}).cwd || home, q:t.q});
+  const t = tokenAt(); if (t && v[0] !== '/' && isCode(chats[cur])) post({type:'files', chat:cur, cwd:cwdOf(chats[cur]), q:t.q});
 });
 $('#in').addEventListener('paste', e => { const fs = [...(e.clipboardData.files || [])].filter(f => f.type.startsWith('image/')); if (fs.length) { e.preventDefault(); addFiles(fs); } });
 $('#attbtn').innerHTML = ico('clip'); $('#attbtn').onclick = () => $('#attfile').click();

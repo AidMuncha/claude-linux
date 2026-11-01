@@ -153,7 +153,7 @@ class Base(unittest.TestCase):
 
 class Startup(Base):
     SCRIPT = """
-        document.getElementById('in').value = 'hello there'; send();
+        document.getElementById('in').value = 'hello there'; setCwd(UNIVERSAL); send();
         await until(() => chats[cur].items.some(i => i.k === 'text' && /Echo: hello there/.test(i.text)) && !chats[cur].busy);
         log({version:S.version, usage:S.usage.rows.map(r => r.pct), email:S.account && S.account.email, plan:S.account && S.account.plan,
              hasCompact:S.cmds.includes('compact'), items:chats[cur].items.map(i => i.k + ':' + (i.text || '')), title:chats[cur].title,
@@ -341,7 +341,7 @@ class WindowAndTray(Base):
 
     def test_exports_land_in_the_export_folder(self):
         r = self.run_app("""
-            document.getElementById('in').value = 'export me'; send();
+            document.getElementById('in').value = 'export me'; setCwd(UNIVERSAL); send();
             await until(() => chats[cur].items.some(i => i.k === 'text') && !chats[cur].busy);
             exportChat('md'); exportChat('html'); await sleep(500);
             exportChat('pdf'); await until(() => /Exported to|PDF failed/.test(document.getElementById('toast').textContent), 30000);

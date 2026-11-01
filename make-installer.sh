@@ -7,7 +7,7 @@ OUT="${1:-claude-linux-installer.sh}"
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 mkdir "$TMP/pkg"
 cp -r app.py build.py icon.svg install.sh claude_linux "$TMP/pkg/"
-mkdir "$TMP/pkg/ui"; cp -r ui/index.html ui/index.tpl.html ui/logo.svg ui/css ui/js "$TMP/pkg/ui/"
+mkdir "$TMP/pkg/ui"; cp -r ui/index.html ui/index.tpl.html ui/hud.html ui/hud.tpl.html ui/screen.html ui/screen.tpl.html ui/logo.svg ui/css ui/js "$TMP/pkg/ui/"
 find "$TMP/pkg" -name __pycache__ -prune -exec rm -rf {} +
 tar -C "$TMP/pkg" -czf "$TMP/payload.tgz" .
 cat > "$OUT" <<'HEAD'

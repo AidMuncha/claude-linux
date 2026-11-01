@@ -19,6 +19,29 @@ from claude_linux.core import Core  # noqa: E402
 from claude_linux.settings import DEFAULTS  # noqa: E402
 
 
+class BypassMode(unittest.TestCase):
+    def risky(self, cmd):
+        return Core.too_risky("Bash", {"command": cmd})
+
+    def test_everyday_commands_never_ask(self):
+        for c in ["ls -la", "cd ~/.var/app/x; cat a.bat; flatpak ps 2>&1 | head", "rm -rf node_modules", "rm -rf ./build /tmp/x",
+                  "rm file.txt", "git push origin main", "dd if=a.iso of=out.img", "pip install requests", "chmod -R 755 ./dist"]:
+            self.assertFalse(self.risky(c), c)
+
+    def test_wiping_the_disk_or_home_still_asks(self):
+        for c in ["rm -rf /", "rm -rf ~", "rm -rf ~/", "rm -fr $HOME", "rm -rf /*", "sudo rm -rf --no-preserve-root /x", "rm -r -f /home",
+                  "mkfs.ext4 /dev/sda1", "dd if=/dev/zero of=/dev/nvme0n1", "echo x > /dev/sda", ":(){ :|:& };:", "chmod -R 777 /", "wipefs -a /dev/sdb"]:
+            self.assertTrue(self.risky(c), c)
+
+    def test_other_tools_are_not_risky(self):
+        self.assertFalse(Core.too_risky("Edit", {"file_path": "/etc/hosts"}))
+
+    def test_switching_to_bypass_is_allowed_when_a_session_starts(self):
+        core = Core.__new__(Core)
+        core.settings = dict(DEFAULTS)
+        self.assertIn("--allow-dangerously-skip-permissions", core.build_cmd({"kind": "code", "mode": "acceptEdits"}))
+
+
 class Paths(unittest.TestCase):
     def test_everything_is_redirected_to_the_test_folders(self):
         self.assertEqual(paths.DATA, os.environ["CL_DATA"])

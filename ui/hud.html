@@ -1,0 +1,282 @@
+<!doctype html>
+<html data-theme="dark">
+<head>
+<meta charset="utf-8">
+<title>Jarvis HUD</title>
+<style>
+html, body { margin:0; height:100%; overflow:hidden; background:transparent; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
+/* ---------- Jarvis: the orb, the captions and the reading hologram ---------- */
+#jv { --jc:92,225,255; position:fixed; left:14px; bottom:12px; z-index:950; width:min(440px,calc(100vw - 28px)); display:none; flex-direction:column; align-items:flex-start; gap:4px; pointer-events:none; color:#d9f7ff; }
+#jv.on { display:flex; animation:jvin .55s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes jvin { from { opacity:0; transform:translateY(16px) scale(.96); } }
+#jv[data-state=waiting], #jv[data-state=muted] { --jc:132,168,198; }
+#jv[data-state=acting] { --jc:112,192,255; }
+#jv[data-state=hearing], #jv[data-state=speaking] { --jc:140,240,255; }
+#jv button, #jv input, #jvorb { pointer-events:auto; }
+
+/* captions: floating in voice mode, a console in text mode */
+#jvpanel { width:100%; display:flex; flex-direction:column; pointer-events:none; }
+#jvhead { display:none; align-items:center; gap:10px; padding:11px 16px 10px; border-bottom:1px solid rgba(var(--jc),.18); font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.32em; color:rgb(var(--jc)); text-shadow:0 0 10px rgba(var(--jc),.6); }
+#jvhead small { margin-left:auto; font-weight:500; letter-spacing:.2em; opacity:.55; }
+#jvhead i { width:7px; height:7px; border-radius:50%; background:rgb(var(--jc)); box-shadow:0 0 10px rgb(var(--jc)); animation:jvpulse 2.2s ease-in-out infinite; }
+@keyframes jvpulse { 50% { opacity:.35; transform:scale(.7); } }
+#jvlog { display:flex; flex-direction:column; gap:8px; max-height:40vh; overflow:hidden; transition:opacity .9s ease; }
+#jvlog.faded { opacity:0; }
+#jvtool { display:none; margin:6px 2px 0; font:11px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace; color:rgba(var(--jc),.75); text-shadow:0 1px 6px rgba(0,0,0,.9); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#jvtool.on { display:block; animation:jvin .3s ease both; }
+#jvform { display:none; }
+.jvu { align-self:flex-end; max-width:88%; font-size:13.5px; line-height:1.45; color:rgba(217,247,255,.72); text-align:right; text-shadow:0 1px 8px rgba(0,0,0,.95); animation:jvin .35s ease both; }
+.jvu::before { content:'you'; display:block; font:600 9px/1 ui-monospace,monospace; letter-spacing:.26em; text-transform:uppercase; color:rgba(var(--jc),.55); margin-bottom:3px; }
+.jvm { position:relative; max-width:100%; padding:10px 14px; border-radius:14px; font-size:15px; line-height:1.55; color:#eafcff; background:rgba(5,14,24,.74); border:1px solid rgba(var(--jc),.24); backdrop-filter:blur(12px); box-shadow:0 8px 30px rgba(0,0,0,.45), 0 0 26px rgba(var(--jc),.1); animation:jvin .35s ease both; }
+.jvs { animation:jvin .3s ease both; }
+
+#jv[data-mode=text] #jvpanel { background:linear-gradient(180deg,rgba(7,18,30,.88),rgba(4,10,18,.92)); border:1px solid rgba(var(--jc),.3); border-radius:18px; backdrop-filter:blur(16px); box-shadow:0 14px 60px rgba(0,0,0,.6), 0 0 44px rgba(var(--jc),.12), inset 0 0 0 1px rgba(var(--jc),.05); overflow:hidden; pointer-events:auto; max-height:min(64vh,560px); position:relative; }
+#jv[data-mode=text] #jvpanel::after { content:''; position:absolute; inset:0; pointer-events:none; background:repeating-linear-gradient(0deg,rgba(var(--jc),.035) 0 1px,transparent 1px 4px); }
+#jv[data-mode=text] #jvhead { display:flex; }
+#jv[data-mode=text] #jvlog { padding:14px 16px 6px; max-height:min(46vh,420px); min-height:90px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:rgba(var(--jc),.3) transparent; }
+#jv[data-mode=text] #jvlog.faded { opacity:1; }
+#jv[data-mode=text] .jvm { background:rgba(var(--jc),.055); box-shadow:none; backdrop-filter:none; align-self:flex-start; }
+#jv[data-mode=text] .jvu { background:rgba(var(--jc),.13); border:1px solid rgba(var(--jc),.28); padding:7px 12px; border-radius:12px; color:#e9fbff; text-shadow:none; }
+#jv[data-mode=text] #jvtool { margin:0 16px 4px; text-shadow:none; }
+#jv[data-mode=text] #jvform { display:flex; gap:8px; padding:8px 12px 12px; position:relative; z-index:1; }
+#jvin { flex:1; min-width:0; height:38px; padding:0 14px; border-radius:11px; border:1px solid rgba(var(--jc),.32); background:rgba(2,8,14,.7); color:#eafcff; font:inherit; font-size:14px; outline:none; transition:border-color .2s, box-shadow .2s; }
+#jvin::placeholder { color:rgba(217,247,255,.38); }
+#jvin:focus { border-color:rgba(var(--jc),.85); box-shadow:0 0 0 3px rgba(var(--jc),.14), 0 0 22px rgba(var(--jc),.18); }
+#jvsend { width:38px; height:38px; border-radius:11px; border:1px solid rgba(var(--jc),.5); background:rgba(var(--jc),.18); color:rgb(var(--jc)); display:grid; place-items:center; cursor:pointer; transition:background .2s, box-shadow .2s; }
+#jvsend:hover { background:rgba(var(--jc),.34); box-shadow:0 0 18px rgba(var(--jc),.4); }
+
+/* the orb and its label */
+#jvdock { display:flex; align-items:center; gap:8px; }
+#jvorb { width:124px; height:124px; cursor:pointer; filter:drop-shadow(0 0 16px rgba(var(--jc),.3)); }
+#jvtext { display:flex; flex-direction:column; gap:3px; min-width:0; }
+#jvstate { font:600 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.26em; text-transform:uppercase; color:rgb(var(--jc)); text-shadow:0 0 12px rgba(var(--jc),.7), 0 1px 6px rgba(0,0,0,.9); }
+#jvsub { font:11px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace; color:rgba(217,247,255,.6); max-width:250px; min-height:15px; text-shadow:0 1px 6px rgba(0,0,0,.9); }
+#jvbtns { display:flex; gap:6px; margin-top:6px; opacity:.55; transition:opacity .2s; }
+#jv:hover #jvbtns { opacity:1; }
+#jvbtns button { width:30px; height:30px; border-radius:50%; border:1px solid rgba(var(--jc),.34); background:rgba(5,14,24,.72); color:rgb(var(--jc)); display:grid; place-items:center; cursor:pointer; backdrop-filter:blur(8px); transition:background .2s, box-shadow .2s, transform .15s; }
+#jvbtns button:hover { background:rgba(var(--jc),.22); box-shadow:0 0 14px rgba(var(--jc),.4); transform:translateY(-1px); }
+#jvbtns button.off { color:rgba(255,130,130,.95); border-color:rgba(255,130,130,.45); }
+
+/* two buttons: stop talking and close; the orb itself mutes the mic, sharing is automatic. White icons in their circles */
+#jv #jvbtns #jvmic, #jv #jvbtns #jvspk, #jv #jvbtns #jvshare, #jv #jvbtns #jvwatch { display:none !important; }
+#jvbtns button, #jvbtns button svg { color:#fff; }
+#jvbtns button svg { stroke:#fff; }
+#jvbtns button:hover { color:#fff; }
+#jvbtns { opacity:.8; }
+
+/* screen sharing */
+#jvwatch { display:none !important; }
+#jv.sharing #jvwatch { display:grid !important; }
+#jvbtns button.on { background:rgba(var(--jc),.3); box-shadow:0 0 14px rgba(var(--jc),.5); }
+#jv.sharing #jvstate::after { content:'\25CF  LIVE'; margin-left:12px; font-size:9.5px; letter-spacing:.2em; color:#ff6b6b; text-shadow:0 0 8px rgba(255,90,90,.75); animation:jvpulse 1.8s ease-in-out infinite; }
+html[data-motion=reduced] #jv.sharing #jvstate::after { animation:none; }
+
+.jvu.live { opacity:.6; font-style:italic; }
+</style>
+</head>
+<body>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const IC = {
+  clip:'<path d="M20 12l-8 8a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/>', plus:'<path d="M12 5v14M5 12h14"/>', gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+  send:'<path d="M12 19V5M5 12l7-7 7 7"/>', stop:'<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/>', folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  chev:'<path d="M9 6l6 6-6 6"/>', down:'<path d="M6 9l6 6 6-6"/>', check:'<path d="M5 12l5 5 9-10"/>', x:'<path d="M6 6l12 12M18 6L6 18"/>', refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>',
+  shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>', remote:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+  cog:'<path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
+  panel:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/>',
+  cpu:'<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>', gauge:'<path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-5"/>', doc:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/>', code:'<path d="M8 8l-5 4 5 4M16 8l5 4-5 4"/>', info:'<circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5"/>', tool:'<path d="M14 6a4 4 0 0 0 4 4l-9 9a2.1 2.1 0 0 1-3-3z"/>',
+};
+const ico = (n, cls) => `<svg class="i ${cls || ''}" viewBox="0 0 24 24">${IC[n]}</svg>`;
+const LOGO = '<svg viewBox="0 0 24 24"><path fill="#d97757" d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg>';
+const LOGO_CC = LOGO.replace('fill="#d97757"', 'fill="currentColor"');
+const EXTRA = {};   // handlers for messages from Python that live in other modules: EXTRA.name = payload => ...
+
+let S = { settings:{}, usage:null, cmds:[], skills:[], files:{}, model:'', version:'', account:null, drawer:false };
+const mine = new Set();
+let chats = {}, cur = null, tab = 'code', home = '', st = {}, toolEls = {}, pending = 0, pt = 0, spinT = null, spinStart = {}, panel = 'general';
+const post = m => window.webkit.messageHandlers.bridge.postMessage(m);
+window.onerror = (msg, src, line) => post({type:'jserr', text: msg + ' @' + line});
+
+/* ---------- the few things the main page normally provides, for Jarvis' own window ---------- */
+const motionOff = () => document.documentElement.dataset.motion === 'reduced';
+const toast = () => {};
+window.fromPyBatch = items => { for (const [n, p] of items) { try { if (EXTRA[n]) EXTRA[n](p); } catch (e) { post({type:'jserr', text:String(e && e.stack || e)}); } } };
+/* ---------- Jarvis' window: the orb, captions and reading hologram. This page (hud.html) lives in its own always-on-top window over the desktop; the work happens in claude_linux/jarvis.py ---------- */
+Object.assign(IC, {
+  mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>', micoff:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M4 4l16 16"/>',
+  spk:'<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 9a4 4 0 0 1 0 6"/>', spkoff:'<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9l5 6M21 9l-5 6"/>',
+  power:'<path d="M12 3v8M6.3 6.8a8 8 0 1 0 11.4 0"/>', eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+});
+const JV = { share:false, watch:false, on:false, mode:'voice', state:'off', muted:false, voice:true, level:0, lv:0, ay:0, last:0, raf:0, col:[92, 225, 255], msg:null, fadeT:0, toolT:0 };
+const JV_STATE = { waiting:['Waiting', [132, 168, 198]], listening:['Listening', [92, 225, 255]], hearing:['Listening', [150, 245, 255]], thinking:['Thinking…', [110, 210, 255]],
+  acting:['Working…', [112, 192, 255]], speaking:['Speaking', [140, 240, 255]], idle:['Ready', [92, 225, 255]], muted:['Muted', [120, 130, 145]] };
+const JV_LOOK = { waiting:[.12, .5, .5], listening:[.22, .85, .52], hearing:[.4, 1, .56], thinking:[1.2, 1, .72], acting:[.8, .95, .62], speaking:[.45, 1, .58], idle:[.18, .7, .5], muted:[.08, .3, .45] };   // spin, brightness, link distance
+const JV_N = 104, JV_PTS = Array.from({length: JV_N}, (_, i) => {
+  const y = 1 - 2 * (i + .5) / JV_N, r = Math.sqrt(1 - y * y), a = i * 2.399963, k = .8 + Math.random() * .2;
+  return { x:Math.cos(a) * r * k, y:y * k, z:Math.sin(a) * r * k, ph:Math.random() * 6.283 };
+});
+let jvEl = null;
+
+function jvBuild() {
+  if (jvEl) return;
+  jvEl = document.createElement('div'); jvEl.id = 'jv'; jvEl.dataset.mode = 'voice'; jvEl.dataset.state = 'waiting';
+  jvEl.innerHTML = `<div id="jvpanel"><div id="jvhead"><i></i>J.A.R.V.I.S<small>TEXT MODE</small></div><div id="jvlog"></div><div id="jvtool"></div>
+    <form id="jvform" autocomplete="off"><input id="jvin" placeholder="Ask Jarvis anything…" spellcheck="false"><button type="submit" id="jvsend" title="Send">${ico('send')}</button></form></div>
+    <div id="jvdock"><canvas id="jvorb"></canvas><div id="jvtext"><div id="jvstate">Waiting</div><div id="jvsub"></div>
+    <div id="jvbtns"><button id="jvmic"></button><button id="jvspk"></button><button id="jvshare"></button><button id="jvwatch"></button><button id="jvstop" title="Stop talking"></button><button id="jvoff" title="Power Jarvis down"></button></div></div></div>`;
+  document.body.appendChild(jvEl);
+  const cv = $('#jvorb'); cv.width = cv.height = Math.round(124 * (window.devicePixelRatio || 1));
+  $('#jvstop').innerHTML = ico('stop'); $('#jvoff').innerHTML = ico('power');
+  $('#jvmic').onclick = () => { JV.muted = !JV.muted; jvButtons(); post({type:'jarvis_mute', on:JV.muted}); };
+  $('#jvspk').onclick = () => { JV.voice = !JV.voice; jvButtons(); post({type:'jarvis_voice', on:JV.voice}); };
+  $('#jvshare').onclick = () => post({type:'jarvis_share', on:!JV.share});
+  $('#jvwatch').onclick = () => post({type:'jarvis_watch', on:!JV.watch});
+  $('#jvstop').onclick = () => post({type:'jarvis_interrupt'});
+  $('#jvoff').onclick = () => post({type:'jarvis_stop'});
+  cv.onclick = () => { if (JV.mode === 'voice') $('#jvmic').click(); else if (['thinking', 'acting', 'speaking'].includes(JV.state)) post({type:'jarvis_interrupt'}); };   // the orb is the mute button
+  $('#jvform').onsubmit = e => { e.preventDefault(); const t = $('#jvin').value.trim(); if (!t) return; $('#jvin').value = ''; post({type:'jarvis_text', text:t}); };
+  $('#jvin').onkeydown = e => { e.stopPropagation(); if (e.key === 'Escape') e.target.blur(); };
+}
+function jvButtons() {
+  $('#jvmic').innerHTML = ico(JV.muted ? 'micoff' : 'mic'); $('#jvmic').title = JV.muted ? 'Unmute the microphone' : 'Mute the microphone'; $('#jvmic').classList.toggle('off', JV.muted);
+  $('#jvshare').innerHTML = ico('remote'); $('#jvshare').title = JV.share ? 'Stop sharing your screen' : 'Share your screen with Jarvis (like a Discord stream)'; $('#jvshare').classList.toggle('on', JV.share);
+  $('#jvwatch').innerHTML = ico('eye'); $('#jvwatch').title = JV.watch ? 'Stop his automatic commentary' : 'Let him comment on what he sees on his own'; $('#jvwatch').classList.toggle('on', JV.watch);
+  $('#jvspk').innerHTML = ico(JV.voice ? 'spk' : 'spkoff'); $('#jvspk').title = JV.voice ? 'Turn his voice off' : 'Turn his voice on'; $('#jvspk').classList.toggle('off', !JV.voice);
+}
+function jvSetMode(mode) {
+  JV.mode = mode; jvEl.dataset.mode = mode; $('#jvmic').style.display = mode === 'voice' ? '' : 'none';
+  $('#jvhead small').textContent = mode === 'text' ? 'TEXT MODE' : 'VOICE'; jvButtons();
+  if (mode === 'text') setTimeout(() => $('#jvin').focus(), 60);
+}
+function jvShow(mode) {
+  JV.on = true; JV.state = 'waiting'; JV.muted = false; JV.voice = true; JV.share = JV.watch = false; JV.msg = null;
+  $('#jvlog').innerHTML = ''; $('#jvsub').textContent = ''; $('#jvstate').textContent = 'Waiting'; jvEl.dataset.state = 'waiting'; jvEl.classList.remove('sharing');
+  jvSetMode(mode); jvEl.classList.add('on');
+  if (!JV.raf) JV.raf = requestAnimationFrame(jvLoop);
+}
+function jvHide() {
+  JV.on = false; JV.state = 'off'; JV.share = JV.watch = false; if (jvEl) jvEl.classList.remove('on', 'sharing');
+  jvStopReads(); cancelAnimationFrame(JV.raf); JV.raf = 0; clearTimeout(JV.fadeT);
+}
+
+/* ---------- what Python tells us ---------- */
+EXTRA.jarvis = p => {
+  if (p.ev === 'state' && p.state === 'off') return jvHide();
+  if (p.ev === 'poweroff') return jvHide();
+  if (!JV.on && p.ev === 'state') jvShow(p.mode || 'voice');
+  if (!JV.on) return;
+  if (p.ev === 'state') {
+    JV.state = p.state; if ('muted' in p) JV.muted = p.muted; if ('voice' in p) JV.voice = p.voice;
+    if (p.mode && p.mode !== JV.mode) jvSetMode(p.mode);
+    jvEl.dataset.state = p.state; jvButtons();
+    $('#jvstate').textContent = p.state === 'acting' && p.label ? p.label : (JV_STATE[p.state] || ['…'])[0];
+    if (p.state !== 'waiting') $('#jvsub').textContent = '';
+  }
+  else if (p.ev === 'setup') $('#jvsub').textContent = p.text;
+  else if (p.ev === 'level') JV.level = Math.sqrt(Math.min(1, p.v || 0));
+  else if (p.ev === 'partial') jvLive(p.text);
+  else if (p.ev === 'heard') jvYou(p.text);
+  else if (p.ev === 'say') jvSay(p);
+  else if (p.ev === 'stopsay') jvStopReads();
+  else if (p.ev === 'tool') jvTool(p.detail || p.name);
+  else if (p.ev === 'caption') jvTool('♪ ' + p.text);
+  else if (p.ev === 'share') { JV.share = !!p.on; JV.watch = !!p.watch; jvEl.classList.toggle('sharing', JV.share); jvButtons(); }
+  else if (p.ev === 'error') { toast(p.text, true); $('#jvsub').textContent = p.text.slice(0, 90); }
+};
+
+/* ---------- the captions ---------- */
+function jvScroll() { const l = $('#jvlog'); l.scrollTop = l.scrollHeight; }
+function jvTouch() {
+  const l = $('#jvlog'); l.classList.remove('faded'); clearTimeout(JV.fadeT);
+  if (JV.mode === 'voice') JV.fadeT = setTimeout(() => { l.classList.add('faded'); setTimeout(() => { if (l.classList.contains('faded')) { l.innerHTML = ''; JV.msg = null; } }, 1000); }, 12000);
+}
+function jvLive(text) {
+  jvTouch(); const l = $('#jvlog'); let d = l.querySelector('.jvu.live');
+  if (!d) { if (JV.mode === 'voice') l.innerHTML = ''; d = document.createElement('div'); d.className = 'jvu live'; l.appendChild(d); JV.msg = null; }
+  d.textContent = text; jvScroll();
+}
+function jvYou(text) {
+  jvTouch(); const l = $('#jvlog'); l.querySelectorAll('.jvu.live').forEach(x => x.remove()); if (JV.mode === 'voice') l.innerHTML = '';
+  const d = document.createElement('div'); d.className = 'jvu'; d.textContent = text; l.appendChild(d); JV.msg = null; jvScroll();
+}
+function jvMsg() {
+  if (JV.msg && JV.msg.isConnected) return JV.msg;
+  const l = $('#jvlog'); if (JV.mode === 'voice') [...l.querySelectorAll('.jvm')].forEach(x => x.remove());
+  JV.msg = document.createElement('div'); JV.msg.className = 'jvm'; l.appendChild(JV.msg); return JV.msg;
+}
+function jvTool(text) {
+  const t = $('#jvtool'); t.textContent = '⌁ ' + text; t.classList.add('on'); clearTimeout(JV.toolT); JV.toolT = setTimeout(() => t.classList.remove('on'), 6000);
+}
+
+/* ---------- captions: each sentence appears as he says it ---------- */
+const jvTimers = new Set();
+function jvSay(p) {
+  const show = () => {
+    if (!JV.on) return; jvTouch(); const m = jvMsg(), s = document.createElement('span');
+    if (m.querySelector('.jvs')) m.appendChild(document.createTextNode(' '));
+    s.className = 'jvs'; s.textContent = p.text; m.appendChild(s); jvScroll();
+  };
+  const t = setTimeout(() => { jvTimers.delete(t); show(); }, Math.max(0, (+p.delay || 0) * 1000)); jvTimers.add(t);
+}
+function jvStopReads() { jvTimers.forEach(clearTimeout); jvTimers.clear(); }
+
+/* ---------- the orb: a rotating web of glowing nodes that breathes with the room's sound and Jarvis' voice ---------- */
+function jvOrb(t, dt) {
+  const cv = $('#jvorb'), ctx = cv.getContext('2d'), S = cv.width, c = S / 2, R = S * .34, dpr = S / 124;
+  const look = JV_LOOK[JV.state] || [.2, .7, .5], target = (JV_STATE[JV.state] || JV_STATE.idle)[1], slow = motionOff() ? .25 : 1;
+  const tl = JV.state === 'hearing' || JV.state === 'listening' ? JV.level : JV.state === 'speaking' ? .3 + .2 * Math.sin(t / 90) * Math.sin(t / 230) + .1 * Math.sin(t / 37) : JV.state === 'thinking' ? .16 : 0;
+  JV.lv += (tl - JV.lv) * .22; JV.level *= .93; JV.ay += look[0] * slow * dt / 500;
+  for (let i = 0; i < 3; i++) JV.col[i] += (target[i] - JV.col[i]) * .08;
+  const col = JV.col.map(Math.round).join(','), bright = look[1], th = look[2], lv = JV.lv;
+  const ax = .45 + Math.sin(t / 4000) * .18, ca = Math.cos(ax), sa = Math.sin(ax), cy = Math.cos(JV.ay), sy = Math.sin(JV.ay);
+  const breath = 1 + Math.sin(t / (JV.state === 'waiting' ? 900 : 600)) * .03;
+  ctx.clearRect(0, 0, S, S); ctx.globalCompositeOperation = 'lighter';
+  const g = ctx.createRadialGradient(c, c, 0, c, c, R * 1.05);
+  g.addColorStop(0, `rgba(225,255,255,${(.5 + lv * .5) * bright})`); g.addColorStop(.35, `rgba(${col},${.22 * bright + lv * .2})`); g.addColorStop(1, `rgba(${col},0)`);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, S, S);
+  const q = JV_PTS.map(p => {
+    const k = breath * (1 + lv * .4 * Math.sin(p.ph + t / 110)), x0 = p.x * k, y0 = p.y * k, z0 = p.z * k;
+    const x1 = x0 * cy + z0 * sy, z1 = -x0 * sy + z0 * cy, y2 = y0 * ca - z1 * sa, z2 = y0 * sa + z1 * ca, f = 1 / (1 - z2 * .28);
+    return { x:x1, y:y2, z:z2, sx:c + x1 * R * f, sy:c + y2 * R * f, d:(z2 + 1) / 2 };
+  });
+  const bk = [[], [], [], [], []];
+  for (let i = 0; i < JV_N; i++) for (let j = i + 1; j < JV_N; j++) {
+    const a = q[i], b = q[j], dx = a.x - b.x, dy = a.y - b.y, dz = a.z - b.z, d2 = dx * dx + dy * dy + dz * dz;
+    if (d2 > th * th) continue;
+    const al = (1 - Math.sqrt(d2) / th) * bright * (.35 + .65 * (a.d + b.d) / 2);
+    bk[Math.min(4, Math.floor(al * 5))].push(a.sx, a.sy, b.sx, b.sy);
+  }
+  ctx.lineWidth = Math.max(1, .85 * dpr);
+  bk.forEach((seg, n) => {
+    if (!seg.length) return; ctx.beginPath();
+    for (let i = 0; i < seg.length; i += 4) { ctx.moveTo(seg[i], seg[i + 1]); ctx.lineTo(seg[i + 2], seg[i + 3]); }
+    ctx.strokeStyle = `rgba(${col},${(n + 1) / 5 * .8})`; ctx.stroke();
+  });
+  q.forEach(p => { ctx.fillStyle = `rgba(215,250,255,${(.3 + .7 * p.d) * Math.min(1, bright + .2)})`; ctx.beginPath(); ctx.arc(p.sx, p.sy, (.9 + 1.5 * p.d) * dpr * (1 + lv * .5), 0, 6.283); ctx.fill(); });
+  if (JV.state === 'thinking' || JV.state === 'acting') {
+    ctx.lineWidth = dpr; ctx.strokeStyle = `rgba(${col},.55)`;
+    for (let i = 0; i < 2; i++) { ctx.beginPath(); ctx.ellipse(c, c, R * 1.22, R * (.45 + i * .12), JV.ay * (1.4 + i * .5) + i * 2, 0, 3.6); ctx.stroke(); }
+  }
+}
+function jvLoop(now) {
+  JV.raf = 0; if (!JV.on) return;
+  const dt = Math.min(64, now - (JV.last || now)); JV.last = now;
+  jvOrb(now, dt);
+  JV.raf = requestAnimationFrame(jvLoop);
+}
+
+/* the window is bigger than what is drawn; tell Python where the drawing is so clicks anywhere else pass through to the desktop */
+function jvReport() {
+  if (!jvEl || !jvEl.classList.contains('on')) return;
+  // only the orb, the close button and (text mode) the chat panel take clicks; the rest of the window lets them through to what is underneath
+  const rects = [$('#jvorb'), $('#jvstop'), $('#jvoff'), jvEl.dataset.mode === 'text' ? $('#jvpanel') : null].filter(Boolean).map(e => e.getBoundingClientRect()).filter(r => r.width > 0 && r.height > 0)
+    .map(r => ({x:Math.floor(r.left) - 2, y:Math.floor(r.top) - 2, w:Math.ceil(r.width) + 4, h:Math.ceil(r.height) + 4}));
+  post({type:'jarvis_hudrect', rects});
+}
+jvBuild();
+new ResizeObserver(jvReport).observe(jvEl);
+new MutationObserver(jvReport).observe(jvEl, { attributes:true, attributeFilter:['class', 'data-mode'] });
+</script>
+</body>
+</html>

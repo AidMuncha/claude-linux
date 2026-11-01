@@ -1,6 +1,6 @@
 /* ---------- settings window ---------- */
 const HOOK_EVENTS = ['PreToolUse', 'PostToolUse', 'UserPromptSubmit', 'Stop', 'SubagentStop', 'SessionStart', 'SessionEnd', 'Notification', 'PreCompact'];
-const PAGES = [['general', 'General', 'cog'], ['model', 'Model', 'cpu'], ['config', 'Claude Code', 'code'], ['perms', 'Permissions', 'shield'], ['remote', 'Remote Control', 'remote'], ['usage', 'Usage', 'gauge'], ['memory', 'Memory', 'doc'], ['mcp', 'MCP servers', 'code'], ['hooks', 'Hooks', 'refresh'], ['advanced', 'Advanced', 'tool'], ['about', 'About', 'info']];
+const PAGES = [['general', 'General', 'cog'], ['model', 'Model', 'cpu'], ['config', 'Claude Code', 'code'], ['perms', 'Permissions', 'shield'], ['remote', 'Remote Control', 'remote'], ['jarvis', 'Jarvis', 'mic'], ['usage', 'Usage', 'gauge'], ['memory', 'Memory', 'doc'], ['mcp', 'MCP servers', 'code'], ['hooks', 'Hooks', 'refresh'], ['advanced', 'Advanced', 'tool'], ['about', 'About', 'info']];
 function openPanel(p) { closePops(); $('#modal').style.display = 'flex'; go(p); }
 function closePanel() { $('#modal').style.display = 'none'; }
 $('#modal').onclick = e => { if (e.target.id === 'modal') closePanel(); };
@@ -29,7 +29,6 @@ const PAGE = {
   general: s => `<div class="ph">General</div><p class="pd">How Claude Linux looks and where it works.</p>
     <div class="card">${setRow('Theme and appearance', 'Colors, fonts, background and animations', '<button class="btn g" data-go="appearance">Open</button>')}</div>
     <div class="sec">Workspace</div><div class="card">
-        ${setRow('Default folder', 'Where new Code sessions start', `<input class="txt" data-id="cwd" value="${esc(s.cwd || '')}" placeholder="${esc(home)}">`)}
     ${setRow('Default permission mode', 'Used by new Code sessions', selH('mode', MODES.map(m => [m[0], m[1]]), s.mode))}
     ${setRow('Desktop notifications', 'When Claude needs you or finishes a long task while this window is in the background', swH('notify', s.notify !== false))}</div>
     <div class="sec">Additional folders</div><textarea class="ta" data-id="addDirs" rows="3" placeholder="One folder per line. Claude may access these in every Code session.">${esc((s.addDirs || []).join('\n'))}</textarea>

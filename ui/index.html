@@ -80,6 +80,13 @@ html.notrans #side { transition:none; }
 #new:hover { filter:brightness(1.08); } #new:active { transform:scale(.98); }
 #list { flex:1; overflow:auto; padding:4px 8px; }
 .grp { padding:12px 10px 4px; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); }
+.grp.proj { display:flex; align-items:center; gap:6px; cursor:pointer; text-transform:none; letter-spacing:0; font-size:13px; font-weight:600; border-radius:8px; margin-top:6px; padding:7px 10px; }
+.grp.proj:hover { background:var(--hover); color:var(--fg); }
+.grp.proj svg { width:14px; height:14px; flex:none; }
+.grp.proj .pn { flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.grp.proj .pc { font-size:11px; font-weight:400; opacity:.7; }
+.grp.proj.shut { opacity:.75; }
+.chat.inproj { padding-left:26px; }
 .chat { padding:7px 10px; border-radius:8px; color:var(--dim); cursor:pointer; display:flex; align-items:center; gap:6px; font-size:14px; transition:background calc(.12s*var(--sp)),color calc(.12s*var(--sp)); }
 .chat:hover { background:var(--hover); color:var(--fg); }
 .chat.active { background:var(--card); color:var(--fg); }
@@ -151,6 +158,9 @@ html.notrans #side { transition:none; }
 .sys { color:var(--dim); font-size:13px; white-space:pre-wrap; background:var(--card); border:1px dashed var(--faint); border-radius:10px; padding:8px 12px; }
 .errtxt { color:var(--red); white-space:pre-wrap; border:1px solid var(--red); border-radius:10px; padding:8px 12px; font-size:13px; }
 
+
+.hero .pick { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:18px; }
+#dirbtn.need { color:var(--accent); }
 /* composer */
 #bar { padding:4px 24px 18px; }
 #wrap { max-width:var(--cw,800px); margin:0 auto; position:relative; }
@@ -350,6 +360,9 @@ html.tfade, html.tfade *, html.tfade *::before, html.tfade *::after {
 
 /* background layer behind the whole app */
 #app { position:relative; z-index:1; }
+#gridfx { position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+html.grid:not(.fx) #main, html.grid:not(.fx) #split { background:transparent; }
+html.grid:not(.fx) #side, html.grid:not(.fx) #drawer { background:color-mix(in srgb,var(--side) 84%,transparent); }
 #bgfx { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; background:var(--bg); }
 #bgfx::after { content:""; position:absolute; inset:0; background:rgba(0,0,0,var(--dim,.5)); display:none; }
 #bgfx.image::after, #bgfx.gradient::after { display:block; }
@@ -651,7 +664,7 @@ const BASE_LABELS = { bg:'Background', side:'Sidebar', card:'Cards', fg:'Text', 
 const CUSTOM_DEFAULT = { bg:'#262624', side:'#1f1e1d', card:'#30302e', fg:'#faf9f5', dim:'#a8a59c', accent:'#d97757', green:'#5fbf79', red:'#f0707f', yellow:'#e6c07b' };
 const ACCENTS = ['#d97757', '#e5484d', '#f76b15', '#ffb224', '#46a758', '#12a594', '#3e63dd', '#8e4ec6', '#d6409f', '#7d8590'];
 const APPEARANCE_KEYS = new Set(['theme', 'autoDark', 'autoLight', 'accent', 'kdeAccent', 'customTheme', 'projectColors', 'font', 'monoFont', 'fontSize', 'chatWidth',
-  'bgMode', 'bgGradient', 'bgImage', 'bgDim', 'glass', 'glassOpacity', 'motion', 'animSpeed', 'syntax', 'codeNums', 'codeWrap']);
+  'bgMode', 'bgGradient', 'bgImage', 'bgDim', 'grid', 'glass', 'glassOpacity', 'motion', 'animSpeed', 'syntax', 'codeNums', 'codeWrap']);
 const SANS_STACK = '"Inter","Segoe UI","Cantarell","Noto Sans",system-ui,-apple-system,sans-serif';
 const MONO_STACK = '"JetBrains Mono","Cascadia Code","Fira Code","DejaVu Sans Mono",monospace';
 let KDE = { scheme:null, buttons:'' };      // Plasma's colors, pushed by Python and refreshed when the user changes scheme
@@ -726,7 +739,7 @@ function applyAppearance() {
   if (s.syntax && s.syntax !== 'auto') root.dataset.syntax = s.syntax; else root.removeAttribute('data-syntax');
   // window
   root.classList.toggle('glass', !!s.glass); st.setProperty('--ga', String(clamp(+s.glassOpacity || .82, .3, 1)));
-  applyBackground();
+  applyBackground(); applyGrid();
   const px = (n, d) => toHex(varRGB(n) || d);
   const msg = { type:'chrome', bg:px('--bg', [38, 38, 36]), side:px('--side', [31, 30, 29]), fg:px('--fg', [250, 249, 245]), line:px('--line', [52, 51, 47]), glass:!!s.glass, opacity:clamp(+s.glassOpacity || .82, .3, 1) };
   const mk = JSON.stringify(msg); if (mk !== chromeKey) { chromeKey = mk; post(msg); }
@@ -857,16 +870,23 @@ function modelMenu() {
 $('#modelbtn').onclick = e => { e.stopPropagation(); modelMenu(); };
 $('#modebtn').onclick = e => { e.stopPropagation(); const c = chats[cur]; listMenu($('#modebtn'), [{head:'Permission mode'}, ...MODES.map(([v, l, d]) => ({label:l, sub:d, on:(c.mode || S.settings.mode) === v, run: () => { c.mode = v; persist(); renderComposer(); post({type:'setmode', chat:cur, mode:v}); }}))], true, 360); };
 $('#dirbtn').onclick = e => {
-  e.stopPropagation(); const rec = [...new Set([home, ...Object.values(chats).map(c => c.cwd).filter(Boolean)])];
-  listMenu($('#dirbtn'), [{label:'Choose a folder…', accent:true, run: () => post({type:'pickdir', start:(chats[cur] || {}).cwd})}, {sep:1}, {head:'Recent'}, ...rec.map(r => ({label: r.split('/').filter(Boolean).pop() || '/', sub:r, on:(chats[cur] || {}).cwd === r, run: () => setCwd(r)}))], true, 380);
+  e.stopPropagation(); const rec = [...new Set(Object.values(chats).map(c => c.cwd).filter(x => x && x !== UNIVERSAL))];
+  listMenu($('#dirbtn'), [{label:'Choose a folder…', accent:true, run: () => post({type:'pickdir', start:(chats[cur] || {}).cwd})}, {label:'Universal', sub:'Works across your whole PC, no single folder', on:(chats[cur] || {}).cwd === UNIVERSAL, run: () => setCwd(UNIVERSAL)}, {sep:1}, {head:'Recent'}, ...rec.map(r => ({label: r.split('/').filter(Boolean).pop() || '/', sub:r, on:(chats[cur] || {}).cwd === r, run: () => setCwd(r)}))], true, 380);
 };
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-pick]'); if (!b) return;
+  if (b.dataset.pick === 'dir') post({type:'pickdir', start:home}); else setCwd(b.dataset.pick);
+});
 function setCwd(p) { if (chats[cur]) { chats[cur].cwd = p; persist(); renderComposer(); if (!chats[cur].items.length) renderChat(); } }
 
 /* ---------- chats ---------- */
 const kindOf = c => c.kind || 'code';
+const UNIVERSAL = 'universal';   // a session that works across the whole PC instead of inside one folder
+const dirName = c => !c.cwd ? 'Choose folder' : c.cwd === UNIVERSAL ? 'Universal' : (c.cwd.split('/').filter(Boolean).pop() || '/');
+const cwdOf = c => !c || !c.cwd || c.cwd === UNIVERSAL ? home : c.cwd;   // a real folder, for things that need one
 function newChat() {
   const id = crypto.randomUUID();
-  chats[id] = { id, title:'New session', kind:tab, session:null, items:[], t:Date.now(), cwd:S.settings.cwd || home, mode:S.settings.mode || 'acceptEdits' };
+  chats[id] = { id, title:'New session', kind:tab, session:null, items:[], t:Date.now(), cwd:tab === 'code' ? '' : home, mode:S.settings.mode || 'acceptEdits' };
   select(id);
 }
 function select(id) { cur = id; renderAll(); $('#in').focus(); }
@@ -882,12 +902,36 @@ function dayGroup(t) { const d = new Date(t), n = new Date(); const diff = Math.
 let sq = '';
 $('#search').oninput = e => { sq = e.target.value.trim().toLowerCase(); renderList(); };
 $('#search').onkeydown = e => { if (e.key === 'Escape') { e.target.value = ''; sq = ''; renderList(); e.target.blur(); } };
+/* Like Claude Code: after the first reply, a short title is made from the first exchange (unless you renamed the session). */
+function autoName(id) {
+  const c = chats[id]; if (!c || c.named || c.renamed || !isCode(c)) return;
+  const u = c.items.find(i => i.k === 'user'), a = c.items.find(i => i.k === 'text' && i.text); if (!u || !a) return;
+  c.named = true; post({type:'autotitle', chat:id, text:u.text, reply:a.text});
+}
+const projectOf = c => !c.cwd ? 'New session' : dirName(c);
+let shut = {}; try { shut = JSON.parse(localStorage.getItem('shutProjects') || '{}'); } catch (e) {}
 function renderList() {
   const l = $('#list'); l.innerHTML = ''; let last = '';
-  visible().filter(c => !sq || c.title.toLowerCase().includes(sq) || c.items.some(i => i.text && String(i.text).toLowerCase().includes(sq))).forEach(c => {
-    const g = dayGroup(c.t); if (g !== last) { l.insertAdjacentHTML('beforeend', `<div class="grp">${g}</div>`); last = g; }
+  const hits = visible().filter(c => !sq || c.title.toLowerCase().includes(sq) || c.items.some(i => i.text && String(i.text).toLowerCase().includes(sq)));
+  const byProject = tab === 'code', seen = {};
+  if (byProject) {   // projects (folders) ordered by their most recent session, sessions newest first inside each
+    const order = []; hits.forEach(c => { const k = c.cwd || ''; if (!seen[k]) { seen[k] = []; order.push(k); } seen[k].push(c); });
+    hits.length = 0; order.forEach(k => hits.push(...seen[k]));
+  }
+  hits.forEach(c => {
+    const g = byProject ? (c.cwd || '') : dayGroup(c.t);
+    if (g !== last) {
+      if (byProject) {
+        const shutNow = !sq && shut[g], h = document.createElement('div'); h.className = 'grp proj' + (shutNow ? ' shut' : ''); h.title = g === UNIVERSAL ? 'Works across your whole PC' : g;
+        h.innerHTML = `${ico('folder')}<span class="pn">${esc(projectOf(c))}</span><span class="pc">${seen[g].length}</span>`;
+        h.onclick = () => { shut[g] = !shut[g]; try { localStorage.setItem('shutProjects', JSON.stringify(shut)); } catch (e) {} renderList(); };
+        l.appendChild(h);
+      } else l.insertAdjacentHTML('beforeend', `<div class="grp">${g}</div>`);
+      last = g;
+    }
+    if (byProject && !sq && shut[g] && c.id !== cur) return;
     const snip = sq && !c.title.toLowerCase().includes(sq) ? snippet(c, sq) : '', col = safeColor(chatColor(c));
-    const d = document.createElement('div'); d.className = 'chat' + (c.id === cur ? ' active' : '') + (snip ? ' hasSnip' : '');
+    const d = document.createElement('div'); d.className = 'chat' + (byProject ? ' inproj' : '') + (c.id === cur ? ' active' : '') + (snip ? ' hasSnip' : '');
     d.oncontextmenu = e => { e.preventDefault(); e.stopPropagation(); colorMenu(e, c); };
     d.innerHTML = (col ? `<span class="cdot" style="background:${col}"></span>` : '') + (snip ? `<span class="snip">${snip}</span>` : '') + `<span class="t">${esc(c.title)}</span>${c.items.some(x => x.k === 'perm' && x.status === 'wait') ? '<span class="bz ask" title="Waiting for you"></span>' : c.busy ? '<span class="bz"></span>' : ''}<button class="x" title="Delete">${ico('x')}</button>`;
     d.onclick = () => select(c.id);
@@ -907,7 +951,7 @@ function snippet(c, q) {
 function renderComposer() {
   const c = chats[cur] || {}, isChat = tab === 'chat', s = S.settings;
   $('#dirbtn').classList.toggle('hide', isChat); $('#modebtn').classList.toggle('hide', isChat);
-  $('#dirbtn').innerHTML = ico('folder') + `<span>${esc(((c.cwd || home) || '/').split('/').filter(Boolean).pop() || '/')}</span>`; $('#dirbtn').title = c.cwd || home;
+  $('#dirbtn').innerHTML = ico('folder') + `<span>${esc(dirName(c))}</span>`; $('#dirbtn').title = !c.cwd ? 'Choose a folder for this session' : c.cwd === UNIVERSAL ? 'Universal: works across your whole PC' : c.cwd; $('#dirbtn').classList.toggle('need', !isChat && !c.cwd);
   $('#modebtn').innerHTML = ico('shield') + `<span>${esc(modeName(c.mode || s.mode))}</span>`;
   const nm = modelName(s.model) || (S.model ? modelName(S.model) : 'Default'), ef = s.effort ? ' · ' + effortName(s.effort) : '';
   $('#modelbtn').innerHTML = `<span>${esc(nm + (s.long && s.model ? ' (1M)' : '') + ef)}</span>` + ico('down');
@@ -934,7 +978,7 @@ function renderDrawer() {
     ${Object.keys(c.tasks || {}).length ? `<div class="dsec"><h4>Background agents</h4>${Object.values(c.tasks).reverse().slice(0, 12).map(x => `<div class="task"><span class="d ${x.status === 'running' ? 'run' : /fail|error|kill|stop/.test(x.status) ? 'bad' : 'ok'}"></span><span class="tx" title="${esc(x.desc)}">${x.type ? '<b>' + esc(x.type) + '</b> · ' : ''}${esc(x.desc)}</span>${x.status === 'running' ? `<button data-stop="${esc(x.id)}">Stop</button>` : ''}</div>`).join('')}</div>` : ''}
     <div class="dsec"><h4>This session</h4>
       <div class="kv"><span>Model</span><span>${esc(modelName(S.settings.model) || (S.model ? modelName(S.model) : 'Default'))}</span></div>
-      <div class="kv"><span>Folder</span><span title="${esc(c.cwd || home)}">${esc(((c.cwd || home).split('/').filter(Boolean).pop()) || '/')}</span></div>
+      <div class="kv"><span>Folder</span><span title="${esc(c.cwd === UNIVERSAL ? 'Whole PC' : cwdOf(c))}">${esc(dirName(c))}</span></div>
       <div class="kv"><span>Permissions</span><span>${esc(modeName(c.mode || S.settings.mode))}</span></div>
       <div class="kv"><span>Input / output</span><span>${fmt(t.i)} / ${fmt(t.o)}</span></div>
       <div class="kv"><span>Cache read / written</span><span>${fmt(t.cr)} / ${fmt(t.cc)}</span></div></div>
@@ -960,7 +1004,10 @@ $('#setbtn').onclick = () => openPanel('general');
 function hero() {
   const c = chats[cur] || {};
   return tab === 'chat' ? `<div class="hero">${LOGO}<h1>How can I help?</h1><p>Chat mode — Claude can't touch your computer.</p></div>`
-    : `<div class="hero">${LOGO}<h1>What are we building?</h1><p>Code mode in <b>${esc(c.cwd || home)}</b></p></div>`;
+    : !c.cwd ? `<div class="hero">${LOGO}<h1>Where should we work?</h1><p>Pick a folder for this session, or go Universal to work across your whole PC.</p>
+        <div class="pick"><button class="btn" data-pick="dir">Choose a folder…</button><button class="btn g" data-pick="${UNIVERSAL}">Universal</button>
+        ${[...new Set(Object.values(chats).map(x => x.cwd).filter(x => x && x !== UNIVERSAL))].slice(0, 4).map(r => `<button class="btn g" data-pick="${esc(r)}" title="${esc(r)}">${esc(r.split('/').filter(Boolean).pop() || '/')}</button>`).join('')}</div></div>`
+    : `<div class="hero">${LOGO}<h1>What are we building?</h1><p>${c.cwd === UNIVERSAL ? 'Universal: works across your whole PC' : 'Code mode in <b>' + esc(c.cwd) + '</b>'}</p></div>`;
 }
 function renderChat() {
   const col = $('#col'); col.innerHTML = ''; toolEls = {};
@@ -1078,7 +1125,7 @@ function typeTick() {
     q.el.innerHTML = '<div class="stable"></div><div class="tail"></div>';
     q.stable = q.el.firstChild; q.tail = q.el.lastChild; q.cut = 0;
   }
-  const text = q.raw.slice(0, q.shown), at = text.lastIndexOf('\n\n') + 2;
+  const text = q.raw.slice(0, q.shown), br = text.lastIndexOf('\n\n'), at = br < 0 ? 0 : br + 2;   // no blank line yet: nothing is finished, so don't split a word
   if (at > q.cut && (text.slice(0, at).match(/```/g) || []).length % 2 === 0) {
     q.stable.insertAdjacentHTML('beforeend', md(text.slice(q.cut, at))); q.cut = at;
   }
@@ -1204,7 +1251,8 @@ window.fromPy = (name, p) => {
   if (name === 'file') { S.files[p.which] = p; if ($('#modal').style.display === 'flex' && ['config', 'perms', 'advanced', 'memory', 'hooks'].includes(panel)) showPage(true); return; }
   if (name === 'cwd') { if (chats[cur]) setCwd(p.path); return; }
   const id = p.chat; if (!chats[id]) return;
-  if (name === 'done') { expirePerms(id); settleTools(id, 'No result: the command was interrupted or did not run.'); setBusy(id, false); persistChat(id); if (id === cur) $('#in').focus(); drainQueue(id); }
+  if (name === 'done') { expirePerms(id); settleTools(id, 'No result: the command was interrupted or did not run.'); setBusy(id, false); persistChat(id); if (id === cur) $('#in').focus(); drainQueue(id); autoName(id); }
+  else if (name === 'autotitle') { const c = chats[id]; if (!c.renamed) { c.title = p.title; renderList(); persistChat(id); } }
   else if (name === 'error') { expirePerms(id); settleTools(id, 'No result: the command crashed or was interrupted.'); pushItem(id, {k:'err', text:p.text, resume:!!chats[id].session}); setBusy(id, false); scrollEnd(); persistChat(id); }
   else if (name === 'meta_init') { chats[id].session = p.session; S.model = p.model; if (p.commands && p.commands.length) S.cmds = p.commands; renderComposer(); }
   else if (name === 'event') handle(id, p.ev);
@@ -1222,7 +1270,7 @@ const LOCAL = {
   help: ['Show all commands', () => sys('Commands:\n' + cmdList().map(([n, d]) => `  /${n.padEnd(18)} ${d}`).join('\n'))],
   clear: ['Start a fresh conversation', () => newChat()], new: ['Start a new session', () => newChat()],
   resume: ['Pick a previous conversation', () => listMenu($('#title'), visible().filter(c => c.items.length).slice(0, 12).map(c => ({label:c.title, run: () => select(c.id)})), false, 360)],
-  rename: ['Rename: /rename <title>', a => { if (a && chats[cur]) { chats[cur].title = a; persist(); renderList(); } else sys('Usage: /rename <new title>'); }],
+  rename: ['Rename: /rename <title>', a => { if (a && chats[cur]) { chats[cur].title = a; chats[cur].renamed = true; persist(); renderList(); } else sys('Usage: /rename <new title>'); }],
   model: ['Choose the model', a => { if (a) { setSetting('model', a); sys('Model set to ' + a); } else modelMenu(); }],
   effort: ['Reasoning effort: /effort [low|medium|high|xhigh|max|auto]', a => { if (a) { setSetting('effort', a === 'auto' ? '' : a); sys('Effort set to ' + a); } else modelMenu(); }],
   rewind: ['Restore files to an earlier message', () => { const c = chats[cur], us = c ? c.items.filter(x => x.k === 'user' && x.uid).slice(-12).reverse() : []; if (!isCode(c) || !us.length) return sys('Nothing to rewind yet. Rewind restores files Claude changed after one of your messages.'); listMenu($('#title'), us.map(u => ({label:(u.text || '[image]').slice(0, 60), run: () => post({type:'rewind', chat:cur, uid:u.uid, dry:true})})), false, 380); }],
@@ -1292,18 +1340,19 @@ function send() {
   const text = $('#in').value.trim(), c = chats[cur];
   if (!c) return;
   if (!text && !att.length) { if (c.busy) stopChat(); return; }
+  if (isCode(c) && !c.cwd) { toast('Choose a folder for this session first, or pick Universal.', true); $('#dirbtn').click(); return; }
   $('#cmds').style.display = 'none';
   if (text) { if (hist[hist.length - 1] !== text) hist.push(text); hist.splice(0, hist.length - 100); try { localStorage.setItem('hist', JSON.stringify(hist)); } catch (e) {} } hi = -1;
   const m = text.match(/^\/(\S+)\s*([\s\S]*)$/);
   if (m && LOCAL[m[1]]) { clearInput(); LOCAL[m[1]][1](m[2].trim()); return; }
   if (text[0] === '!' && text.length > 1 && isCode(c)) { clearInput(); runBang(c, text.slice(1).trim()); return; }
   const images = att; att = []; renderAtt(); clearInput();
-  if (c.busy) { (c.queue = c.queue || []).push({text, images}); renderQueue(); return; }
   dispatch(c.id, text, images);
 }
 function dispatch(id, text, images) {
   const c = chats[id]; if (!c) return;
   if (!c.items.length) c.title = (text || 'Image').slice(0, 44);
+  if (c.busy) endLive(id);   // sent while Claude is working: it goes straight in and is picked up within the running turn
   const uid = crypto.randomUUID(); mine.add(uid);
   pushItem(id, {k:'user', text, uid, after:c.lastAsst || null, imgs: images.length || undefined}); if (id === cur) scrollEnd(true); setBusy(id, true); persistChat(id);
   const full = (c.ctx || '') + text; c.ctx = ''; c.items.forEach(i => { if (i.resume) i.resume = false; });
@@ -1313,7 +1362,7 @@ function dispatch(id, text, images) {
 function runBang(c, cmd) {
   const id = 'bang-' + crypto.randomUUID();
   pushItem(c.id, {k:'tool', id, name:'Bash', input:{command:cmd}, result:null, bang:true}); scrollEnd(true); persistChat(c.id);
-  post({type:'bang', chat:c.id, id, cmd, cwd:c.cwd || home});
+  post({type:'bang', chat:c.id, id, cmd, cwd:cwdOf(c)});
 }
 function drainQueue(id) {
   const c = chats[id]; if (!c || !c.queue || !c.queue.length || c.busy) return;
@@ -1448,7 +1497,7 @@ document.addEventListener('keydown', e => {
 $('#in').addEventListener('input', () => {
   csel = 0; resize(); showCmds();
   const v = $('#in').value; $('#box').classList.toggle('bang', v[0] === '!' && isCode(chats[cur]));
-  const t = tokenAt(); if (t && v[0] !== '/' && isCode(chats[cur])) post({type:'files', chat:cur, cwd:(chats[cur] || {}).cwd || home, q:t.q});
+  const t = tokenAt(); if (t && v[0] !== '/' && isCode(chats[cur])) post({type:'files', chat:cur, cwd:cwdOf(chats[cur]), q:t.q});
 });
 $('#in').addEventListener('paste', e => { const fs = [...(e.clipboardData.files || [])].filter(f => f.type.startsWith('image/')); if (fs.length) { e.preventDefault(); addFiles(fs); } });
 $('#attbtn').innerHTML = ico('clip'); $('#attbtn').onclick = () => $('#attfile').click();
@@ -1521,7 +1570,7 @@ document.addEventListener('keydown', e => {
 
 /* ---------- settings window ---------- */
 const HOOK_EVENTS = ['PreToolUse', 'PostToolUse', 'UserPromptSubmit', 'Stop', 'SubagentStop', 'SessionStart', 'SessionEnd', 'Notification', 'PreCompact'];
-const PAGES = [['general', 'General', 'cog'], ['model', 'Model', 'cpu'], ['config', 'Claude Code', 'code'], ['perms', 'Permissions', 'shield'], ['remote', 'Remote Control', 'remote'], ['usage', 'Usage', 'gauge'], ['memory', 'Memory', 'doc'], ['mcp', 'MCP servers', 'code'], ['hooks', 'Hooks', 'refresh'], ['advanced', 'Advanced', 'tool'], ['about', 'About', 'info']];
+const PAGES = [['general', 'General', 'cog'], ['model', 'Model', 'cpu'], ['config', 'Claude Code', 'code'], ['perms', 'Permissions', 'shield'], ['remote', 'Remote Control', 'remote'], ['jarvis', 'Jarvis', 'mic'], ['usage', 'Usage', 'gauge'], ['memory', 'Memory', 'doc'], ['mcp', 'MCP servers', 'code'], ['hooks', 'Hooks', 'refresh'], ['advanced', 'Advanced', 'tool'], ['about', 'About', 'info']];
 function openPanel(p) { closePops(); $('#modal').style.display = 'flex'; go(p); }
 function closePanel() { $('#modal').style.display = 'none'; }
 $('#modal').onclick = e => { if (e.target.id === 'modal') closePanel(); };
@@ -1550,7 +1599,6 @@ const PAGE = {
   general: s => `<div class="ph">General</div><p class="pd">How Claude Linux looks and where it works.</p>
     <div class="card">${setRow('Theme and appearance', 'Colors, fonts, background and animations', '<button class="btn g" data-go="appearance">Open</button>')}</div>
     <div class="sec">Workspace</div><div class="card">
-        ${setRow('Default folder', 'Where new Code sessions start', `<input class="txt" data-id="cwd" value="${esc(s.cwd || '')}" placeholder="${esc(home)}">`)}
     ${setRow('Default permission mode', 'Used by new Code sessions', selH('mode', MODES.map(m => [m[0], m[1]]), s.mode))}
     ${setRow('Desktop notifications', 'When Claude needs you or finishes a long task while this window is in the background', swH('notify', s.notify !== false))}</div>
     <div class="sec">Additional folders</div><textarea class="ta" data-id="addDirs" rows="3" placeholder="One folder per line. Claude may access these in every Code session.">${esc((s.addDirs || []).join('\n'))}</textarea>
@@ -1676,6 +1724,7 @@ PAGE.appearance = s => {
 
     <div class="sec">Background and window</div>
     <div class="card">
+      ${apRow('Grid', 'A faint grid behind the window that lights up near your mouse', swH('grid', s.grid !== false))}
       ${apRow('Background', 'Drawn behind the whole window', selH('bgMode', [['none', 'None'], ['aurora', 'Aurora (drifting glow)'], ['particles', 'Particles'], ['gradient', 'Gradient'], ['image', 'Picture']], s.bgMode || 'none'))}
       ${s.bgMode === 'gradient' ? apRow('Gradient', '', selH('bgGradient', Object.keys(GRADIENTS).map(g => [g, g[0].toUpperCase() + g.slice(1)]), s.bgGradient || 'dusk')) : ''}
       ${s.bgMode === 'image' ? apRow('Picture', esc(s.bgImage ? s.bgImage.split('/').pop() : 'No picture chosen'), '<button class="btn g" data-ap-act="pick-bg">Choose…</button>') : ''}
@@ -1751,6 +1800,17 @@ PAGE_BIND.appearance = b => {
   };
   b.querySelectorAll('[data-ap-act]').forEach(x => { const f = act[x.dataset.apAct]; if (f) x.onclick = f; });
 };
+
+PAGE.jarvis = s => `<div class="ph">Jarvis</div><p class="pd">How Jarvis listens and how fast he reacts. Changes apply straight away.</p>
+  <div class="sec" style="margin-top:0">Activation word</div><div class="card">
+    ${setRow('Wait for the activation word', 'Like "Alexa": he only reacts when you say it (and for a short follow-up after he has spoken). Turn it off and he answers everything he hears. "Stop" always works.', swH('jarvisWake', !!s.jarvisWake))}
+    ${setRow('Activation word', 'Separate several with commas, for example: jarvis, hey jarvis', `<input class="txt" data-id="jarvisWord" value="${esc(s.jarvisWord || 'jarvis')}" placeholder="jarvis">`)}</div>
+  <div class="sec">Brain</div><div class="card">
+    ${setRow('How smart he is', 'Fast (Haiku) answers quickest. Balanced (Sonnet) is the everyday choice. Smart thinks a little more. Genius (Opus) is the cleverest and slowest. For games and quick reactions, Fast or Balanced.', selH('jarvisBrain', [['fast', 'Fast (Haiku)'], ['balanced', 'Balanced (Sonnet)'], ['smart', 'Smart (Sonnet, thinks more)'], ['genius', 'Genius (Opus)']], s.jarvisBrain || 'balanced'))}</div>
+  <div class="sec">Watching</div><div class="card">
+    ${setRow('Keep an eye on my screen', 'He sees your screen all the time, even when you are not talking to him, and speaks up when something matters (a kill, a mistake, a pop-up, an error).', swH('jarvisWatch', s.jarvisWatch !== false))}
+    ${setRow('Reaction speed', 'Normal checks every half minute or so. Fast reacts within a few seconds. Game checks every few seconds while the screen is moving, for fast games.', selH('jarvisReact', [['normal', 'Normal'], ['fast', 'Fast'], ['game', 'Game (fastest)']], s.jarvisReact || 'fast'))}</div>
+  <p class="pd" style="margin-top:14px">Faster reactions use more of your Claude usage. Click the orb to mute his microphone; this only mutes Jarvis, other apps still hear you.</p>`;
 /* ---------- motion and effects: ripples, backgrounds, celebrations, taskbar status ---------- */
 const motionOff = () => document.documentElement.dataset.motion === 'reduced';
 
@@ -1810,6 +1870,53 @@ function startParticles(host, rgb) {
   pRaf = requestAnimationFrame(frame);
 }
 
+/* faint grid behind everything; lines near the mouse light up in the accent color. Colors come from the theme, so it suits all of them. */
+const GRID = { cell:44, R:230, mx:-1e4, my:-1e4, x:-1e4, y:-1e4, glow:0, raf:0, cv:null, g:null, w:0, h:0, dpr:1, bound:false };
+function gridDraw() {
+  const G = GRID, g = G.g; if (!g) return;
+  const fg = varRGB('--fg') || [250, 249, 245], ac = varRGB('--accent') || [217, 119, 87], c = G.cell * G.dpr;
+  const light = document.documentElement.dataset.scheme === 'light';
+  g.clearRect(0, 0, G.w, G.h);
+  const path = new Path2D();
+  for (let x = .5; x < G.w; x += c) { path.moveTo(Math.round(x), 0); path.lineTo(Math.round(x), G.h); }
+  for (let y = .5; y < G.h; y += c) { path.moveTo(0, Math.round(y)); path.lineTo(G.w, Math.round(y)); }
+  g.lineWidth = G.dpr; g.strokeStyle = `rgba(${fg[0]},${fg[1]},${fg[2]},${light ? .09 : .06})`; g.stroke(path);
+  if (G.glow > .01) {
+    const R = G.R * G.dpr, gr = g.createRadialGradient(G.x * G.dpr, G.y * G.dpr, 0, G.x * G.dpr, G.y * G.dpr, R);
+    const a = (light ? .55 : .5) * G.glow;
+    gr.addColorStop(0, `rgba(${ac[0]},${ac[1]},${ac[2]},${a})`); gr.addColorStop(1, `rgba(${ac[0]},${ac[1]},${ac[2]},0)`);
+    g.strokeStyle = gr; g.lineWidth = 1.5 * G.dpr; g.stroke(path);
+    g.fillStyle = gr; for (let x = .5; x < G.w; x += c) for (let y = .5; y < G.h; y += c) {   // dots on the crossings near the mouse
+      const dx = x - G.x * G.dpr, dy = y - G.y * G.dpr; if (dx * dx + dy * dy > R * R) continue;
+      g.beginPath(); g.arc(Math.round(x), Math.round(y), 1.6 * G.dpr, 0, 6.2832); g.fill();
+    }
+  }
+}
+function gridTick() {
+  const G = GRID; G.raf = 0;
+  G.x += (G.mx - G.x) * .18; G.y += (G.my - G.y) * .18;
+  const want = G.mx > -1e3 ? 1 : 0; G.glow += (want - G.glow) * .12;
+  gridDraw();
+  if (Math.abs(G.mx - G.x) > .5 || Math.abs(G.my - G.y) > .5 || Math.abs(want - G.glow) > .01) G.raf = requestAnimationFrame(gridTick);
+}
+function gridKick() { if (!GRID.raf && !document.hidden) GRID.raf = requestAnimationFrame(gridTick); }
+function applyGrid() {
+  const on = (S.settings || {}).grid !== false, G = GRID;
+  document.documentElement.classList.toggle('grid', on);
+  if (!on) { if (G.cv) { cancelAnimationFrame(G.raf); G.raf = 0; G.cv.remove(); G.cv = G.g = null; } return; }
+  if (!G.cv) { G.cv = document.createElement('canvas'); G.cv.id = 'gridfx'; $('#app').before(G.cv); G.g = G.cv.getContext('2d'); }
+  const dpr = G.dpr = Math.min(devicePixelRatio || 1, 2);
+  G.w = G.cv.width = Math.round(innerWidth * dpr); G.h = G.cv.height = Math.round(innerHeight * dpr);
+  if (!G.bound) {
+    G.bound = true;
+    addEventListener('resize', () => G.cv && applyGrid());
+    addEventListener('pointermove', e => { if (motionOff()) return; if (G.mx < -1e3) { G.x = e.clientX; G.y = e.clientY; } G.mx = e.clientX; G.my = e.clientY; gridKick(); }, { passive:true });
+    document.addEventListener('pointerleave', () => { G.mx = G.my = -1e4; gridKick(); });
+    document.addEventListener('mouseleave', () => { G.mx = G.my = -1e4; gridKick(); });
+  }
+  gridDraw();
+}
+
 /* celebrating a finished long task */
 function confetti() {
   if (motionOff()) return;
@@ -1861,7 +1968,7 @@ function toggleSplit() { if (S.split) closeSplit(); else pickSplit(); }
 function pickSplit() {
   const others = Object.values(chats).filter(c => c.id !== cur && c.items.length).sort((a, b) => b.t - a.t).slice(0, 14);
   if (!others.length) return toast('Start a second chat first, then split the view to see both');
-  listMenu($('#splbtn'), [{ head:'Show beside this chat' }, ...others.map(c => ({ label:c.title, sub:kindOf(c) === 'chat' ? 'Chat' : ((c.cwd || '').split('/').filter(Boolean).pop() || ''), run:() => openSplit(c.id) }))], false, 340);
+  listMenu($('#splbtn'), [{ head:'Show beside this chat' }, ...others.map(c => ({ label:c.title, sub:kindOf(c) === 'chat' ? 'Chat' : dirName(c), run:() => openSplit(c.id) }))], false, 340);
 }
 function openSplit(id) { S.split = id; splitFresh = true; renderSplit(); }
 function closeSplit() { S.split = null; renderSplit(); }
@@ -1948,7 +2055,7 @@ function dropPaths(dt) {
     .map(l => { try { return decodeURIComponent(new URL(l).pathname); } catch (e) { return ''; } }).filter(Boolean);
 }
 function mentionPaths(paths) {
-  const cwd = (chats[cur] || {}).cwd || home, inp = $('#in');
+  const cwd = cwdOf(chats[cur]), inp = $('#in');
   const toks = paths.map(p => { const r = p.startsWith(cwd + '/') ? p.slice(cwd.length + 1) : p; return /\s/.test(r) ? '@"' + r + '"' : '@' + r; });
   inp.value += (inp.value && !/\s$/.test(inp.value) ? ' ' : '') + toks.join(' ') + ' '; resize(); inp.focus();
   if (tab === 'chat') toast('Added the path. Chat mode cannot read files; switch to Code to let Claude open them.');
@@ -2062,6 +2169,15 @@ $('#loginpage').addEventListener('click', e => {
   else if (a === 'copy' && LG.url) navigator.clipboard.writeText(LG.url).then(() => toast('Link copied')).catch(() => toast(LG.url));
   else if (a === 'install') post({type:'install_cli'});
 });
+/* ---------- /jarvis and /jarvistextmode: the commands live here, the orb lives in its own window (hud.html, js/jarvis.js) ---------- */
+LOCAL.jarvis = ['Jarvis: talk to your PC. /jarvis share = he sees your screen, /jarvis watch = he watches along, /jarvis off = stop', a => {
+  const x = (a || '').toLowerCase().trim();
+  if (/^(off|stop|exit)$/.test(x)) return post({type:'jarvis_stop'});
+  const extra = x === 'share' || x === 'watch' || x === 'unshare';
+  post({type:'jarvis_start', mode:extra ? 'keep' : 'voice'}); sys('Jarvis Mode Activated');
+  if (x === 'share' || x === 'watch') post({type:'jarvis_share', on:true, watch:x === 'watch'}); else if (x === 'unshare') post({type:'jarvis_share', on:false});
+}];
+LOCAL.jarvistextmode = ['Jarvis in text mode: type to him instead of talking', () => { post({type:'jarvis_start', mode:'text'}); sys('Jarvis Mode Activated'); }];
 setInterval(() => { renderUsage(); }, 60000);
 $('#new').innerHTML = ico('plus') + 'New session'; $('#setbtn').innerHTML = ico('gear') + 'Settings';
 post({type:'ready'});

@@ -15,6 +15,13 @@ html.notrans #side { transition:none; }
 #new:hover { filter:brightness(1.08); } #new:active { transform:scale(.98); }
 #list { flex:1; overflow:auto; padding:4px 8px; }
 .grp { padding:12px 10px 4px; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); }
+.grp.proj { display:flex; align-items:center; gap:6px; cursor:pointer; text-transform:none; letter-spacing:0; font-size:13px; font-weight:600; border-radius:8px; margin-top:6px; padding:7px 10px; }
+.grp.proj:hover { background:var(--hover); color:var(--fg); }
+.grp.proj svg { width:14px; height:14px; flex:none; }
+.grp.proj .pn { flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.grp.proj .pc { font-size:11px; font-weight:400; opacity:.7; }
+.grp.proj.shut { opacity:.75; }
+.chat.inproj { padding-left:26px; }
 .chat { padding:7px 10px; border-radius:8px; color:var(--dim); cursor:pointer; display:flex; align-items:center; gap:6px; font-size:14px; transition:background calc(.12s*var(--sp)),color calc(.12s*var(--sp)); }
 .chat:hover { background:var(--hover); color:var(--fg); }
 .chat.active { background:var(--card); color:var(--fg); }
@@ -86,3 +93,6 @@ html.notrans #side { transition:none; }
 .sys { color:var(--dim); font-size:13px; white-space:pre-wrap; background:var(--card); border:1px dashed var(--faint); border-radius:10px; padding:8px 12px; }
 .errtxt { color:var(--red); white-space:pre-wrap; border:1px solid var(--red); border-radius:10px; padding:8px 12px; font-size:13px; }
 
+
+.hero .pick { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:18px; }
+#dirbtn.need { color:var(--accent); }

@@ -1,0 +1,12 @@
+/* the reading hologram, drawn over the real text on the screen: a blue glass strip that stretches through the words as they are spoken, then turns green and fades */
+.holo { --hc:92,225,255; position:absolute; inset:0; pointer-events:none; transition:opacity .9s ease; }
+.holo.done { --hc:84,240,140; }
+.holo.fade { opacity:0; }
+.holo i { position:absolute; border-radius:4px; mix-blend-mode:screen; transition:background-color .35s, border-color .35s, box-shadow .35s; }
+.holo i.hl { background-color:rgba(var(--hc),.16); border-bottom:1px solid rgba(var(--hc),.8); box-shadow:0 0 12px rgba(var(--hc),.3); background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.09) 0 1px,transparent 1px 3px); }
+.holo i.hd { background-color:rgba(var(--hc),.34); border:1px solid rgba(var(--hc),.95); box-shadow:0 0 14px rgba(var(--hc),.85), inset 0 0 8px rgba(255,255,255,.3); animation:jvflick .14s steps(2) infinite; }
+.holo.done i { animation:none; }
+@keyframes jvflick { 0% { opacity:.82; } 100% { opacity:1; } }
+html[data-motion=reduced] .holo i.hd, html[data-motion=reduced] #jvhead i { animation:none; }
+
+html[data-motion=reduced] .holo i.hd { animation:none; }

@@ -31,7 +31,7 @@ function typeTick() {
     q.el.innerHTML = '<div class="stable"></div><div class="tail"></div>';
     q.stable = q.el.firstChild; q.tail = q.el.lastChild; q.cut = 0;
   }
-  const text = q.raw.slice(0, q.shown), at = text.lastIndexOf('\n\n') + 2;
+  const text = q.raw.slice(0, q.shown), br = text.lastIndexOf('\n\n'), at = br < 0 ? 0 : br + 2;   // no blank line yet: nothing is finished, so don't split a word
   if (at > q.cut && (text.slice(0, at).match(/```/g) || []).length % 2 === 0) {
     q.stable.insertAdjacentHTML('beforeend', md(text.slice(q.cut, at))); q.cut = at;
   }

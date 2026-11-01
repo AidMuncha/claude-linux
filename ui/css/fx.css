@@ -37,6 +37,9 @@ html.tfade, html.tfade *, html.tfade *::before, html.tfade *::after {
 
 /* background layer behind the whole app */
 #app { position:relative; z-index:1; }
+#gridfx { position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+html.grid:not(.fx) #main, html.grid:not(.fx) #split { background:transparent; }
+html.grid:not(.fx) #side, html.grid:not(.fx) #drawer { background:color-mix(in srgb,var(--side) 84%,transparent); }
 #bgfx { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; background:var(--bg); }
 #bgfx::after { content:""; position:absolute; inset:0; background:rgba(0,0,0,var(--dim,.5)); display:none; }
 #bgfx.image::after, #bgfx.gradient::after { display:block; }

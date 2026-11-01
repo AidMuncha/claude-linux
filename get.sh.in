@@ -4,6 +4,15 @@
 # Add `-s -- --uninstall` after `bash` to remove it. Nothing is installed unless the checksum AND the author's signature are correct.
 set -euo pipefail
 MANIFEST="@@MANIFEST@@"
+if ! command -v python3 >/dev/null || ! command -v openssl >/dev/null || ! command -v tar >/dev/null; then
+  echo "Installing basic tools (python3, openssl, tar)... (may ask for your password)"
+  S=""; [ "$(id -u)" -ne 0 ] && command -v sudo >/dev/null && S="sudo"
+  if   command -v apt-get >/dev/null; then $S apt-get update -y >/dev/null 2>&1; $S apt-get install -y python3 openssl tar
+  elif command -v dnf >/dev/null; then $S dnf install -y python3 openssl tar
+  elif command -v pacman >/dev/null; then $S pacman -S --needed --noconfirm python openssl tar
+  elif command -v zypper >/dev/null; then $S zypper --non-interactive install python3 openssl tar
+  fi
+fi
 for c in curl python3 openssl tar; do command -v "$c" >/dev/null || { echo "Missing '$c' - please install it and run this again."; exit 1; }; done
 T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
 cat > "$T/pub.pem" <<'PUB'

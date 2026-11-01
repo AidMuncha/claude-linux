@@ -44,6 +44,7 @@ PAGE.appearance = s => {
 
     <div class="sec">Background and window</div>
     <div class="card">
+      ${apRow('Grid', 'A faint grid behind the window that lights up near your mouse', swH('grid', s.grid !== false))}
       ${apRow('Background', 'Drawn behind the whole window', selH('bgMode', [['none', 'None'], ['aurora', 'Aurora (drifting glow)'], ['particles', 'Particles'], ['gradient', 'Gradient'], ['image', 'Picture']], s.bgMode || 'none'))}
       ${s.bgMode === 'gradient' ? apRow('Gradient', '', selH('bgGradient', Object.keys(GRADIENTS).map(g => [g, g[0].toUpperCase() + g.slice(1)]), s.bgGradient || 'dusk')) : ''}
       ${s.bgMode === 'image' ? apRow('Picture', esc(s.bgImage ? s.bgImage.split('/').pop() : 'No picture chosen'), '<button class="btn g" data-ap-act="pick-bg">Choose…</button>') : ''}
@@ -119,3 +120,14 @@ PAGE_BIND.appearance = b => {
   };
   b.querySelectorAll('[data-ap-act]').forEach(x => { const f = act[x.dataset.apAct]; if (f) x.onclick = f; });
 };
+
+PAGE.jarvis = s => `<div class="ph">Jarvis</div><p class="pd">How Jarvis listens and how fast he reacts. Changes apply straight away.</p>
+  <div class="sec" style="margin-top:0">Activation word</div><div class="card">
+    ${setRow('Wait for the activation word', 'Like "Alexa": he only reacts when you say it (and for a short follow-up after he has spoken). Turn it off and he answers everything he hears. "Stop" always works.', swH('jarvisWake', !!s.jarvisWake))}
+    ${setRow('Activation word', 'Separate several with commas, for example: jarvis, hey jarvis', `<input class="txt" data-id="jarvisWord" value="${esc(s.jarvisWord || 'jarvis')}" placeholder="jarvis">`)}</div>
+  <div class="sec">Brain</div><div class="card">
+    ${setRow('How smart he is', 'Fast (Haiku) answers quickest. Balanced (Sonnet) is the everyday choice. Smart thinks a little more. Genius (Opus) is the cleverest and slowest. For games and quick reactions, Fast or Balanced.', selH('jarvisBrain', [['fast', 'Fast (Haiku)'], ['balanced', 'Balanced (Sonnet)'], ['smart', 'Smart (Sonnet, thinks more)'], ['genius', 'Genius (Opus)']], s.jarvisBrain || 'balanced'))}</div>
+  <div class="sec">Watching</div><div class="card">
+    ${setRow('Keep an eye on my screen', 'He sees your screen all the time, even when you are not talking to him, and speaks up when something matters (a kill, a mistake, a pop-up, an error).', swH('jarvisWatch', s.jarvisWatch !== false))}
+    ${setRow('Reaction speed', 'Normal checks every half minute or so. Fast reacts within a few seconds. Game checks every few seconds while the screen is moving, for fast games.', selH('jarvisReact', [['normal', 'Normal'], ['fast', 'Fast'], ['game', 'Game (fastest)']], s.jarvisReact || 'fast'))}</div>
+  <p class="pd" style="margin-top:14px">Faster reactions use more of your Claude usage. Click the orb to mute his microphone; this only mutes Jarvis, other apps still hear you.</p>`;

@@ -6,7 +6,7 @@ function toggleSplit() { if (S.split) closeSplit(); else pickSplit(); }
 function pickSplit() {
   const others = Object.values(chats).filter(c => c.id !== cur && c.items.length).sort((a, b) => b.t - a.t).slice(0, 14);
   if (!others.length) return toast('Start a second chat first, then split the view to see both');
-  listMenu($('#splbtn'), [{ head:'Show beside this chat' }, ...others.map(c => ({ label:c.title, sub:kindOf(c) === 'chat' ? 'Chat' : ((c.cwd || '').split('/').filter(Boolean).pop() || ''), run:() => openSplit(c.id) }))], false, 340);
+  listMenu($('#splbtn'), [{ head:'Show beside this chat' }, ...others.map(c => ({ label:c.title, sub:kindOf(c) === 'chat' ? 'Chat' : dirName(c), run:() => openSplit(c.id) }))], false, 340);
 }
 function openSplit(id) { S.split = id; splitFresh = true; renderSplit(); }
 function closeSplit() { S.split = null; renderSplit(); }

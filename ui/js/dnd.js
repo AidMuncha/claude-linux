@@ -6,7 +6,7 @@ function dropPaths(dt) {
     .map(l => { try { return decodeURIComponent(new URL(l).pathname); } catch (e) { return ''; } }).filter(Boolean);
 }
 function mentionPaths(paths) {
-  const cwd = (chats[cur] || {}).cwd || home, inp = $('#in');
+  const cwd = cwdOf(chats[cur]), inp = $('#in');
   const toks = paths.map(p => { const r = p.startsWith(cwd + '/') ? p.slice(cwd.length + 1) : p; return /\s/.test(r) ? '@"' + r + '"' : '@' + r; });
   inp.value += (inp.value && !/\s$/.test(inp.value) ? ' ' : '') + toks.join(' ') + ' '; resize(); inp.focus();
   if (tab === 'chat') toast('Added the path. Chat mode cannot read files; switch to Code to let Claude open them.');

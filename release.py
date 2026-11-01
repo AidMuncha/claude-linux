@@ -23,7 +23,7 @@ import tempfile
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_KEY = os.path.expanduser("~/.local/share/claude-linux-release/private.pem")
 PACKAGE = ("app.py", "build.py", "icon.svg", "install.sh", "claude_linux")
-UI_PARTS = ("index.html", "index.tpl.html", "logo.svg", "css", "js")
+UI_PARTS = ("index.html", "index.tpl.html", "hud.html", "hud.tpl.html", "screen.html", "screen.tpl.html", "logo.svg", "css", "js")
 
 
 def read_version(root=ROOT):

@@ -1,0 +1,67 @@
+/* ---------- Jarvis: the orb, the captions and the reading hologram ---------- */
+#jv { --jc:92,225,255; position:fixed; left:14px; bottom:12px; z-index:950; width:min(440px,calc(100vw - 28px)); display:none; flex-direction:column; align-items:flex-start; gap:4px; pointer-events:none; color:#d9f7ff; }
+#jv.on { display:flex; animation:jvin .55s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes jvin { from { opacity:0; transform:translateY(16px) scale(.96); } }
+#jv[data-state=waiting], #jv[data-state=muted] { --jc:132,168,198; }
+#jv[data-state=acting] { --jc:112,192,255; }
+#jv[data-state=hearing], #jv[data-state=speaking] { --jc:140,240,255; }
+#jv button, #jv input, #jvorb { pointer-events:auto; }
+
+/* captions: floating in voice mode, a console in text mode */
+#jvpanel { width:100%; display:flex; flex-direction:column; pointer-events:none; }
+#jvhead { display:none; align-items:center; gap:10px; padding:11px 16px 10px; border-bottom:1px solid rgba(var(--jc),.18); font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.32em; color:rgb(var(--jc)); text-shadow:0 0 10px rgba(var(--jc),.6); }
+#jvhead small { margin-left:auto; font-weight:500; letter-spacing:.2em; opacity:.55; }
+#jvhead i { width:7px; height:7px; border-radius:50%; background:rgb(var(--jc)); box-shadow:0 0 10px rgb(var(--jc)); animation:jvpulse 2.2s ease-in-out infinite; }
+@keyframes jvpulse { 50% { opacity:.35; transform:scale(.7); } }
+#jvlog { display:flex; flex-direction:column; gap:8px; max-height:40vh; overflow:hidden; transition:opacity .9s ease; }
+#jvlog.faded { opacity:0; }
+#jvtool { display:none; margin:6px 2px 0; font:11px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace; color:rgba(var(--jc),.75); text-shadow:0 1px 6px rgba(0,0,0,.9); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#jvtool.on { display:block; animation:jvin .3s ease both; }
+#jvform { display:none; }
+.jvu { align-self:flex-end; max-width:88%; font-size:13.5px; line-height:1.45; color:rgba(217,247,255,.72); text-align:right; text-shadow:0 1px 8px rgba(0,0,0,.95); animation:jvin .35s ease both; }
+.jvu::before { content:'you'; display:block; font:600 9px/1 ui-monospace,monospace; letter-spacing:.26em; text-transform:uppercase; color:rgba(var(--jc),.55); margin-bottom:3px; }
+.jvm { position:relative; max-width:100%; padding:10px 14px; border-radius:14px; font-size:15px; line-height:1.55; color:#eafcff; background:rgba(5,14,24,.74); border:1px solid rgba(var(--jc),.24); backdrop-filter:blur(12px); box-shadow:0 8px 30px rgba(0,0,0,.45), 0 0 26px rgba(var(--jc),.1); animation:jvin .35s ease both; }
+.jvs { animation:jvin .3s ease both; }
+
+#jv[data-mode=text] #jvpanel { background:linear-gradient(180deg,rgba(7,18,30,.88),rgba(4,10,18,.92)); border:1px solid rgba(var(--jc),.3); border-radius:18px; backdrop-filter:blur(16px); box-shadow:0 14px 60px rgba(0,0,0,.6), 0 0 44px rgba(var(--jc),.12), inset 0 0 0 1px rgba(var(--jc),.05); overflow:hidden; pointer-events:auto; max-height:min(64vh,560px); position:relative; }
+#jv[data-mode=text] #jvpanel::after { content:''; position:absolute; inset:0; pointer-events:none; background:repeating-linear-gradient(0deg,rgba(var(--jc),.035) 0 1px,transparent 1px 4px); }
+#jv[data-mode=text] #jvhead { display:flex; }
+#jv[data-mode=text] #jvlog { padding:14px 16px 6px; max-height:min(46vh,420px); min-height:90px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:rgba(var(--jc),.3) transparent; }
+#jv[data-mode=text] #jvlog.faded { opacity:1; }
+#jv[data-mode=text] .jvm { background:rgba(var(--jc),.055); box-shadow:none; backdrop-filter:none; align-self:flex-start; }
+#jv[data-mode=text] .jvu { background:rgba(var(--jc),.13); border:1px solid rgba(var(--jc),.28); padding:7px 12px; border-radius:12px; color:#e9fbff; text-shadow:none; }
+#jv[data-mode=text] #jvtool { margin:0 16px 4px; text-shadow:none; }
+#jv[data-mode=text] #jvform { display:flex; gap:8px; padding:8px 12px 12px; position:relative; z-index:1; }
+#jvin { flex:1; min-width:0; height:38px; padding:0 14px; border-radius:11px; border:1px solid rgba(var(--jc),.32); background:rgba(2,8,14,.7); color:#eafcff; font:inherit; font-size:14px; outline:none; transition:border-color .2s, box-shadow .2s; }
+#jvin::placeholder { color:rgba(217,247,255,.38); }
+#jvin:focus { border-color:rgba(var(--jc),.85); box-shadow:0 0 0 3px rgba(var(--jc),.14), 0 0 22px rgba(var(--jc),.18); }
+#jvsend { width:38px; height:38px; border-radius:11px; border:1px solid rgba(var(--jc),.5); background:rgba(var(--jc),.18); color:rgb(var(--jc)); display:grid; place-items:center; cursor:pointer; transition:background .2s, box-shadow .2s; }
+#jvsend:hover { background:rgba(var(--jc),.34); box-shadow:0 0 18px rgba(var(--jc),.4); }
+
+/* the orb and its label */
+#jvdock { display:flex; align-items:center; gap:8px; }
+#jvorb { width:124px; height:124px; cursor:pointer; filter:drop-shadow(0 0 16px rgba(var(--jc),.3)); }
+#jvtext { display:flex; flex-direction:column; gap:3px; min-width:0; }
+#jvstate { font:600 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.26em; text-transform:uppercase; color:rgb(var(--jc)); text-shadow:0 0 12px rgba(var(--jc),.7), 0 1px 6px rgba(0,0,0,.9); }
+#jvsub { font:11px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace; color:rgba(217,247,255,.6); max-width:250px; min-height:15px; text-shadow:0 1px 6px rgba(0,0,0,.9); }
+#jvbtns { display:flex; gap:6px; margin-top:6px; opacity:.55; transition:opacity .2s; }
+#jv:hover #jvbtns { opacity:1; }
+#jvbtns button { width:30px; height:30px; border-radius:50%; border:1px solid rgba(var(--jc),.34); background:rgba(5,14,24,.72); color:rgb(var(--jc)); display:grid; place-items:center; cursor:pointer; backdrop-filter:blur(8px); transition:background .2s, box-shadow .2s, transform .15s; }
+#jvbtns button:hover { background:rgba(var(--jc),.22); box-shadow:0 0 14px rgba(var(--jc),.4); transform:translateY(-1px); }
+#jvbtns button.off { color:rgba(255,130,130,.95); border-color:rgba(255,130,130,.45); }
+
+/* two buttons: stop talking and close; the orb itself mutes the mic, sharing is automatic. White icons in their circles */
+#jv #jvbtns #jvmic, #jv #jvbtns #jvspk, #jv #jvbtns #jvshare, #jv #jvbtns #jvwatch { display:none !important; }
+#jvbtns button, #jvbtns button svg { color:#fff; }
+#jvbtns button svg { stroke:#fff; }
+#jvbtns button:hover { color:#fff; }
+#jvbtns { opacity:.8; }
+
+/* screen sharing */
+#jvwatch { display:none !important; }
+#jv.sharing #jvwatch { display:grid !important; }
+#jvbtns button.on { background:rgba(var(--jc),.3); box-shadow:0 0 14px rgba(var(--jc),.5); }
+#jv.sharing #jvstate::after { content:'\25CF  LIVE'; margin-left:12px; font-size:9.5px; letter-spacing:.2em; color:#ff6b6b; text-shadow:0 0 8px rgba(255,90,90,.75); animation:jvpulse 1.8s ease-in-out infinite; }
+html[data-motion=reduced] #jv.sharing #jvstate::after { animation:none; }
+
+.jvu.live { opacity:.6; font-style:italic; }

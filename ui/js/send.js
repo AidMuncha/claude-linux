@@ -21,18 +21,19 @@ function send() {
   const text = $('#in').value.trim(), c = chats[cur];
   if (!c) return;
   if (!text && !att.length) { if (c.busy) stopChat(); return; }
+  if (isCode(c) && !c.cwd) { toast('Choose a folder for this session first, or pick Universal.', true); $('#dirbtn').click(); return; }
   $('#cmds').style.display = 'none';
   if (text) { if (hist[hist.length - 1] !== text) hist.push(text); hist.splice(0, hist.length - 100); try { localStorage.setItem('hist', JSON.stringify(hist)); } catch (e) {} } hi = -1;
   const m = text.match(/^\/(\S+)\s*([\s\S]*)$/);
   if (m && LOCAL[m[1]]) { clearInput(); LOCAL[m[1]][1](m[2].trim()); return; }
   if (text[0] === '!' && text.length > 1 && isCode(c)) { clearInput(); runBang(c, text.slice(1).trim()); return; }
   const images = att; att = []; renderAtt(); clearInput();
-  if (c.busy) { (c.queue = c.queue || []).push({text, images}); renderQueue(); return; }
   dispatch(c.id, text, images);
 }
 function dispatch(id, text, images) {
   const c = chats[id]; if (!c) return;
   if (!c.items.length) c.title = (text || 'Image').slice(0, 44);
+  if (c.busy) endLive(id);   // sent while Claude is working: it goes straight in and is picked up within the running turn
   const uid = crypto.randomUUID(); mine.add(uid);
   pushItem(id, {k:'user', text, uid, after:c.lastAsst || null, imgs: images.length || undefined}); if (id === cur) scrollEnd(true); setBusy(id, true); persistChat(id);
   const full = (c.ctx || '') + text; c.ctx = ''; c.items.forEach(i => { if (i.resume) i.resume = false; });
@@ -42,7 +43,7 @@ function dispatch(id, text, images) {
 function runBang(c, cmd) {
   const id = 'bang-' + crypto.randomUUID();
   pushItem(c.id, {k:'tool', id, name:'Bash', input:{command:cmd}, result:null, bang:true}); scrollEnd(true); persistChat(c.id);
-  post({type:'bang', chat:c.id, id, cmd, cwd:c.cwd || home});
+  post({type:'bang', chat:c.id, id, cmd, cwd:cwdOf(c)});
 }
 function drainQueue(id) {
   const c = chats[id]; if (!c || !c.queue || !c.queue.length || c.busy) return;

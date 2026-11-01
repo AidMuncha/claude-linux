@@ -57,6 +57,53 @@ function startParticles(host, rgb) {
   pRaf = requestAnimationFrame(frame);
 }
 
+/* faint grid behind everything; lines near the mouse light up in the accent color. Colors come from the theme, so it suits all of them. */
+const GRID = { cell:44, R:230, mx:-1e4, my:-1e4, x:-1e4, y:-1e4, glow:0, raf:0, cv:null, g:null, w:0, h:0, dpr:1, bound:false };
+function gridDraw() {
+  const G = GRID, g = G.g; if (!g) return;
+  const fg = varRGB('--fg') || [250, 249, 245], ac = varRGB('--accent') || [217, 119, 87], c = G.cell * G.dpr;
+  const light = document.documentElement.dataset.scheme === 'light';
+  g.clearRect(0, 0, G.w, G.h);
+  const path = new Path2D();
+  for (let x = .5; x < G.w; x += c) { path.moveTo(Math.round(x), 0); path.lineTo(Math.round(x), G.h); }
+  for (let y = .5; y < G.h; y += c) { path.moveTo(0, Math.round(y)); path.lineTo(G.w, Math.round(y)); }
+  g.lineWidth = G.dpr; g.strokeStyle = `rgba(${fg[0]},${fg[1]},${fg[2]},${light ? .09 : .06})`; g.stroke(path);
+  if (G.glow > .01) {
+    const R = G.R * G.dpr, gr = g.createRadialGradient(G.x * G.dpr, G.y * G.dpr, 0, G.x * G.dpr, G.y * G.dpr, R);
+    const a = (light ? .55 : .5) * G.glow;
+    gr.addColorStop(0, `rgba(${ac[0]},${ac[1]},${ac[2]},${a})`); gr.addColorStop(1, `rgba(${ac[0]},${ac[1]},${ac[2]},0)`);
+    g.strokeStyle = gr; g.lineWidth = 1.5 * G.dpr; g.stroke(path);
+    g.fillStyle = gr; for (let x = .5; x < G.w; x += c) for (let y = .5; y < G.h; y += c) {   // dots on the crossings near the mouse
+      const dx = x - G.x * G.dpr, dy = y - G.y * G.dpr; if (dx * dx + dy * dy > R * R) continue;
+      g.beginPath(); g.arc(Math.round(x), Math.round(y), 1.6 * G.dpr, 0, 6.2832); g.fill();
+    }
+  }
+}
+function gridTick() {
+  const G = GRID; G.raf = 0;
+  G.x += (G.mx - G.x) * .18; G.y += (G.my - G.y) * .18;
+  const want = G.mx > -1e3 ? 1 : 0; G.glow += (want - G.glow) * .12;
+  gridDraw();
+  if (Math.abs(G.mx - G.x) > .5 || Math.abs(G.my - G.y) > .5 || Math.abs(want - G.glow) > .01) G.raf = requestAnimationFrame(gridTick);
+}
+function gridKick() { if (!GRID.raf && !document.hidden) GRID.raf = requestAnimationFrame(gridTick); }
+function applyGrid() {
+  const on = (S.settings || {}).grid !== false, G = GRID;
+  document.documentElement.classList.toggle('grid', on);
+  if (!on) { if (G.cv) { cancelAnimationFrame(G.raf); G.raf = 0; G.cv.remove(); G.cv = G.g = null; } return; }
+  if (!G.cv) { G.cv = document.createElement('canvas'); G.cv.id = 'gridfx'; $('#app').before(G.cv); G.g = G.cv.getContext('2d'); }
+  const dpr = G.dpr = Math.min(devicePixelRatio || 1, 2);
+  G.w = G.cv.width = Math.round(innerWidth * dpr); G.h = G.cv.height = Math.round(innerHeight * dpr);
+  if (!G.bound) {
+    G.bound = true;
+    addEventListener('resize', () => G.cv && applyGrid());
+    addEventListener('pointermove', e => { if (motionOff()) return; if (G.mx < -1e3) { G.x = e.clientX; G.y = e.clientY; } G.mx = e.clientX; G.my = e.clientY; gridKick(); }, { passive:true });
+    document.addEventListener('pointerleave', () => { G.mx = G.my = -1e4; gridKick(); });
+    document.addEventListener('mouseleave', () => { G.mx = G.my = -1e4; gridKick(); });
+  }
+  gridDraw();
+}
+
 /* celebrating a finished long task */
 function confetti() {
   if (motionOff()) return;
